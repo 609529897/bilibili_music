@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Video } from "../types/electron";
+import { fetchImage } from '../utils/imageProxy';
 
 interface ModernPlayerProps {
   currentVideo: Video | null;
@@ -11,15 +12,6 @@ const formatTime = (time: number) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-// 处理B站图片URL，添加@
-const processImageUrl = (url: string) => {
-  if (!url) return '';
-  // 如果URL已经包含@，则直接返回
-  if (url.includes('@')) return url;
-  // 否则在.jpg前添加@672w_378h
-  return url.replace(/\.(jpg|jpeg|png|gif)/, '@672w_378h.$1');
-};
-
 export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -27,20 +19,18 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isHoveringProgress, setIsHoveringProgress] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
+    if (currentVideo) {
+      fetchImage(currentVideo.thumbnail).then(setThumbnailUrl);
     }
-  }, [volume]);
+  }, [currentVideo]);
 
   useEffect(() => {
     if (currentVideo && audioRef.current) {
       audioRef.current.play().catch(console.error);
     }
-    // 重置图片错误状态
-    setImageError(false);
   }, [currentVideo]);
 
   const handleTimeUpdate = () => {
@@ -69,10 +59,6 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
     }
   };
 
-  const handleImageError = () => {
-    setImageError(true);
-  };
-
   if (!currentVideo) {
     return (
       <div className="h-24 bg-white border-t border-gray-200 shadow-lg flex items-center justify-center text-gray-400">
@@ -93,21 +79,12 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
           {/* 封面和信息 */}
           <div className="flex items-center gap-4 w-64 flex-shrink-0">
             <div className="relative group cursor-pointer" onClick={handlePlayPause}>
-              {!imageError ? (
-                <img
-                  src={processImageUrl(currentVideo.thumbnail)}
-                  alt={currentVideo.title}
-                  onError={handleImageError}
-                  className="w-16 h-16 rounded-lg object-cover shadow-md"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-lg shadow-md bg-gray-100 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-gray-400" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3h-6Z"/>
-                  </svg>
-                </div>
-              )}
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all rounded-lg">
+              <img
+                src={thumbnailUrl || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2U1ZTdlYiIgZD0iTTEyIDN2MTAuNTVjLS41OS0uMzQtMS4yNy0uNTUtMi0uNTVjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDRzNC0xLjc5IDQtNFY3aDRWM2gtNloiLz48L3N2Zz4='}
+                alt={currentVideo.title}
+                className="w-16 h-16 rounded-lg object-cover shadow-md"
+              />
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all">
                 {isPlaying ? (
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M14 19h4V5h-4M6 19h4V5H6v14Z"/>

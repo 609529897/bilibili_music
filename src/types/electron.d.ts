@@ -23,32 +23,21 @@ interface AudioUrlResponse {
   audioUrl: string;
 }
 
+interface ElectronAPI {
+  openBilibiliLogin: () => Promise<void>;
+  checkLoginStatus: () => Promise<boolean>;
+  getFavorites: () => Promise<Favorite[]>;
+  getFavoriteVideos: (id: number) => Promise<Video[]>;
+  getUserInfo: () => Promise<UserInfo>;
+  getVideoAudioUrl: (bvid: string) => Promise<string>;
+  onLoginSuccess: (callback: () => void) => void;
+  fetchImage: (url: string) => Promise<string>;
+}
+
 declare global {
   interface Window {
-    electronAPI: {
-      getUserInfo: () => Promise<{ success: boolean; data: UserInfo }>;
-      getImage: (url: string) => Promise<string | null>;
-      openBilibiliLogin: () => Promise<void>;
-      getFavorites: () => Promise<{
-        success: boolean;
-        data: Favorite[];
-        error?: string;
-      }>;
-      getFavoriteVideos: (id: number) => Promise<{
-        success: boolean;
-        data: Video[];
-        error?: string;
-      }>;
-      getVideoAudioUrl: (bvid: string) => Promise<{
-        success: boolean;
-        data: AudioUrlResponse;
-        error?: string;
-      }>;
-      addVideo: (url: string) => Promise<{ success: boolean; data?: any }>;
-      onLoginSuccess: (callback: () => void) => void;
-      checkLoginStatus: () => Promise<boolean>;
-    };
+    electronAPI: ElectronAPI;
   }
 }
 
-export { UserInfo, Video, Favorite, AudioUrlResponse };
+export { UserInfo, Video, Favorite, AudioUrlResponse, ElectronAPI };

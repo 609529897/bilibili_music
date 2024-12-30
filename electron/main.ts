@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, session } from 'electron'
 import path from 'path'
 import axios from 'axios'
+import { setupImageProxy } from './main/image-proxy'
 
 // B站API接口
 const API = {
@@ -121,6 +122,7 @@ async function getCookieString() {
 
 app.whenReady().then(() => {
   createWindow()
+  setupImageProxy()  // 注册图片代理服务
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -471,28 +473,5 @@ ipcMain.handle('check-login-status', async () => {
   } catch (err) {
     console.error('Error checking login status:', err)
     return false
-  }
-})
-
-// 获取用户头像
-ipcMain.handle('get-image', async (_event, url: string) => {
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        ...headers,
-        'Accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-        'Sec-Fetch-Dest': 'image',
-        'Sec-Fetch-Mode': 'no-cors',
-        'Sec-Fetch-Site': 'same-site',
-      },
-      responseType: 'arraybuffer'
-    })
-
-    const base64 = Buffer.from(response.data, 'binary').toString('base64')
-    const contentType = response.headers['content-type']
-    return `data:${contentType};base64,${base64}`
-  } catch (error) {
-    console.error('Error getting image:', error)
-    return null
   }
 })

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { UserInfo } from '../types/electron';
+import { fetchImage } from '../utils/imageProxy';
 
 export const useUserInfo = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -52,11 +53,7 @@ export const useUserInfo = () => {
 
   useEffect(() => {
     if (userInfo?.face) {
-      window.electronAPI.getImage(userInfo.face).then((url) => {
-        if (url) {
-          setAvatarUrl(url);
-        }
-      });
+      fetchImage(userInfo.face).then(setAvatarUrl);
     }
   }, [userInfo?.face]);
 
