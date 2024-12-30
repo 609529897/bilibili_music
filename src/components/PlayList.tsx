@@ -18,7 +18,7 @@ export const PlayList = ({
   onVideoSelect,
 }: PlayListProps) => {
   return (
-    <div className="w-80 h-screen flex flex-col">
+    <div className="h-screen flex flex-col flex-1 border-l border-gray-200">
       <div className="h-4 app-drag-region" />
       <div className="p-3 border-b border-gray-200 bg-white">
         <div className="flex items-center justify-between">

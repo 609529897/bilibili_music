@@ -56,9 +56,6 @@ export default function App() {
           error={playlistError}
           onVideoSelect={handleVideoSelect}
         />
-        <div className="flex-1 border-l border-gray-200">
-          {/* 主内容区域 */}
-        </div>
       </div>
       <ModernPlayer currentVideo={currentVideo} />
       {isSelectingFavorites && (
