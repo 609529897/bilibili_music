@@ -28,8 +28,9 @@ export const FavoritesList = ({
   onRefresh,
 }: FavoritesListProps) => {
   return (
-    <div className="w-64 border-r border-gray-200 pt-4">
-      <div className="p-4 h-[calc(100%-2rem)] flex flex-col">
+    <div className="w-64 border-r border-gray-200 flex flex-col">
+      <div className="h-8 app-drag-region" />
+      <div className="p-4 flex-1 flex flex-col">
         {/* 操作按钮区域 */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
