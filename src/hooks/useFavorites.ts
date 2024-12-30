@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 interface Favorite {
   id: number;
@@ -18,7 +18,7 @@ export const useFavorites = () => {
     setError(null);
     try {
       const result = await window.electronAPI.getFavorites();
-      if (result.success) {
+      if (result.success && result.data) {
         setFavorites(result.data);
       } else {
         setError(result.error || '获取收藏夹失败');
@@ -31,15 +31,33 @@ export const useFavorites = () => {
     }
   }, []);
 
+  // 当用户选择收藏夹时
+  const handleSetSelectedFavoriteIds = useCallback((ids: Set<number>) => {
+    setSelectedFavoriteIds(ids);
+    // 如果有选择的收藏夹，设置第一个为当前选中
+    if (ids.size > 0) {
+      const firstId = Array.from(ids)[0];
+      const firstFavorite = favorites.find(f => f.id === firstId);
+      if (firstFavorite) {
+        setSelectedFavorite(firstFavorite);
+      }
+    }
+  }, [favorites]);
+
   const handleFavoriteSelect = useCallback(async (favorite: Favorite) => {
     setSelectedFavorite(favorite);
   }, []);
+
+  // 组件挂载时自动加载收藏夹
+  useEffect(() => {
+    loadFavorites();
+  }, [loadFavorites]);
 
   return {
     favorites,
     selectedFavorite,
     selectedFavoriteIds,
-    setSelectedFavoriteIds,
+    setSelectedFavoriteIds: handleSetSelectedFavoriteIds,
     onFavoriteSelect: handleFavoriteSelect,
     loadFavorites,
     isLoading,

@@ -30,10 +30,6 @@ export default function App() {
   const { avatarUrl } = useUserInfo();
   const [isSelectingFavorites, setIsSelectingFavorites] = useState(false);
 
-  useEffect(() => {
-    loadFavorites();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       {/* 内容区域 */}
