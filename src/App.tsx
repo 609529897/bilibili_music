@@ -3,7 +3,7 @@ import { LoginScreen } from './components/LoginScreen';
 import { TitleBar } from './components/TitleBar';
 import { FavoritesList } from './components/FavoritesList';
 import { PlayList } from './components/PlayList';
-import { Player } from './components/Player';
+import { ModernPlayer } from './components/ModernPlayer';
 import { FavoritesDialog } from './components/FavoritesDialog';
 import { useAudio } from './hooks/useAudio';
 import { useFavorites } from './hooks/useFavorites';
@@ -182,24 +182,15 @@ export default function App() {
               onRefresh={loadFavorites}
               avatarUrl={avatarUrl}
             />
-            <div className="flex-1 flex">
-              <PlayList
-                playlist={playlist}
-                currentVideo={currentVideo}
-                selectedFavorite={selectedFavorite}
-                isLoading={playlistLoading}
-                error={playlistError}
-                onVideoSelect={handleVideoSelect}
-              />
-              <Player
-                currentVideo={currentVideo}
-                isPlaying={isPlaying}
-                currentTime={currentTime}
-                duration={duration}
-                onTogglePlay={togglePlay}
-                onVolumeChange={adjustVolume}
-              />
-            </div>
+            <PlayList
+              playlist={playlist}
+              currentVideo={currentVideo}
+              selectedFavorite={selectedFavorite}
+              isLoading={playlistLoading}
+              error={playlistError}
+              onVideoSelect={handleVideoSelect}
+            />
+            <ModernPlayer currentVideo={currentVideo} />
           </div>
         </div>
       )}

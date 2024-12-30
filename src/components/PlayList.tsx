@@ -25,9 +25,9 @@ export const PlayList = ({
 }: PlayListProps) => {
   return (
     <div className="flex-1 flex flex-col">
-      <div className="h-8 app-drag-region" />
-      <div className="flex-1 p-4">
-        <div className="w-80 h-full flex flex-col border-r border-gray-200">
+      <div className="h-4 app-drag-region" />
+      <div className="flex-1">
+        <div className="w-80 h-full flex flex-col ">
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-medium text-gray-900 flex items-center gap-2">
