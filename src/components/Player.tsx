@@ -20,10 +20,14 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   const [volume, setVolume] = useState(1);
   const [isHoveringProgress, setIsHoveringProgress] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
 
   useEffect(() => {
     if (currentVideo) {
-      fetchImage(currentVideo.thumbnail).then(setThumbnailUrl);
+      setIsLoadingImage(true);
+      fetchImage(currentVideo.thumbnail)
+        .then(setThumbnailUrl)
+        .finally(() => setIsLoadingImage(false));
     }
   }, [currentVideo]);
 
@@ -84,6 +88,11 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                 alt={currentVideo.title}
                 className="w-16 h-16 rounded-lg object-cover shadow-md"
               />
+              {isLoadingImage && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/5 rounded-lg">
+                  <div className="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
               <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all">
                 {isPlaying ? (
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">

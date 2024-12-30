@@ -24,14 +24,29 @@ export const PlayList = ({
   onVideoSelect,
 }: PlayListProps) => {
   const [imageUrls, setImageUrls] = useState<ImageCache>({});
+  const [loadingImages, setLoadingImages] = useState<Set<string>>(new Set());
 
   // 预加载图片
   useEffect(() => {
     const loadImages = async () => {
       const newImageUrls: ImageCache = {};
+      const newLoadingImages = new Set<string>();
+      
+      for (const video of playlist) {
+        if (!imageUrls[video.thumbnail]) {
+          newLoadingImages.add(video.thumbnail);
+        }
+      }
+      setLoadingImages(newLoadingImages);
+
       for (const video of playlist) {
         if (!imageUrls[video.thumbnail]) {
           newImageUrls[video.thumbnail] = await fetchImage(video.thumbnail);
+          setLoadingImages(prev => {
+            const next = new Set(prev);
+            next.delete(video.thumbnail);
+            return next;
+          });
         }
       }
       setImageUrls(prev => ({ ...prev, ...newImageUrls }));
@@ -87,6 +102,11 @@ export const PlayList = ({
                     alt={video.title}
                     className="w-16 h-16 rounded object-cover"
                   />
+                  {loadingImages.has(video.thumbnail) && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/5 rounded">
+                      <div className="w-5 h-5 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
                   <div className={`absolute inset-0 flex items-center justify-center rounded bg-black/40 transition-opacity ${
                     currentVideo?.bvid === video.bvid ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                   }`}>
