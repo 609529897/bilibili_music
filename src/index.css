@@ -31,3 +31,17 @@
     scrollbar-width: none;
   }
 }
+
+@keyframes spectrum {
+  0%, 100% {
+    height: 10%;
+  }
+  50% {
+    height: var(--random-height);
+  }
+}
+
+.spectrum-bar {
+  --random-height: 10%;
+  animation: spectrum 0.5s infinite;
+}

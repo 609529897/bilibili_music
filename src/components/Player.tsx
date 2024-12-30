@@ -22,6 +22,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   const [thumbnailUrl, setThumbnailUrl] = useState<string>("");
   const [isLoadingImage, setIsLoadingImage] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
     if (currentVideo) {
@@ -106,6 +107,13 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
     setIsFullscreen(!isFullscreen);
   };
 
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    if (audioRef.current) {
+      audioRef.current.muted = isMuted;
+    }
+  };
+
   if (!currentVideo) {
     return (
       <div className="h-20 bg-white/80 backdrop-blur-md border-t border-gray-100 flex items-center justify-center text-gray-400">
@@ -142,20 +150,32 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
 
       <div className={`${isFullscreen ? "h-full flex flex-col" : "h-full"}`}>
         {isFullscreen && (
-          <div className="relative flex-1">
-            {thumbnailUrl && (
-              <div className="absolute inset-0">
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50">
+            <div className="h-full w-full flex flex-col items-center justify-center p-8 relative">
+              {/* 全屏封面 */}
+              <div className="relative">
                 <img
                   src={thumbnailUrl}
                   alt={currentVideo.title}
-                  className="w-full h-full object-contain"
+                  className="w-[40vh] h-[40vh] object-cover rounded-3xl shadow-2xl"
                 />
-                <div className="absolute inset-0 bg-black/20" />
+                {/* 音频频谱 */}
+                <div className="absolute inset-x-0 -bottom-16 h-16 flex items-end justify-center gap-1 px-4 overflow-hidden">
+                  {Array.from({ length: 32 }, (_, i) => (
+                    <div
+                      key={i}
+                      className="w-1.5 bg-white/60 rounded-t spectrum-bar"
+                      style={{
+                        '--random-height': `${30 + Math.random() * 70}%`,
+                        animationDelay: `${i * 0.05}s`
+                      } as React.CSSProperties}
+                    />
+                  ))}
+                </div>
               </div>
-            )}
+            </div>
           </div>
         )}
-
         <div
           className={`${
             isFullscreen
@@ -169,10 +189,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
               <div className="relative group">
                 <div className="w-[3.25rem] h-[3.25rem] relative">
                   <img
-                    src={
-                      thumbnailUrl ||
-                      "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2U1ZTdlYiIgZD0iTTEyIDN2MTAuNTVjLS41OS0uMzQtMS4yNy0uNTUtMi0uNTVjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDRzNC0xLjc5IDQtNFY3aDRWM2gtNloiLz48L3N2Zz4="
-                    }
+                    src={thumbnailUrl}
                     alt={currentVideo.title}
                     className="w-full h-full object-cover rounded-lg shadow-md"
                   />
@@ -187,22 +204,11 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                   className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 hover:bg-black/40 transition-all duration-200 group-hover:opacity-100 opacity-0"
                 >
                   {isPlaying ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-6 h-6 text-white"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        fill="currentColor"
-                        d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"
-                      />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
                     </svg>
                   ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-6 h-6 text-white"
-                      viewBox="0 0 24 24"
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" viewBox="0 0 24 24">
                       <path fill="currentColor" d="M8 5.14v14l11-7l-11-7z" />
                     </svg>
                   )}
@@ -237,16 +243,16 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                       : "text-gray-400 hover:text-gray-600"
                   } transition-colors`}
                 >
-                    <svg
+                  <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="w-5 h-5"
                     viewBox="0 0 24 24"
-                    >
+                  >
                     <path
                       fill="currentColor"
                       d="M18 6l-8.5 6L18 18V6zM8 6v12H6V6h2z"
                     />
-                    </svg>
+                  </svg>
                 </button>
                 {/* 播放/暂停 */}
                 <button
@@ -373,8 +379,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                     >
                       <path
                         fill="currentColor"
-                        d="M3.63 3.63a.996.996 0 0 0 0 1.41L7.29 8.7L7 9H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71v-4.17l4.18 4.18c-.49.37-1.02.68-1.6.91c-.36.15-.58.53-.58.92c0 .72.73 1.18 1.39.91c.8-.33 1.55-.77 2.22-1.31l1.34 1.34a.996.996 0 1 0 1.41-1.41L5.05 3.63c-.39-.39-1.02-.39-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53c.56-1.17.88-2.48.88-3.87c0-3.83-2.4-7.11-5.78-8.4c-.59-.23-1.22.23-1.22.86v.19c0 .38.25.71.61.85C17.18 6.54 19 9.06 19 12zm-8.71-6.29l-.17.17L12 7.76V6.41c0-.89-1.08-1.33-1.71-.7zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v1.79l2.48 2.48c.01-.08.02-.16.02-.24z"
-                      />
+                        d="M3.63 3.63a.996.996 0 000 1.41L7.29 8.7L7 9H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71v-4.17l4.18 4.18c-.49.37-1.02.68-1.6.91c-.36.15-.58.53-.58.92c0 .72.73 1.18 1.39.91.8-.33 1.55-.77 2.22-1.31l1.34 1.34a.996.996 0 101.41-1.41L5.05 3.63c-.39-.39-1.02-.39-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53c.56-1.17.88-2.48.88-3.87c0-3.83-2.4-7.11-5.78-8.4c-.59-.23-1.22.23-1.22.86v.19c0 .38.25.71.61.85C17.18 6.54 19 9.06 19 12zm-8.71-6.29l-.17.17L12 7.76V6.41c0-.89-1.08-1.33-1.71-.7zM16.5 12A4.5 4.5 0 0014 7.97v1.79l2.48 2.48c.01-.08.02-.16.02-.24z"/>
                     </svg>
                   ) : (
                     <svg
@@ -384,7 +389,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                     >
                       <path
                         fill="currentColor"
-                        d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+                        d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 5v2h3v3h2V5h-5z"
                       />
                     </svg>
                   )}
