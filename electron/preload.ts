@@ -5,5 +5,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   login: () => ipcRenderer.invoke('bilibili-login'),
   onLoginSuccess: (callback: () => void) => {
     ipcRenderer.on('bilibili-login-success', callback)
-  }
+  },
+  getFavorites: () => ipcRenderer.invoke('get-favorites')
 })

@@ -25,6 +25,7 @@ declare global {
       addVideo: (url: string) => Promise<{ success: boolean, data?: any }>
       login: () => Promise<void>
       onLoginSuccess: (callback: () => void) => void
+      getFavorites: () => Promise<{ success: boolean, data?: Video[] }>
     }
   }
 }
@@ -37,6 +38,7 @@ function App() {
   const [progress, setProgress] = useState(0)
   const [volume, setVolume] = useState(100)
   const [isMuted, setIsMuted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
@@ -151,6 +153,35 @@ function App() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  // 加载收藏列表
+  const loadFavorites = async () => {
+    try {
+      setIsLoading(true)
+      const result = await window.electronAPI.getFavorites()
+      if (result.success && result.data) {
+        setVideos(prev => [...prev, ...result.data])
+      } else {
+        console.error('Failed to load favorites:', result.error)
+      }
+    } catch (error) {
+      console.error('Error loading favorites:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    // 监听登录成功事件
+    window.electronAPI.onLoginSuccess(() => {
+      // 登录成功后加载收藏列表
+      loadFavorites()
+      // 如果有待添加的视频，也添加
+      if (url) {
+        handleAddVideo()
+      }
+    })
+  }, [])
+
   return (
     <div className="h-screen flex flex-col bg-white">
       {/* Header */}
@@ -172,6 +203,13 @@ function App() {
               className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-purple-500 text-white text-sm rounded-full hover:bg-purple-600 transition-all hover:shadow-md"
             >
               Add
+            </button>
+            <button
+              onClick={loadFavorites}
+              disabled={isLoading}
+              className="absolute right-14 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-purple-500 text-white text-sm rounded-full hover:bg-purple-600 transition-all hover:shadow-md disabled:opacity-50"
+            >
+              {isLoading ? '加载中...' : '导入收藏'}
             </button>
           </div>
         </div>

@@ -6,7 +6,9 @@ import axios from 'axios'
 const API = {
   VIEW: 'https://api.bilibili.com/x/web-interface/view',
   PLAY_URL: 'https://api.bilibili.com/x/player/playurl',
-  USER_INFO: 'https://api.bilibili.com/x/web-interface/nav'
+  USER_INFO: 'https://api.bilibili.com/x/web-interface/nav',
+  FAVORITE_LIST: 'https://api.bilibili.com/x/v3/fav/folder/created/list-all',
+  FAVORITE_DETAIL: 'https://api.bilibili.com/x/v3/fav/resource/list'
 }
 
 // 基础请求头
@@ -223,6 +225,117 @@ ipcMain.handle('add-video', async (event, videoUrl: string) => {
     return {
       success: false,
       error: error.message || 'Failed to process video'
+    }
+  }
+})
+
+// 获取收藏列表
+ipcMain.handle('get-favorites', async () => {
+  try {
+    // 检查登录状态
+    const isLoggedIn = await checkLoginStatus()
+    if (!isLoggedIn) {
+      throw new Error('请先登录B站账号')
+    }
+
+    const cookieString = await getCookieString()
+    
+    // 获取用户信息
+    const userResponse = await axios.get(API.USER_INFO, {
+      headers: {
+        ...headers,
+        Cookie: cookieString
+      }
+    })
+
+    if (userResponse.data.code !== 0) {
+      throw new Error('获取用户信息失败')
+    }
+
+    const mid = userResponse.data.data.mid
+    
+    // 获取收藏夹列表
+    const favListResponse = await axios.get(API.FAVORITE_LIST, {
+      params: { up_mid: mid },
+      headers: {
+        ...headers,
+        Cookie: cookieString
+      }
+    })
+
+    if (favListResponse.data.code !== 0) {
+      throw new Error('获取收藏夹列表失败')
+    }
+
+    const favList = favListResponse.data.data.list
+    const allVideos = []
+
+    // 获取每个收藏夹的详细内容
+    for (const fav of favList) {
+      const detailResponse = await axios.get(API.FAVORITE_DETAIL, {
+        params: {
+          media_id: fav.id,
+          pn: 1,
+          ps: 20,
+          order: 'mtime',
+          type: 0,
+        },
+        headers: {
+          ...headers,
+          Cookie: cookieString
+        }
+      })
+
+      if (detailResponse.data.code === 0) {
+        const videos = detailResponse.data.data.medias || []
+        for (const video of videos) {
+          // 获取音频URL
+          try {
+            const playUrlResponse = await axios.get(API.PLAY_URL, {
+              params: {
+                bvid: video.bvid,
+                cid: video.cid,
+                fnval: 16,
+                qn: 64,
+                fourk: 1
+              },
+              headers: {
+                ...headers,
+                Cookie: cookieString
+              }
+            })
+
+            if (playUrlResponse.data.code === 0) {
+              const audioUrl = playUrlResponse.data.data.dash?.audio?.[0]?.baseUrl
+              if (audioUrl) {
+                allVideos.push({
+                  bvid: video.bvid,
+                  title: video.title,
+                  author: video.upper.name,
+                  duration: video.duration,
+                  thumbnail: video.cover,
+                  audioUrl: audioUrl,
+                  favTitle: fav.title // 添加收藏夹标题
+                })
+              }
+            }
+          } catch (error) {
+            console.error(`Failed to get audio URL for video ${video.bvid}:`, error)
+          }
+        }
+      }
+    }
+
+    return {
+      success: true,
+      data: allVideos
+    }
+
+  } catch (error) {
+    console.error('Error getting favorites:', error)
+    return {
+      success: false,
+      error: error.message || 'Failed to get favorites'
     }
   }
 })
