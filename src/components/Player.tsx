@@ -42,15 +42,15 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
       // 设置新的音频源
       const handleAudio = async () => {
         try {
-          const audioUrl = await window.electronAPI.getVideoAudioUrl(currentVideo.bvid);
-          if (audioUrl) {
-            audioRef.current!.src = audioUrl;
+          const result = await window.electronAPI.getVideoAudioUrl(currentVideo.bvid);
+          if (result.success && result.data.audioUrl) {
+            audioRef.current!.src = result.data.audioUrl;
             audioRef.current!.load();
             // 自动播放
             await audioRef.current!.play();
             setIsPlaying(true);
           } else {
-            console.error('Failed to get audio URL');
+            console.error('Failed to get audio URL:', result.error);
             setIsPlaying(false);
           }
         } catch (error) {

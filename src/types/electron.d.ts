@@ -23,13 +23,17 @@ interface ApiResponse<T> {
   error?: string;
 }
 
+interface AudioUrlResponse {
+  audioUrl: string;
+}
+
 interface ElectronAPI {
   openBilibiliLogin: () => Promise<void>;
   checkLoginStatus: () => Promise<boolean>;
-  getFavorites: () => Promise<Favorite[]>;
-  getFavoriteVideos: (id: number) => Promise<Video[]>;
-  getUserInfo: () => Promise<UserInfo>;
-  getVideoAudioUrl: (bvid: string) => Promise<string>;
+  getFavorites: () => Promise<ApiResponse<Favorite[]>>;
+  getFavoriteVideos: (id: number) => Promise<ApiResponse<Video[]>>;
+  getUserInfo: () => Promise<ApiResponse<UserInfo>>;
+  getVideoAudioUrl: (bvid: string) => Promise<ApiResponse<AudioUrlResponse>>;
   onLoginSuccess: (callback: () => void) => void;
   fetchImage: (url: string) => Promise<string>;
 }
@@ -40,4 +44,4 @@ declare global {
   }
 }
 
-export { UserInfo, Video, Favorite, ElectronAPI };
+export { UserInfo, Video, Favorite, AudioUrlResponse, ElectronAPI };
