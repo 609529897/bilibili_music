@@ -285,7 +285,6 @@ ipcMain.handle('get-favorites', async () => {
 
     // 只保留以"我的"开头的收藏夹
     const favList = favListResponse.data.data.list
-      .filter((fav: any) => fav.title.startsWith('我的'))
       .map((fav: any) => ({
         id: fav.id,
         title: fav.title,
