@@ -7,7 +7,7 @@ interface PlayListProps {
   currentVideo: Video | null;
   isLoading: boolean;
   error: string | null;
-  selectedFavorite: string | null;
+  selectedFavorite: string | undefined;
   onVideoSelect: (video: Video) => void;
 }
 

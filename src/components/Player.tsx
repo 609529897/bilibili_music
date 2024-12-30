@@ -21,6 +21,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   const [isHoveringProgress, setIsHoveringProgress] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
   const [isLoadingImage, setIsLoadingImage] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     if (currentVideo) {
@@ -63,6 +64,18 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
     }
   };
 
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const vol = parseFloat(e.target.value);
+    setVolume(vol);
+    if (audioRef.current) {
+      audioRef.current.volume = vol;
+    }
+  };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
   if (!currentVideo) {
     return (
       <div className="h-24 bg-white border-t border-gray-200 shadow-lg flex items-center justify-center text-gray-400">
@@ -77,53 +90,66 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   }
 
   return (
-    <div className="h-full bg-white">
-      <div className="max-w-screen-xl mx-auto h-full px-6">
-        <div className="flex items-center gap-8 h-full">
-          {/* 封面和信息 */}
-          <div className="flex items-center gap-4 w-64 flex-shrink-0">
-            <div className="relative group cursor-pointer" onClick={handlePlayPause}>
+    <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-black' : 'h-full bg-white'}`}>
+      <div className={`${isFullscreen ? 'h-full flex flex-col' : 'max-w-screen-xl mx-auto h-full px-6'}`}>
+        {isFullscreen && (
+          <div className="relative w-full flex-1">
+            {thumbnailUrl && (
               <img
-                src={thumbnailUrl || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2U1ZTdlYiIgZD0iTTEyIDN2MTAuNTVjLS41OS0uMzQtMS4yNy0uNTUtMi0uNTVjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDRzNC0xLjc5IDQtNFY3aDRWM2gtNloiLz48L3N2Zz4='}
+                src={thumbnailUrl}
                 alt={currentVideo.title}
-                className="w-16 h-16 rounded-lg object-cover shadow-md"
+                className="absolute inset-0 w-full h-full object-contain"
               />
-              {isLoadingImage && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/5 rounded-lg">
-                  <div className="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
-                </div>
-              )}
-              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all">
-                {isPlaying ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M14 19h4V5h-4M6 19h4V5H6v14Z"/>
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M8 5v14l11-7l-11-7Z"/>
-                  </svg>
-                )}
-              </div>
-            </div>
-            <div className="min-w-0">
-              <div className="font-medium text-gray-900 hover:text-pink-500 cursor-pointer transition-colors truncate">
-                {currentVideo.title}
-              </div>
-              <div className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition-colors truncate">
-                {currentVideo.author}
-              </div>
-            </div>
+            )}
           </div>
+        )}
+        <div className={`${isFullscreen ? 'p-6 bg-gradient-to-t from-black/80 to-transparent' : 'flex items-center gap-8 h-full'}`}>
+          {/* 封面和信息 */}
+          {!isFullscreen && (
+            <div className="flex items-center gap-4 w-64 flex-shrink-0">
+              <div className="relative group cursor-pointer" onClick={handlePlayPause}>
+                <img
+                  src={thumbnailUrl || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2U1ZTdlYiIgZD0iTTEyIDN2MTAuNTVjLS41OS0uMzQtMS4yNy0uNTUtMi0uNTVjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDRzNC0xLjc5IDQtNFY3aDRWM2gtNloiLz48L3N2Zz4='}
+                  alt={currentVideo.title}
+                  className="w-16 h-16 rounded-lg object-cover shadow-md"
+                />
+                {isLoadingImage && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/5 rounded-lg">
+                    <div className="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+                <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all">
+                  {isPlaying ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M14 19h4V5h-4M6 19h4V5H6v14Z"/>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M8 5v14l11-7l-11-7Z"/>
+                    </svg>
+                  )}
+                </div>
+              </div>
+              <div className="min-w-0">
+                <div className="font-medium text-gray-900 hover:text-pink-500 cursor-pointer transition-colors truncate">
+                  {currentVideo.title}
+                </div>
+                <div className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition-colors truncate">
+                  {currentVideo.author}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 播放控制 */}
-          <div className="flex-1 flex flex-col gap-2 max-w-2xl">
+          <div className={`flex-1 flex flex-col gap-2 max-w-2xl ${isFullscreen ? 'w-full' : ''}`}>
             <div className="flex items-center justify-center gap-8">
               <button
                 onClick={() => setVolume(v => Math.max(0, v - 0.1))}
                 className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm7-4.17v14.34L5.17 15H4v-6h1.17L10 4.83zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                  <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm7-4.17v14.34L5.17 15H4v-6h1.17L10 4.83zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                 </svg>
               </button>
               <button
@@ -211,6 +237,22 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
               />
             </div>
           </div>
+
+          {/* 全屏按钮 */}
+          <button
+            onClick={toggleFullscreen}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            {isFullscreen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M9 9h6v6H9z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
       <audio

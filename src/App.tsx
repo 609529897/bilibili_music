@@ -54,7 +54,7 @@ export default function App() {
           currentVideo={currentVideo}
           isLoading={playlistLoading}
           error={playlistError}
-          selectedFavorite={selectedFavorite}
+          selectedFavorite={selectedFavorite?.title}
           onVideoSelect={handleVideoSelect}
         />
       </div>
