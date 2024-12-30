@@ -33,24 +33,54 @@ export const PlayList = ({
             {selectedFavorite ? '收藏夹是空的' : '请选择一个收藏夹'}
           </div>
         ) : (
-          <div className="space-y-1 p-2">
+          <div className="space-y-0.5 p-3">
             {playlist.map(video => (
-              <button
+              <div
                 key={video.bvid}
                 onClick={() => onVideoSelect(video)}
-                className={`w-full p-2 text-left rounded-lg transition-all ${
+                className={`group flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition-all ${
                   currentVideo?.bvid === video.bvid
-                    ? 'bg-pink-500 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? 'bg-pink-500'
+                    : 'hover:bg-gray-50'
                 }`}
               >
-                <div className="font-medium line-clamp-2">{video.title}</div>
-                <div className={`text-sm ${
-                  currentVideo?.bvid === video.bvid ? 'text-pink-100' : 'text-gray-400'
-                }`}>
-                  {video.author}
+                <div className="relative flex-shrink-0">
+                  <img 
+                    src={video.thumbnail} 
+                    alt={video.title}
+                    className="w-16 h-16 rounded object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2U1ZTdlYiIgZD0iTTEyIDN2MTAuNTVjLS41OS0uMzQtMS4yNy0uNTUtMi0uNTVjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDRzNC0xLjc5IDQtNFY3aDRWM2gtNloiLz48L3N2Zz4=';
+                    }}
+                  />
+                  <div className={`absolute inset-0 flex items-center justify-center rounded bg-black/40 transition-opacity ${
+                    currentVideo?.bvid === video.bvid ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                  }`}>
+                    {currentVideo?.bvid === video.bvid ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M14 19h4V5h-4M6 19h4V5H6v14Z"/>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M8 5v14l11-7l-11-7Z"/>
+                      </svg>
+                    )}
+                  </div>
                 </div>
-              </button>
+                <div className="min-w-0 flex-1">
+                  <div className={`font-medium line-clamp-2 ${
+                    currentVideo?.bvid === video.bvid ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {video.title}
+                  </div>
+                  <div className={`text-sm mt-0.5 ${
+                    currentVideo?.bvid === video.bvid ? 'text-pink-100' : 'text-gray-500'
+                  }`}>
+                    {video.author}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         )}

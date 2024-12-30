@@ -91,7 +91,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
       <div className="max-w-screen-xl mx-auto h-full px-6">
         <div className="flex items-center gap-8 h-full">
           {/* 封面和信息 */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 w-64 flex-shrink-0">
             <div className="relative group cursor-pointer" onClick={handlePlayPause}>
               {!imageError ? (
                 <img
@@ -119,11 +119,11 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                 )}
               </div>
             </div>
-            <div>
-              <div className="font-medium text-gray-900 hover:text-pink-500 cursor-pointer transition-colors">
+            <div className="min-w-0">
+              <div className="font-medium text-gray-900 hover:text-pink-500 cursor-pointer transition-colors truncate">
                 {currentVideo.title}
               </div>
-              <div className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition-colors">
+              <div className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition-colors truncate">
                 {currentVideo.author}
               </div>
             </div>
