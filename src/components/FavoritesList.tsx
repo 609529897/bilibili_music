@@ -37,7 +37,7 @@ export const FavoritesList = ({
   }, [favorites, selectedFavorite, onFavoriteSelect]);
 
   return (
-    <div className="w-64 border-r border-gray-200 flex flex-col h-full">
+    <div className="w-64 flex flex-col h-full bg-gray-200/80 backdrop-blur-xl">
       <div className="h-4 app-drag-region" />
       <div className="p-4 flex-1 flex flex-col">
         {/* 操作按钮区域 */}
