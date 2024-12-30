@@ -1,10 +1,5 @@
 import { useState, useEffect } from 'react';
-
-interface UserInfo {
-  uname: string;
-  face: string;
-  level: number;
-}
+import { UserInfo } from '../types/electron';
 
 export const useUser = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

@@ -9,46 +9,6 @@ import { useAudio } from "./hooks/useAudio";
 import { useFavorites } from "./hooks/useFavorites";
 import { usePlaylist } from "./hooks/usePlaylist";
 
-interface UserInfo {
-  uname: string;
-  face: string;
-  level: number;
-}
-
-interface UserInfo {
-  face: string;
-  // Add other user info fields as needed
-}
-
-declare global {
-  interface Window {
-    electronAPI: {
-      getUserInfo: () => Promise<{ success: boolean; data: UserInfo }>;
-      getImage: (url: string) => Promise<string | null>;
-      openBilibiliLogin: () => Promise<void>;
-      getFavorites: () => Promise<{
-        success: boolean;
-        data: Array<{ id: number; title: string; count: number }>;
-        error?: string;
-      }>;
-      getFavoriteVideos: (id: number) => Promise<{
-        success: boolean;
-        data: Array<{
-          bvid: string;
-          title: string;
-          author: string;
-          thumbnail: string;
-          audioUrl: string;
-        }>;
-        error?: string;
-      }>;
-      addVideo: (url: string) => Promise<{ success: boolean; data?: any }>;
-      onLoginSuccess: (callback: () => void) => void;
-      checkLoginStatus: () => Promise<boolean>;
-    };
-  }
-}
-
 export default function App() {
   const {
     isLoggedIn,
