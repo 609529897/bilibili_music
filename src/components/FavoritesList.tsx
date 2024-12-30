@@ -1,3 +1,8 @@
+import { useEffect } from 'react';
+import { clsx } from 'clsx';
+import RefreshIcon from './RefreshIcon';
+import LoadingSpinner from './LoadingSpinner';
+
 interface Favorite {
   id: number;
   title: string;
@@ -14,6 +19,7 @@ interface FavoritesListProps {
   onOpenSelectDialog: () => void;
   avatarUrl: string | null;
   onRefresh: () => void;
+  defaultAvatar: string;
 }
 
 export const FavoritesList = ({
@@ -26,7 +32,15 @@ export const FavoritesList = ({
   onOpenSelectDialog,
   avatarUrl,
   onRefresh,
+  defaultAvatar,
 }: FavoritesListProps) => {
+  // 默认选中第一个收藏夹
+  useEffect(() => {
+    if (!selectedFavorite && favorites.length > 0) {
+      onFavoriteSelect(favorites[0]);
+    }
+  }, [favorites, selectedFavorite, onFavoriteSelect]);
+
   return (
     <div className="w-64 border-r border-gray-200 flex flex-col">
       <div className="h-4 app-drag-region" />
@@ -56,21 +70,18 @@ export const FavoritesList = ({
               disabled={isLoading}
               title="刷新收藏夹"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="currentColor"
-                  d="M12 20q-3.35 0-5.675-2.325T4 12q0-3.35 2.325-5.675T12 4q1.725 0 3.3.712T18 6.75V4h2v7h-7V9h4.2q-.8-1.4-2.187-2.2T12 6Q9.5 6 7.75 7.75T6 12q0 2.5 1.75 4.25T12 18q1.925 0 3.475-1.1T17.65 14h2.1q-.7 2.65-2.85 4.325T12 20Z"
-                />
-              </svg>
+              <RefreshIcon className={clsx("w-4 h-4", isLoading && "animate-spin")} />
             </button>
           </div>
-          {avatarUrl && (
+          {avatarUrl ? (
             <img
               src={avatarUrl}
+              alt="avatar"
+              className="w-6 h-6 rounded-full"
+            />
+          ) : (
+            <img
+              src={defaultAvatar}
               alt="avatar"
               className="w-6 h-6 rounded-full"
             />
@@ -110,7 +121,7 @@ export const FavoritesList = ({
                             : "text-gray-400"
                         }`}
                       >
-                        {fav.count} 首音乐
+                        {fav.count} 个视频
                       </div>
                     </button>
                   ))

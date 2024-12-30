@@ -8,14 +8,19 @@ interface Video {
   bvid: string;
   title: string;
   author: string;
+  duration: number;
   thumbnail: string;
-  audioUrl: string;
+  audioUrl?: string;
 }
 
 interface Favorite {
   id: number;
   title: string;
   count: number;
+}
+
+interface AudioUrlResponse {
+  audioUrl: string;
 }
 
 declare global {
@@ -34,6 +39,11 @@ declare global {
         data: Video[];
         error?: string;
       }>;
+      getVideoAudioUrl: (bvid: string) => Promise<{
+        success: boolean;
+        data: AudioUrlResponse;
+        error?: string;
+      }>;
       addVideo: (url: string) => Promise<{ success: boolean; data?: any }>;
       onLoginSuccess: (callback: () => void) => void;
       checkLoginStatus: () => Promise<boolean>;
@@ -41,4 +51,4 @@ declare global {
   }
 }
 
-export { UserInfo, Video, Favorite };
+export { UserInfo, Video, Favorite, AudioUrlResponse };

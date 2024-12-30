@@ -60,7 +60,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="h-screen bg-white overflow-auto">
       {!isLoggedIn ? (
         <LoginScreen
           isLoading={isLoading}
@@ -68,28 +68,35 @@ export default function App() {
           onLogin={handleLogin}
         />
       ) : (
-        <div className="flex flex-col h-screen">
-          <div className="flex flex-1">
-            <FavoritesList
-              favorites={favorites}
-              selectedFavorite={selectedFavorite}
-              selectedFavoriteIds={selectedFavoriteIds}
-              isLoading={favoritesLoading}
-              error={favoritesError}
-              onFavoriteSelect={handleFavoriteSelect}
-              onOpenSelectDialog={() => setIsSelectingFavorites(true)}
-              onRefresh={loadFavorites}
-              avatarUrl={avatarUrl}
-            />
-            <PlayList
-              playlist={playlist}
-              currentVideo={currentVideo}
-              selectedFavorite={selectedFavorite}
-              isLoading={playlistLoading}
-              error={playlistError}
-              onVideoSelect={handleVideoSelect}
-            />
-            <ModernPlayer currentVideo={currentVideo} />
+        <div className="flex flex-col h-full">
+          <div className="flex flex-1 min-w-max">
+            <div className="w-64 min-w-[16rem]">
+              <FavoritesList
+                favorites={favorites}
+                selectedFavorite={selectedFavorite}
+                selectedFavoriteIds={selectedFavoriteIds}
+                isLoading={favoritesLoading}
+                error={favoritesError}
+                onFavoriteSelect={handleFavoriteSelect}
+                onOpenSelectDialog={() => setIsSelectingFavorites(true)}
+                onRefresh={loadFavorites}
+                avatarUrl={avatarUrl}
+                defaultAvatar="/default-avatar.png"
+              />
+            </div>
+            <div className="w-80 min-w-[20rem]">
+              <PlayList
+                playlist={playlist}
+                currentVideo={currentVideo}
+                selectedFavorite={selectedFavorite}
+                isLoading={playlistLoading}
+                error={playlistError}
+                onVideoSelect={handleVideoSelect}
+              />
+            </div>
+            <div className="flex-1">
+              <ModernPlayer currentVideo={currentVideo} />
+            </div>
           </div>
         </div>
       )}

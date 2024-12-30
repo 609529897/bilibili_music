@@ -328,74 +328,20 @@ ipcMain.handle('get-favorite-videos', async (_event, mediaId: number) => {
       }
     })
 
+    console.log('Detail response:', detailResponse.data)
+
     if (detailResponse.data.code === 0) {
-      const videos = detailResponse.data.data.medias
-      const processedVideos = []
-      const headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Referer': 'https://www.bilibili.com'
-      }
-
-      for (const video of videos) {
-        try {
-          console.log('Processing video:', video.bvid, video.title)
-          
-          // 先获取视频信息以获取 cid
-          const videoInfoResponse = await axios.get(API.VIEW, {
-            params: {
-              bvid: video.bvid
-            },
-            headers: {
-              ...headers,
-              Cookie: cookieString
-            }
-          })
-
-          if (videoInfoResponse.data.code === 0) {
-            const cid = videoInfoResponse.data.data.cid
-            console.log('Got cid for video:', video.bvid, cid)
-
-            const playUrlResponse = await axios.get(API.PLAY_URL, {
-              params: {
-                bvid: video.bvid,
-                cid: cid,
-                fnval: 16,
-                qn: 64,
-                fourk: 1,
-                platform: 'web'
-              },
-              headers: {
-                ...headers,
-                Cookie: cookieString
-              }
-            })
-
-            console.log('Play URL response for', video.bvid, ':', playUrlResponse.data)
-
-            if (playUrlResponse.data.code === 0) {
-              const audioUrl = playUrlResponse.data.data.dash?.audio?.[0]?.baseUrl
-              if (audioUrl) {
-                processedVideos.push({
-                  bvid: video.bvid,
-                  title: video.title,
-                  author: video.upper.name,
-                  duration: video.duration,
-                  thumbnail: video.cover,
-                  audioUrl: audioUrl
-                })
-                console.log('Added video to playlist:', video.title)
-              } else {
-                console.log('No audio URL found for video:', video.bvid)
-              }
-            }
-          } else {
-            console.error('Failed to get video info:', videoInfoResponse.data)
-          }
-        } catch (error) {
-          console.error(`Failed to process video ${video.bvid}:`, error.response?.data || error)
-        }
-      }
-
+      const videos = detailResponse.data.data?.medias || []
+      console.log('Found videos:', videos.length)
+      
+      const processedVideos = videos.map(video => ({
+        bvid: video.bvid,
+        title: video.title,
+        author: video.upper.name,
+        duration: video.duration,
+        thumbnail: video.cover
+      }))
+      
       return { success: true, data: processedVideos }
     }
     
@@ -408,6 +354,64 @@ ipcMain.handle('get-favorite-videos', async (_event, mediaId: number) => {
     return { 
       success: false, 
       error: error.response?.data?.message || error.message || 'Failed to get favorite videos'
+    }
+  }
+})
+
+// 获取视频音频URL
+ipcMain.handle('get-video-audio-url', async (_event, bvid: string) => {
+  try {
+    const cookieString = await getCookieString()
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      'Referer': 'https://www.bilibili.com'
+    }
+
+    // 先获取视频信息以获取 cid
+    const videoInfoResponse = await axios.get(API.VIDEO_INFO, {
+      params: {
+        bvid: bvid
+      },
+      headers: {
+        ...headers,
+        Cookie: cookieString
+      }
+    })
+
+    if (videoInfoResponse.data.code === 0) {
+      const cid = videoInfoResponse.data.data.cid
+      console.log('Got cid for video:', bvid, cid)
+
+      const playUrlResponse = await axios.get(API.PLAY_URL, {
+        params: {
+          bvid: bvid,
+          cid: cid,
+          fnval: 16,
+          qn: 64,
+          fourk: 1,
+          platform: 'web'
+        },
+        headers: {
+          ...headers,
+          Cookie: cookieString
+        }
+      })
+
+      if (playUrlResponse.data.code === 0) {
+        const audioUrl = playUrlResponse.data.data.dash?.audio?.[0]?.baseUrl
+        if (audioUrl) {
+          return { success: true, data: { audioUrl } }
+        }
+        return { success: false, error: 'No audio URL found' }
+      }
+      return { success: false, error: playUrlResponse.data.message }
+    }
+    return { success: false, error: videoInfoResponse.data.message }
+  } catch (error) {
+    console.error('Error getting video audio URL:', error.response?.data || error)
+    return { 
+      success: false, 
+      error: error.response?.data?.message || error.message || 'Failed to get audio URL'
     }
   }
 })
