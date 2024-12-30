@@ -7,7 +7,7 @@ const API = {
   VIEW: 'https://api.bilibili.com/x/web-interface/view',
   PLAY_URL: 'https://api.bilibili.com/x/player/playurl',
   USER_INFO: 'https://api.bilibili.com/x/web-interface/nav',
-  FAVORITE_LIST: 'https://api.bilibili.com/x/v3/fav/folder/created/list',
+  FAVORITE_LIST: 'https://api.bilibili.com/x/v3/fav/folder/created/list-all',
   FAVORITE_DETAIL: 'https://api.bilibili.com/x/v3/fav/resource/list'
 }
 
@@ -261,13 +261,11 @@ ipcMain.handle('get-favorites', async () => {
     console.log('User mid:', mid)
     
     // 获取收藏夹列表
-    console.log('Fetching favorite folders with params:', { up_mid: mid, platform: 'web', pn: 1, ps: 100 })
+    console.log('Fetching favorite folders...')
     const favListResponse = await axios.get(API.FAVORITE_LIST, {
       params: { 
         up_mid: mid,
-        platform: 'web',
-        pn: 1,        // 页码，从1开始
-        ps: 100       // 每页数量
+        web_location: '333.1387'
       },
       headers: {
         ...headers,
@@ -285,30 +283,67 @@ ipcMain.handle('get-favorites', async () => {
       throw new Error('收藏夹列表为空或格式不正确')
     }
 
+    // 只保留以"我的"开头的收藏夹
     const favList = favListResponse.data.data.list
-    console.log('Found favorite folders:', favList.length)
+      .filter((fav: any) => fav.title.startsWith('我的'))
+      .map((fav: any) => ({
+        id: fav.id,
+        title: fav.title,
+        count: fav.media_count
+      }))
 
-    // 如果收藏夹列表为空，直接返回
-    if (favList.length === 0) {
-      return {
-        success: true,
-        data: []
-      }
+    return {
+      success: true,
+      data: favList
     }
 
-    const allVideos = []
+  } catch (error) {
+    console.error('Error getting favorites:', error.response?.data || error)
+    return {
+      success: false,
+      error: error.message || 'Failed to get favorites'
+    }
+  }
+})
 
-    // 获取每个收藏夹的详细内容
-    for (const fav of favList) {
-      console.log(`Fetching videos from folder: ${fav.title} (ID: ${fav.id})`)
+// 获取收藏夹内容
+ipcMain.handle('get-favorite-videos', async (_event, mediaId: number) => {
+  try {
+    const cookieString = await getCookieString()
+    
+    const detailResponse = await axios.get(API.FAVORITE_DETAIL, {
+      params: {
+        media_id: mediaId,
+        pn: 1,
+        ps: 40,
+        keyword: '',
+        order: 'mtime',
+        tid: 0,
+        platform: 'web',
+        web_location: '333.1387'
+      },
+      headers: {
+        ...headers,
+        Cookie: cookieString
+      }
+    })
+
+    if (detailResponse.data.code !== 0) {
+      throw new Error(`获取收藏夹内容失败: ${detailResponse.data.message}`)
+    }
+
+    const videos = detailResponse.data.data.medias || []
+    const processedVideos = []
+
+    for (const video of videos) {
       try {
-        const detailResponse = await axios.get(API.FAVORITE_DETAIL, {
+        const playUrlResponse = await axios.get(API.PLAY_URL, {
           params: {
-            media_id: fav.id,
-            pn: 1,
-            ps: 20,
-            order: 'mtime',
-            type: 0,
+            bvid: video.bvid,
+            cid: video.cid,
+            fnval: 16,
+            qn: 64,
+            fourk: 1,
             platform: 'web'
           },
           headers: {
@@ -317,73 +352,34 @@ ipcMain.handle('get-favorites', async () => {
           }
         })
 
-        console.log(`Folder ${fav.title} detail response:`, detailResponse.data)
-
-        if (detailResponse.data.code === 0 && detailResponse.data.data) {
-          const videos = detailResponse.data.data.medias || []
-          console.log(`Found ${videos.length} videos in folder: ${fav.title}`)
-          
-          for (const video of videos) {
-            console.log(`Processing video: ${video.title} (BV: ${video.bvid}, CID: ${video.cid})`)
-            // 获取音频URL
-            try {
-              const playUrlResponse = await axios.get(API.PLAY_URL, {
-                params: {
-                  bvid: video.bvid,
-                  cid: video.cid,
-                  fnval: 16,
-                  qn: 64,
-                  fourk: 1,
-                  platform: 'web'
-                },
-                headers: {
-                  ...headers,
-                  Cookie: cookieString
-                }
-              })
-
-              if (playUrlResponse.data.code === 0) {
-                const audioUrl = playUrlResponse.data.data.dash?.audio?.[0]?.baseUrl
-                if (audioUrl) {
-                  console.log(`Got audio URL for video: ${video.title}`)
-                  allVideos.push({
-                    bvid: video.bvid,
-                    title: video.title,
-                    author: video.upper.name,
-                    duration: video.duration,
-                    thumbnail: video.cover,
-                    audioUrl: audioUrl,
-                    favTitle: fav.title
-                  })
-                } else {
-                  console.log(`No audio URL found for video: ${video.title}`)
-                }
-              } else {
-                console.error(`Failed to get play URL for video ${video.title}:`, playUrlResponse.data)
-              }
-            } catch (error) {
-              console.error(`Failed to get audio URL for video ${video.bvid}:`, error.response?.data || error)
-            }
+        if (playUrlResponse.data.code === 0) {
+          const audioUrl = playUrlResponse.data.data.dash?.audio?.[0]?.baseUrl
+          if (audioUrl) {
+            processedVideos.push({
+              bvid: video.bvid,
+              title: video.title,
+              author: video.upper.name,
+              duration: video.duration,
+              thumbnail: video.cover,
+              audioUrl: audioUrl
+            })
           }
-        } else {
-          console.error(`Failed to get folder ${fav.title} details:`, detailResponse.data)
         }
       } catch (error) {
-        console.error(`Error processing folder ${fav.title}:`, error.response?.data || error)
+        console.error(`Failed to get audio URL for video ${video.bvid}:`, error)
       }
     }
 
-    console.log(`Total videos processed: ${allVideos.length}`)
     return {
       success: true,
-      data: allVideos
+      data: processedVideos
     }
 
   } catch (error) {
-    console.error('Error getting favorites:', error.response?.data || error)
+    console.error('Error getting favorite videos:', error)
     return {
       success: false,
-      error: error.message || 'Failed to get favorites'
+      error: error.message || 'Failed to get favorite videos'
     }
   }
 })
