@@ -34,7 +34,32 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
 
   useEffect(() => {
     if (currentVideo && audioRef.current) {
-      audioRef.current.play().catch(console.error);
+      // 重置播放状态
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+      
+      // 设置新的音频源
+      const handleAudio = async () => {
+        try {
+          const audioUrl = await window.electronAPI.getVideoAudioUrl(currentVideo.bvid);
+          if (audioUrl) {
+            audioRef.current!.src = audioUrl;
+            audioRef.current!.load();
+            // 自动播放
+            await audioRef.current!.play();
+            setIsPlaying(true);
+          } else {
+            console.error('Failed to get audio URL');
+            setIsPlaying(false);
+          }
+        } catch (error) {
+          console.error('Failed to play audio:', error);
+          setIsPlaying(false);
+        }
+      };
+
+      handleAudio();
     }
   }, [currentVideo]);
 
@@ -56,24 +81,33 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
     }
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const time = parseFloat(e.target.value);
+  const handleSeek = (time: number) => {
     if (audioRef.current) {
       audioRef.current.currentTime = time;
       setCurrentTime(time);
     }
   };
 
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const vol = parseFloat(e.target.value);
-    setVolume(vol);
+  const handleVolumeChange = (newVolume: number) => {
     if (audioRef.current) {
-      audioRef.current.volume = vol;
+      audioRef.current.volume = newVolume;
+      setVolume(newVolume);
     }
   };
 
+  const handleEnded = () => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+  };
+
   const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
   };
 
   if (!currentVideo) {
@@ -90,7 +124,14 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   }
 
   return (
-    <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-black' : 'h-full bg-white'}`}>
+    <div className={`bg-white shadow-lg rounded-lg p-4 ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
+      <audio
+        ref={audioRef}
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={handleEnded}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
       <div className={`${isFullscreen ? 'h-full flex flex-col' : 'max-w-screen-xl mx-auto h-full px-6'}`}>
         {isFullscreen && (
           <div className="relative w-full flex-1">
@@ -107,38 +148,38 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
           {/* 封面和信息 */}
           {!isFullscreen && (
             <div className="flex items-center gap-4 w-64 flex-shrink-0">
-              <div className="relative group cursor-pointer" onClick={handlePlayPause}>
-                <img
-                  src={thumbnailUrl || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2U1ZTdlYiIgZD0iTTEyIDN2MTAuNTVjLS41OS0uMzQtMS4yNy0uNTUtMi0uNTVjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDRzNC0xLjc5IDQtNFY3aDRWM2gtNloiLz48L3N2Zz4='}
-                  alt={currentVideo.title}
-                  className="w-16 h-16 rounded-lg object-cover shadow-md"
-                />
-                {isLoadingImage && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/5 rounded-lg">
-                    <div className="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
-                  </div>
+            <div className="relative group cursor-pointer" onClick={handlePlayPause}>
+              <img
+                src={thumbnailUrl || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2U1ZTdlYiIgZD0iTTEyIDN2MTAuNTVjLS41OS0uMzQtMS4yNy0uNTUtMi0uNTVjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDRzNC0xLjc5IDQtNFY3aDRWM2gtNloiLz48L3N2Zz4='}
+                alt={currentVideo.title}
+                className="w-16 h-16 rounded-lg object-cover shadow-md"
+              />
+              {isLoadingImage && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/5 rounded-lg">
+                  <div className="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all">
+                {isPlaying ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M14 19h4V5h-4M6 19h4V5H6v14Z"/>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M8 5v14l11-7l-11-7Z"/>
+                  </svg>
                 )}
-                <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all">
-                  {isPlaying ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M14 19h4V5h-4M6 19h4V5H6v14Z"/>
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M8 5v14l11-7l-11-7Z"/>
-                    </svg>
-                  )}
-                </div>
-              </div>
-              <div className="min-w-0">
-                <div className="font-medium text-gray-900 hover:text-pink-500 cursor-pointer transition-colors truncate">
-                  {currentVideo.title}
-                </div>
-                <div className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition-colors truncate">
-                  {currentVideo.author}
-                </div>
               </div>
             </div>
+            <div className="min-w-0">
+              <div className="font-medium text-gray-900 hover:text-pink-500 cursor-pointer transition-colors truncate">
+                {currentVideo.title}
+              </div>
+              <div className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition-colors truncate">
+                {currentVideo.author}
+              </div>
+            </div>
+          </div>
           )}
 
           {/* 播放控制 */}
@@ -187,7 +228,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                   min={0}
                   max={duration || 100}
                   value={currentTime}
-                  onChange={handleSeek}
+                  onChange={(e) => handleSeek(parseFloat(e.target.value))}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
                 <div
@@ -228,7 +269,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                 max={1}
                 step={0.1}
                 value={volume}
-                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
                 className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer 
                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 
                   [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-pink-500 
@@ -255,14 +296,6 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
           </button>
         </div>
       </div>
-      <audio
-        ref={audioRef}
-        src={currentVideo.audioUrl}
-        onTimeUpdate={handleTimeUpdate}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onEnded={() => setIsPlaying(false)}
-      />
     </div>
   );
 };

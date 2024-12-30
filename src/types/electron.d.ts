@@ -1,16 +1,14 @@
 interface UserInfo {
   uname: string;
-  face: string;
   level: number;
 }
 
 interface Video {
+  id: number;
   bvid: string;
   title: string;
   author: string;
-  duration: number;
   thumbnail: string;
-  audioUrl?: string;
 }
 
 interface Favorite {
@@ -19,8 +17,10 @@ interface Favorite {
   count: number;
 }
 
-interface AudioUrlResponse {
-  audioUrl: string;
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
 }
 
 interface ElectronAPI {
@@ -40,4 +40,4 @@ declare global {
   }
 }
 
-export { UserInfo, Video, Favorite, AudioUrlResponse, ElectronAPI };
+export { UserInfo, Video, Favorite, ElectronAPI };
