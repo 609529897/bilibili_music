@@ -2,3 +2,17 @@
   -webkit-app-region: drag;
   user-select: none;
 }
+
+/* 内容区域样式 */
+.content-container {
+  height: calc(100vh - 96px); /* 减去播放器高度 */
+  overflow: hidden;
+}
+
+/* 播放器样式 */
+.player-container {
+  height: 96px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.05);
+}

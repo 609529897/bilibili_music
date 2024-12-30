@@ -77,7 +77,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   }
 
   return (
-    <div className="h-24 bg-white border-t border-gray-200 shadow-lg">
+    <div className="h-full bg-white">
       <div className="max-w-screen-xl mx-auto h-full px-6">
         <div className="flex items-center gap-8 h-full">
           {/* 封面和信息 */}

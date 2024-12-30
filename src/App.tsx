@@ -12,17 +12,18 @@ export default function App() {
     favorites,
     selectedFavorite,
     selectedFavoriteIds,
-    isLoading,
-    error,
-    handleFavoriteSelect,
+    setSelectedFavoriteIds,
+    onFavoriteSelect,
     loadFavorites,
+    isLoading: favoritesLoading,
+    error: favoritesError,
   } = useFavorites();
 
   const {
     playlist,
-    currentVideo,
     isLoading: playlistLoading,
     error: playlistError,
+    currentVideo,
     handleVideoSelect,
   } = usePlaylist({ selectedFavorite });
 
@@ -30,20 +31,20 @@ export default function App() {
   const [isSelectingFavorites, setIsSelectingFavorites] = useState(false);
 
   useEffect(() => {
-    // 初始加载收藏夹
     loadFavorites();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="flex flex-1 min-h-0">
+      {/* 内容区域 */}
+      <div className="content-container flex min-h-0">
         <FavoritesList
           favorites={favorites}
           selectedFavorite={selectedFavorite}
           selectedFavoriteIds={selectedFavoriteIds}
-          isLoading={isLoading}
-          error={error}
-          onFavoriteSelect={handleFavoriteSelect}
+          isLoading={favoritesLoading}
+          error={favoritesError}
+          onFavoriteSelect={onFavoriteSelect}
           onOpenSelectDialog={() => setIsSelectingFavorites(true)}
           onRefresh={loadFavorites}
           avatarUrl={avatarUrl}
@@ -51,17 +52,26 @@ export default function App() {
         <PlayList
           playlist={playlist}
           currentVideo={currentVideo}
-          selectedFavorite={selectedFavorite}
           isLoading={playlistLoading}
           error={playlistError}
+          selectedFavorite={selectedFavorite}
           onVideoSelect={handleVideoSelect}
         />
       </div>
-      <ModernPlayer currentVideo={currentVideo} />
+
+      {/* 播放器 */}
+      <div className="player-container">
+        <ModernPlayer currentVideo={currentVideo} />
+      </div>
+
       {isSelectingFavorites && (
         <SelectFavoritesDialog
           selectedIds={selectedFavoriteIds}
           onClose={() => setIsSelectingFavorites(false)}
+          onConfirm={(ids) => {
+            setSelectedFavoriteIds(ids);
+            setIsSelectingFavorites(false);
+          }}
         />
       )}
     </div>
