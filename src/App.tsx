@@ -43,6 +43,8 @@ function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [isPlaylistOpen, setPlaylistOpen] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isSelectingFavorites, setIsSelectingFavorites] = useState(false)
+  const [selectedFavoriteIds, setSelectedFavoriteIds] = useState<Set<number>>(new Set())
   const audioRef = useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
@@ -257,6 +259,18 @@ function App() {
     }
   };
 
+  const toggleFavoriteSelection = (favoriteId: number) => {
+    setSelectedFavoriteIds(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(favoriteId)) {
+        newSet.delete(favoriteId)
+      } else {
+        newSet.add(favoriteId)
+      }
+      return newSet
+    })
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {!isLoggedIn ? (
@@ -265,7 +279,6 @@ function App() {
             <svg xmlns="http://www.w3.org/2000/svg" className="w-24 h-24 text-pink-500 mx-auto mb-6" viewBox="0 0 24 24">
               <path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3h-6Z"/>
             </svg>
-            <h1 className="text-2xl font-medium text-gray-900 mb-4">欢迎使用哔哩哔哩音乐</h1>
             <p className="text-gray-500 mb-8">请先登录以继续使用</p>
             <button
               onClick={handleLogin}
@@ -278,232 +291,235 @@ function App() {
           </div>
         </div>
       ) : (
-        <div className="flex h-screen">
-          {/* 左侧收藏夹列表 */}
-          <div className={`border-r border-gray-200 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-12'}`}>
-            <div className="p-4 h-full flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className={`text-xl font-medium text-gray-900 flex items-center gap-2 ${!isSidebarOpen && 'hidden'}`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3h-6Z"/>
-                  </svg>
-                  音乐收藏
-                </h2>
-                <button
-                  onClick={() => setSidebarOpen(!isSidebarOpen)}
-                  className="p-2 hover:bg-gray-50 rounded-full transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500" viewBox="0 0 24 24">
-                    <path fill="currentColor" d={isSidebarOpen ? 
-                      "M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" : 
-                      "M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
-                    }/>
-                  </svg>
-                </button>
-              </div>
-              
-              {isSidebarOpen && (
-                <div className="flex-1 overflow-hidden flex flex-col">
-                  <div className="flex justify-end mb-4">
-                    <button
-                      onClick={() => {
-                        setIsLoading(true);
-                        window.electronAPI.getFavorites()
-                          .then(result => {
-                            if (result.success) {
-                              setFavorites(result.data);
-                              setError(null);
-                            } else {
-                              setError(result.error || '获取收藏夹失败');
-                            }
-                          })
-                          .catch(err => {
-                            console.error('Error refreshing favorites:', err);
-                            setError('刷新收藏夹失败');
-                          })
-                          .finally(() => {
-                            setIsLoading(false);
-                          });
-                      }}
-                      className="p-2 hover:bg-gray-50 rounded-full transition-colors"
-                      disabled={isLoading}
-                      title="刷新收藏夹"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className={`w-5 h-5 text-gray-500 ${isLoading ? 'animate-spin' : ''}`}
-                        viewBox="0 0 24 24"
-                      >
-                        <path fill="currentColor" d="M12 20q-3.35 0-5.675-2.325T4 12q0-3.35 2.325-5.675T12 4q1.725 0 3.3.712T18 6.75V4h2v7h-7V9h4.2q-.8-1.4-2.187-2.2T12 6Q9.5 6 7.75 7.75T6 12q0 2.5 1.75 4.25T12 18q1.925 0 3.475-1.1T17.65 14h2.1q-.7 2.65-2.85 4.325T12 20Z"/>
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="space-y-1">
-                      {favorites.length === 0 && !isLoading && !error ? (
-                        <div className="text-gray-500 text-sm px-3 py-2">
-                          没有找到以"我的"开头的收藏夹
-                        </div>
-                      ) : (
-                        favorites
-                          .filter(fav => fav.title.startsWith('我的'))
-                          .map(fav => (
-                            <button
-                              key={fav.id}
-                              onClick={() => handleFavoriteSelect(fav)}
-                              className={`w-full px-3 py-2 text-left rounded-lg transition-all text-gray-600 ${
-                                selectedFavorite?.id === fav.id 
-                                  ? 'bg-pink-500 text-white' 
-                                  : 'hover:bg-gray-100'
-                              }`}
-                            >
-                              <div className="font-medium">{fav.title}</div>
-                              <div className={`text-sm ${selectedFavorite?.id === fav.id ? 'text-pink-100' : 'text-gray-400'}`}>
-                                {fav.count} 首音乐
-                              </div>
-                            </button>
-                          ))
-                      )}
-                    </div>
-                    {isLoading && <div className="mt-4 text-pink-500">加载中...</div>}
-                    {error && <div className="mt-4 text-red-500">{error}</div>}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 中间收藏夹内容 */}
-          <div className={`border-r border-gray-200 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-12'}`}>
-            <div className="h-full flex flex-col">
-              <div className="p-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-medium text-gray-900 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3h-6Z"/>
-                    </svg>
-                    {selectedFavorite ? selectedFavorite.title : '播放列表'}
-                  </h2>
-                </div>
-              </div>
-              
-              <div className="flex-1 overflow-y-auto p-4">
-                {isLoading ? (
-                  <div className="text-center text-gray-500 py-8">
-                    加载中...
-                  </div>
-                ) : playlist.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">
-                    {selectedFavorite ? '当前收藏夹暂无内容' : '从左侧选择一个收藏夹'}
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    {playlist.map((video, index) => (
+        <div className="flex flex-col h-screen">
+          {/* 顶部可拖动区域 */}
+          <div className="h-8 w-full app-drag-region" />
+          <div className="flex flex-1">
+            {/* 左侧收藏夹列表 */}
+            <div className={`border-r border-gray-200 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-12'}`}>
+              <div className="p-4 h-full flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                  {isSidebarOpen && (
+                    <div className="flex items-center gap-2">
                       <button
-                        key={video.bvid}
-                        onClick={() => handleVideoSelect(video)}
-                        className={`w-full px-3 py-2 text-left rounded-lg transition-all ${
-                          currentVideo?.bvid === video.bvid
-                            ? 'bg-pink-500 text-white'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
+                        onClick={() => setIsSelectingFavorites(true)}
+                        className="p-2 hover:bg-gray-50 rounded-lg transition-colors text-gray-600"
+                        title="选择收藏夹"
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm opacity-50">{index + 1}</span>
-                          <div className="flex-1 truncate">
-                            <div className="font-medium truncate">{video.title}</div>
-                            <div className={`text-sm truncate ${
-                              currentVideo?.bvid === video.bvid ? 'text-pink-100' : 'text-gray-400'
-                            }`}>
-                              {video.author}
-                            </div>
-                          </div>
-                          <span className="text-sm opacity-50">{formatTime(video.duration)}</span>
-                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
+                          <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
                       </button>
-                    ))}
+                      <button
+                        onClick={() => {
+                          setIsLoading(true);
+                          window.electronAPI.getFavorites()
+                            .then(result => {
+                              if (result.success) {
+                                setFavorites(result.data);
+                                setError(null);
+                              } else {
+                                setError(result.error || '获取收藏夹失败');
+                              }
+                            })
+                            .catch(err => {
+                              console.error('Error refreshing favorites:', err);
+                              setError('刷新收藏夹失败');
+                            })
+                            .finally(() => {
+                              setIsLoading(false);
+                            });
+                        }}
+                        className="p-2 hover:bg-gray-50 rounded-lg transition-colors text-gray-600"
+                        disabled={isLoading}
+                        title="刷新收藏夹"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}
+                          viewBox="0 0 24 24"
+                        >
+                          <path fill="currentColor" d="M12 20q-3.35 0-5.675-2.325T4 12q0-3.35 2.325-5.675T12 4q1.725 0 3.3.712T18 6.75V4h2v7h-7V9h4.2q-.8-1.4-2.187-2.2T12 6Q9.5 6 7.75 7.75T6 12q0 2.5 1.75 4.25T12 18q1.925 0 3.475-1.1T17.65 14h2.1q-.7 2.65-2.85 4.325T12 20Z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setSidebarOpen(!isSidebarOpen)}
+                    className="p-2 hover:bg-gray-50 rounded-full transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500" viewBox="0 0 24 24">
+                      <path fill="currentColor" d={isSidebarOpen ? 
+                        "M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" : 
+                        "M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+                      }/>
+                    </svg>
+                  </button>
+                </div>
+                
+                {isSidebarOpen && (
+                  <div className="flex-1 overflow-hidden flex flex-col">
+                    <div className="flex-1 overflow-y-auto">
+                      <div className="space-y-1">
+                        {favorites.length === 0 && !isLoading && !error ? (
+                          <div className="text-gray-500 text-sm px-3 py-2">
+                            没有找到收藏夹
+                          </div>
+                        ) : (
+                          favorites
+                            .filter(fav => selectedFavoriteIds.size === 0 || selectedFavoriteIds.has(fav.id))
+                            .map(fav => (
+                              <button
+                                key={fav.id}
+                                onClick={() => handleFavoriteSelect(fav)}
+                                className={`w-full px-3 py-2 text-left rounded-lg transition-all text-gray-600 ${
+                                  selectedFavorite?.id === fav.id 
+                                    ? 'bg-pink-500 text-white' 
+                                    : 'hover:bg-gray-100'
+                                }`}
+                              >
+                                <div className="font-medium">{fav.title}</div>
+                                <div className={`text-sm ${selectedFavorite?.id === fav.id ? 'text-pink-100' : 'text-gray-400'}`}>
+                                  {fav.count} 首音乐
+                                </div>
+                              </button>
+                            ))
+                        )}
+                      </div>
+                      {isLoading && <div className="mt-4 text-pink-500">加载中...</div>}
+                      {error && <div className="mt-4 text-red-500">{error}</div>}
+                    </div>
                   </div>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* 右侧播放器 */}
-          <div className="flex-1 flex flex-col">
-            {/* 视频/封面显示区域 */}
-            <div className="aspect-video bg-gray-50">
-              {currentVideo ? (
-                <img
-                  src={currentVideo.thumbnail}
-                  alt={currentVideo.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-24 h-24 text-gray-300" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3h-6Z"/>
-                  </svg>
+            {/* 中间收藏夹内容 */}
+            <div className={`border-r border-gray-200 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-12'}`}>
+              <div className="h-full flex flex-col">
+                <div className="p-4 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-medium text-gray-900 flex items-center gap-2">
+                      {selectedFavorite ? selectedFavorite.title : '播放列表'}
+                    </h2>
+                  </div>
                 </div>
-              )}
+                
+                <div className="flex-1 overflow-y-auto p-4">
+                  {isLoading ? (
+                    <div className="text-center text-gray-500 py-8">
+                      加载中...
+                    </div>
+                  ) : playlist.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                      {selectedFavorite ? '当前收藏夹暂无内容' : '从左侧选择一个收藏夹'}
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {playlist.map((video, index) => (
+                        <button
+                          key={video.bvid}
+                          onClick={() => handleVideoSelect(video)}
+                          className={`w-full px-3 py-2 text-left rounded-lg transition-all ${
+                            currentVideo?.bvid === video.bvid
+                              ? 'bg-pink-500 text-white'
+                              : 'text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm opacity-50">{index + 1}</span>
+                            <div className="flex-1 truncate">
+                              <div className="font-medium truncate">{video.title}</div>
+                              <div className={`text-sm truncate ${
+                                currentVideo?.bvid === video.bvid ? 'text-pink-100' : 'text-gray-400'
+                              }`}>
+                                {video.author}
+                              </div>
+                            </div>
+                            <span className="text-sm opacity-50">{formatTime(video.duration)}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {/* 播放控制区域 */}
-            <div className="flex-1 p-8 flex flex-col">
-              <div className="mb-6">
-                <h2 className="text-2xl font-medium mb-2 text-gray-900 line-clamp-2">
-                  {currentVideo?.title || '未播放'}
-                </h2>
-                <p className="text-lg text-gray-500">
-                  {currentVideo?.author || '选择一首歌开始播放'}
-                </p>
-              </div>
-
-              {/* 进度条 */}
-              <div className="mb-8">
-                <div className="flex justify-between text-base text-gray-400 mb-2">
-                  <span>{formatTime(currentTime)}</span>
-                  <span>{formatTime(duration)}</span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full">
-                  <div
-                    className="h-full bg-pink-500 rounded-full"
-                    style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
+            {/* 右侧播放器 */}
+            <div className="flex-1 flex flex-col">
+              {/* 视频/封面显示区域 */}
+              <div className="aspect-video bg-gray-50">
+                {currentVideo ? (
+                  <img
+                    src={currentVideo.thumbnail}
+                    alt={currentVideo.title}
+                    className="w-full h-full object-cover"
                   />
-                </div>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-24 h-24 text-gray-300" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3h-6Z"/>
+                    </svg>
+                  </div>
+                )}
               </div>
 
-              {/* 控制按钮 */}
-              <div className="flex items-center justify-center gap-12">
-                <button
-                  className="p-3 text-gray-400 hover:text-gray-600 transition-colors"
-                  onClick={() => setVolume(prev => Math.max(0, prev - 0.1))}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
-                  </svg>
-                </button>
-                <button
-                  className="p-4 bg-pink-500 rounded-full hover:bg-pink-600 transition-colors text-white shadow-lg"
-                  onClick={() => setIsPlaying(!isPlaying)}
-                >
-                  {isPlaying ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              {/* 播放控制区域 */}
+              <div className="flex-1 p-8 flex flex-col">
+                <div className="mb-6">
+                  <p className="text-lg text-gray-500">
+                    {currentVideo?.author || '选择一首歌开始播放'}
+                  </p>
+                </div>
+
+                {/* 进度条 */}
+                <div className="mb-8">
+                  <div className="flex justify-between text-base text-gray-400 mb-2">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
+                  </div>
+                  <div className="h-2 bg-gray-100 rounded-full">
+                    <div
+                      className="h-full bg-pink-500 rounded-full"
+                      style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* 控制按钮 */}
+                <div className="flex items-center justify-center gap-12">
+                  <button
+                    className="p-3 text-gray-400 hover:text-gray-600 transition-colors"
+                    onClick={() => setVolume(prev => Math.max(0, prev - 0.1))}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
                     </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M8 5v14l11-7z"/>
+                  </button>
+                  <button
+                    className="p-4 bg-pink-500 rounded-full hover:bg-pink-600 transition-colors text-white shadow-lg"
+                    onClick={() => setIsPlaying(!isPlaying)}
+                  >
+                    {isPlaying ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M8 5v14l11-7z"/>
+                      </svg>
+                    )}
+                  </button>
+                  <button
+                    className="p-3 text-gray-400 hover:text-gray-600 transition-colors"
+                    onClick={() => setVolume(prev => Math.min(1, prev + 0.1))}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                     </svg>
-                  )}
-                </button>
-                <button
-                  className="p-3 text-gray-400 hover:text-gray-600 transition-colors"
-                  onClick={() => setVolume(prev => Math.min(1, prev + 0.1))}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                  </svg>
-                </button>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -517,6 +533,57 @@ function App() {
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
       />
+
+      {/* 收藏夹选择对话框 */}
+      {isSelectingFavorites && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-96 max-h-[80vh] flex flex-col">
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-lg font-medium">选择要显示的收藏夹</h2>
+              <button
+                onClick={() => setIsSelectingFavorites(false)}
+                className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-500"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+            <div className="p-4 flex-1 overflow-y-auto">
+              <div className="space-y-2">
+                {favorites.map(fav => (
+                  <label key={fav.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedFavoriteIds.has(fav.id)}
+                      onChange={() => toggleFavoriteSelection(fav.id)}
+                      className="w-4 h-4 text-pink-500 rounded border-gray-300 focus:ring-pink-500"
+                    />
+                    <div>
+                      <div className="font-medium">{fav.title}</div>
+                      <div className="text-sm text-gray-500">{fav.count} 首音乐</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
+              <button
+                onClick={() => setSelectedFavoriteIds(new Set())}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                显示全部
+              </button>
+              <button
+                onClick={() => setIsSelectingFavorites(false)}
+                className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
+              >
+                确定
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
