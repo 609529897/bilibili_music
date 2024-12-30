@@ -1,7 +1,3 @@
-import clsx from 'clsx';
-import LoadingSpinner from './LoadingSpinner'; // Assuming LoadingSpinner is a separate component
-import { formatDuration } from './utils'; // Assuming formatDuration is a utility function
-
 interface Video {
   bvid: string;
   title: string;
@@ -29,7 +25,7 @@ export const PlayList = ({
   onVideoSelect,
 }: PlayListProps) => {
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col h-screen overflow-y-auto">
       <div className="h-4 app-drag-region" />
       <div className="flex-1">
         <div className="w-80 h-full flex flex-col">
