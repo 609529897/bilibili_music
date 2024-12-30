@@ -237,16 +237,16 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                       : "text-gray-400 hover:text-gray-600"
                   } transition-colors`}
                 >
-                  <svg
+                    <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="w-5 h-5"
                     viewBox="0 0 24 24"
-                  >
+                    >
                     <path
                       fill="currentColor"
-                      d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"
+                      d="M18 6l-8.5 6L18 18V6zM8 6v12H6V6h2z"
                     />
-                  </svg>
+                    </svg>
                 </button>
                 {/* 播放/暂停 */}
                 <button
