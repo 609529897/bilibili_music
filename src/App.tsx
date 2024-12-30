@@ -22,7 +22,9 @@ interface Video {
 declare global {
   interface Window {
     electronAPI: {
-      addVideo: (url: string) => Promise<{ success: boolean, data?: { bvid: string, title: string, author: string, duration: number, thumbnail: string, audioUrl: string } }>
+      addVideo: (url: string) => Promise<{ success: boolean, data?: any }>
+      login: () => Promise<void>
+      onLoginSuccess: (callback: () => void) => void
     }
   }
 }
@@ -37,17 +39,24 @@ function App() {
   const [isMuted, setIsMuted] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
 
+  useEffect(() => {
+    // 监听登录成功事件
+    window.electronAPI.onLoginSuccess(() => {
+      // 登录成功后重试添加视频
+      if (url) {
+        handleAddVideo()
+      }
+    })
+  }, [])
+
   const handleAddVideo = async () => {
     if (!url.trim()) return
 
     try {
       console.log('Adding video with URL:', url)
       const result = await window.electronAPI.addVideo(url)
-      console.log('API response:', result)
       
       if (result.success && result.data) {
-        console.log('Video data received:', result.data)
-        
         const newVideo: Video = {
           id: Date.now().toString(),
           bvid: result.data.bvid,
@@ -58,7 +67,6 @@ function App() {
           audioUrl: result.data.audioUrl
         }
 
-        console.log('Created new video object:', newVideo)
         setVideos(prev => [...prev, newVideo])
         setUrl('')
       } else {

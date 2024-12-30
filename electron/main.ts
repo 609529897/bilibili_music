@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, session } from 'electron'
 import path from 'path'
 import axios from 'axios'
 
@@ -13,50 +13,13 @@ const API = {
 const headers = {
   'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   'Referer': 'https://www.bilibili.com',
-  'Origin': 'https://www.bilibili.com',
-  'Accept': 'application/json, text/plain, */*',
-  'Connection': 'keep-alive',
-  'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-  'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-  'sec-ch-ua-mobile': '?0',
-  'sec-ch-ua-platform': '"macOS"',
-  'Sec-Fetch-Dest': 'empty',
-  'Sec-Fetch-Mode': 'cors',
-  'Sec-Fetch-Site': 'same-site'
+  'Origin': 'https://www.bilibili.com'
 }
 
-// 认证信息
-const BILIBILI_COOKIES = {
-  SESSDATA: '请把你的SESSDATA粘贴在这里',  // 例如：'abc123....'
-  bili_jct: '请把你的bili_jct粘贴在这里',  // 例如：'def456....'
-  DedeUserID: '请把你的DedeUserID粘贴在这里'  // 例如：'123456'
-}
-
-// 获取完整的Cookie字符串
-const getCookieString = () => {
-  return Object.entries(BILIBILI_COOKIES)
-    .map(([key, value]) => `${key}=${value}`)
-    .join('; ')
-}
-
-// 检查登录状态
-async function checkLoginStatus() {
-  try {
-    const response = await axios.get(API.USER_INFO, {
-      headers: {
-        ...headers,
-        Cookie: getCookieString()
-      }
-    })
-    return response.data.code === 0
-  } catch (error) {
-    console.error('Failed to check login status:', error)
-    return false
-  }
-}
+let mainWindow: BrowserWindow | null = null
 
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
@@ -67,13 +30,87 @@ function createWindow() {
   })
 
   if (process.env.VITE_DEV_SERVER_URL) {
-    win.loadURL(process.env.VITE_DEV_SERVER_URL)
+    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
   } else {
-    win.loadFile('dist/index.html')
+    mainWindow.loadFile('dist/index.html')
   }
 
   // 默认打开开发者工具
-  win.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
+}
+
+// 打开B站登录页面
+async function openBilibiliLogin() {
+  if (!mainWindow) return
+
+  const loginWindow = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    parent: mainWindow,
+    modal: true
+  })
+
+  // 监听登录成功
+  loginWindow.webContents.on('did-navigate', async (event, url) => {
+    if (url.includes('bilibili.com') && !url.includes('login')) {
+      // 获取所有cookies
+      const cookies = await session.defaultSession.cookies.get({
+        url: 'https://bilibili.com'
+      })
+      
+      // 保存需要的cookies
+      const cookieData = {
+        SESSDATA: cookies.find(c => c.name === 'SESSDATA')?.value,
+        bili_jct: cookies.find(c => c.name === 'bili_jct')?.value,
+        DedeUserID: cookies.find(c => c.name === 'DedeUserID')?.value
+      }
+
+      // 检查是否获取到所有需要的cookie
+      if (cookieData.SESSDATA && cookieData.bili_jct && cookieData.DedeUserID) {
+        console.log('Login successful, cookies obtained')
+        // 关闭登录窗口
+        loginWindow.close()
+        // 通知渲染进程登录成功
+        mainWindow?.webContents.send('bilibili-login-success')
+      }
+    }
+  })
+
+  // 加载B站登录页面
+  await loginWindow.loadURL('https://passport.bilibili.com/login')
+}
+
+// 检查登录状态
+async function checkLoginStatus() {
+  try {
+    const cookies = await session.defaultSession.cookies.get({
+      url: 'https://bilibili.com'
+    })
+
+    const sessdata = cookies.find(c => c.name === 'SESSDATA')?.value
+    if (!sessdata) {
+      return false
+    }
+
+    const response = await axios.get(API.USER_INFO, {
+      headers: {
+        ...headers,
+        Cookie: cookies.map(c => `${c.name}=${c.value}`).join('; ')
+      }
+    })
+    return response.data.code === 0
+  } catch (error) {
+    console.error('Failed to check login status:', error)
+    return false
+  }
+}
+
+// 获取cookie字符串
+async function getCookieString() {
+  const cookies = await session.defaultSession.cookies.get({
+    url: 'https://bilibili.com'
+  })
+  return cookies.map(c => `${c.name}=${c.value}`).join('; ')
 }
 
 app.whenReady().then(() => {
@@ -92,6 +129,11 @@ app.on('window-all-closed', () => {
   }
 })
 
+// 处理登录请求
+ipcMain.handle('bilibili-login', async () => {
+  await openBilibiliLogin()
+})
+
 // Handle IPC messages here
 ipcMain.handle('add-video', async (event, videoUrl: string) => {
   try {
@@ -100,8 +142,13 @@ ipcMain.handle('add-video', async (event, videoUrl: string) => {
     // 检查登录状态
     const isLoggedIn = await checkLoginStatus()
     if (!isLoggedIn) {
-      throw new Error('需要登录B站账号才能获取视频信息')
+      // 如果未登录，打开登录窗口
+      await openBilibiliLogin()
+      throw new Error('请先登录B站账号')
     }
+
+    // 获取cookie字符串
+    const cookieString = await getCookieString()
 
     // 解析BV号
     const bvMatch = videoUrl.match(/BV\w+/)
@@ -117,11 +164,9 @@ ipcMain.handle('add-video', async (event, videoUrl: string) => {
       params: { bvid },
       headers: {
         ...headers,
-        Cookie: getCookieString()
+        Cookie: cookieString
       }
     })
-
-    console.log('Video info response:', viewResponse.data)
 
     if (viewResponse.data.code !== 0) {
       throw new Error(viewResponse.data.message || 'Failed to fetch video info')
@@ -141,17 +186,15 @@ ipcMain.handle('add-video', async (event, videoUrl: string) => {
       params: {
         bvid,
         cid: videoData.cid,
-        fnval: 16, // 请求音频流
-        qn: 64,    // 音质
-        fourk: 1   // 支持4K
+        fnval: 16,
+        qn: 64,
+        fourk: 1
       },
       headers: {
         ...headers,
-        Cookie: getCookieString()
+        Cookie: cookieString
       }
     })
-
-    console.log('Play URL response:', playUrlResponse.data)
 
     if (playUrlResponse.data.code !== 0) {
       throw new Error(playUrlResponse.data.message || 'Failed to fetch audio URL')
@@ -162,9 +205,8 @@ ipcMain.handle('add-video', async (event, videoUrl: string) => {
     if (!audioUrl) {
       throw new Error('无法获取音频URL，可能需要大会员权限')
     }
-    console.log('Extracted audio URL:', audioUrl)
 
-    const responseData = {
+    return {
       success: true,
       data: {
         bvid,
@@ -175,9 +217,6 @@ ipcMain.handle('add-video', async (event, videoUrl: string) => {
         audioUrl
       }
     }
-    
-    console.log('Sending response to renderer:', responseData)
-    return responseData
 
   } catch (error) {
     console.error('Error processing video:', error)
