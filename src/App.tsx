@@ -5,6 +5,7 @@ import { useUserInfo } from "./hooks/useUserInfo";
 import { FavoritesList } from "./components/FavoritesList";
 import { PlayList } from "./components/PlayList";
 import { SelectFavoritesDialog } from "./components/SelectFavoritesDialog";
+import { ModernPlayer } from "./components/Player";
 
 export default function App() {
   const {
@@ -34,8 +35,8 @@ export default function App() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="h-screen overflow-hidden">
-      <div className="flex h-full">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         <FavoritesList
           favorites={favorites}
           selectedFavorite={selectedFavorite}
@@ -55,10 +56,11 @@ export default function App() {
           error={playlistError}
           onVideoSelect={handleVideoSelect}
         />
-        <div className="flex-1">
-          {/* Player component will go here */}
+        <div className="flex-1 border-l border-gray-200">
+          {/* 主内容区域 */}
         </div>
       </div>
+      <ModernPlayer currentVideo={currentVideo} />
       {isSelectingFavorites && (
         <SelectFavoritesDialog
           selectedIds={selectedFavoriteIds}
