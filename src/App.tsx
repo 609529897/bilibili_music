@@ -15,14 +15,23 @@ interface Favorite {
   count: number
 }
 
+interface UserInfo {
+  uname: string
+  face: string
+  level: number
+}
+
 declare global {
   interface Window {
     electronAPI: {
       addVideo: (url: string) => Promise<{ success: boolean, data?: any }>
-      login: () => Promise<void>
+      openBilibiliLogin: () => Promise<void>
       onLoginSuccess: (callback: () => void) => void
       getFavorites: () => Promise<{ success: boolean, data?: Favorite[] }>
       getFavoriteVideos: (mediaId: number) => Promise<{ success: boolean, data?: Video[] }>
+      getUserInfo: () => Promise<{ success: boolean, data?: UserInfo }>
+      getImage: (url: string) => Promise<string | null>
+      checkLoginStatus: () => Promise<boolean>
     }
   }
 }
@@ -43,24 +52,96 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isSelectingFavorites, setIsSelectingFavorites] = useState(false)
   const [selectedFavoriteIds, setSelectedFavoriteIds] = useState<Set<number>>(new Set())
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
+    // 检查登录状态
+    window.electronAPI.checkLoginStatus().then(isLoggedIn => {
+      setIsLoggedIn(isLoggedIn)
+      if (isLoggedIn) {
+        loadUserInfo()
+        loadFavorites()
+      }
+    })
+
     // 监听登录成功事件
     window.electronAPI.onLoginSuccess(() => {
       setIsLoggedIn(true)
+      loadUserInfo()
       loadFavorites()
     })
   }, [])
 
+  const loadUserInfo = async () => {
+    try {
+      const result = await window.electronAPI.getUserInfo()
+      if (result.success) {
+        setUserInfo(result.data)
+      }
+    } catch (err) {
+      console.error('Failed to load user info:', err)
+    }
+  }
+
+  useEffect(() => {
+    if (userInfo?.face) {
+      window.electronAPI.getImage(userInfo.face).then(url => {
+        if (url) {
+          setAvatarUrl(url)
+        }
+      })
+    }
+  }, [userInfo?.face])
+
   const handleLogin = async () => {
     try {
       setIsLoading(true)
-      setError(null)
-      await window.electronAPI.login()
+      await window.electronAPI.openBilibiliLogin()
     } catch (err) {
       console.error('Login error:', err)
-      setError('登录失败，请重试')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const loadFavorites = async () => {
+    setIsLoading(true)
+    try {
+      const result = await window.electronAPI.getFavorites()
+      if (result.success) {
+        console.log('Loaded favorites:', result.data)
+        setFavorites(result.data)
+        setError(null)
+      } else {
+        setError(result.error || '获取收藏夹失败')
+      }
+    } catch (err) {
+      console.error('Error loading favorites:', err)
+      setError('加载收藏夹失败')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleFavoriteSelect = async (favorite: Favorite) => {
+    setSelectedFavorite(favorite)
+    setIsLoading(true)
+    try {
+      console.log('Loading videos for favorite:', favorite.id)
+      const result = await window.electronAPI.getFavoriteVideos(favorite.id)
+      console.log('Got videos result:', result)
+      if (result.success) {
+        console.log('Setting playlist:', result.data)
+        setPlaylist(result.data)
+        setError(null)
+      } else {
+        setError(result.error || '获取收藏夹内容失败')
+      }
+    } catch (err) {
+      console.error('Error loading favorite videos:', err)
+      setError('加载收藏夹内容失败')
     } finally {
       setIsLoading(false)
     }
@@ -192,25 +273,6 @@ function App() {
     loadFavorites()
   }, [])
 
-  const loadFavorites = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const result = await window.electronAPI.getFavorites()
-      console.log('Favorites result:', result)
-      if (result.success) {
-        setFavorites(result.data)
-      } else {
-        setError(result.error)
-      }
-    } catch (err) {
-      console.error('Error loading favorites:', err)
-      setError(err instanceof Error ? err.message : '加载收藏夹失败')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const loadFavoriteVideos = async (mediaId: number) => {
     try {
       setIsLoading(true)
@@ -237,25 +299,6 @@ function App() {
     setCurrentVideo(video)
     setIsPlaying(true)
   }
-
-  const handleFavoriteSelect = async (favorite: Favorite) => {
-    setSelectedFavorite(favorite);
-    setIsLoading(true);
-    try {
-      const result = await window.electronAPI.getFavoriteVideos(favorite.id);
-      if (result.success) {
-        setPlaylist(result.data);
-        setError(null);
-      } else {
-        setError(result.error || '获取收藏夹内容失败');
-      }
-    } catch (err) {
-      console.error('Error loading favorite videos:', err);
-      setError('加载收藏夹内容失败');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const toggleFavoriteSelection = (favoriteId: number) => {
     setSelectedFavoriteIds(prev => {
@@ -297,6 +340,13 @@ function App() {
             <div className="w-64 border-r border-gray-200">
               <div className="p-4 h-full flex flex-col">
                 <div className="flex items-center justify-between mb-4">
+                  {avatarUrl && (
+                    <img
+                      src={avatarUrl}
+                      alt="avatar"
+                      className="w-8 h-8 rounded-full"
+                    />
+                  )}
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setIsSelectingFavorites(true)}
@@ -308,25 +358,7 @@ function App() {
                       </svg>
                     </button>
                     <button
-                      onClick={() => {
-                        setIsLoading(true);
-                        window.electronAPI.getFavorites()
-                          .then(result => {
-                            if (result.success) {
-                              setFavorites(result.data);
-                              setError(null);
-                            } else {
-                              setError(result.error || '获取收藏夹失败');
-                            }
-                          })
-                          .catch(err => {
-                            console.error('Error refreshing favorites:', err);
-                            setError('刷新收藏夹失败');
-                          })
-                          .finally(() => {
-                            setIsLoading(false);
-                          });
-                      }}
+                      onClick={loadFavorites}
                       className="p-2 hover:bg-gray-50 rounded-lg transition-colors text-gray-600"
                       disabled={isLoading}
                       title="刷新收藏夹"

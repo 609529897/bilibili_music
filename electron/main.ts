@@ -310,6 +310,7 @@ ipcMain.handle('get-favorites', async () => {
 // 获取收藏夹内容
 ipcMain.handle('get-favorite-videos', async (_event, mediaId: number) => {
   try {
+    console.log('Getting favorite videos for media ID:', mediaId)
     const cookieString = await getCookieString()
     
     const detailResponse = await axios.get(API.FAVORITE_DETAIL, {
@@ -319,9 +320,9 @@ ipcMain.handle('get-favorite-videos', async (_event, mediaId: number) => {
         ps: 40,
         keyword: '',
         order: 'mtime',
+        type: 0,
         tid: 0,
-        platform: 'web',
-        web_location: '333.1387'
+        platform: 'web'
       },
       headers: {
         ...headers,
@@ -329,15 +330,20 @@ ipcMain.handle('get-favorite-videos', async (_event, mediaId: number) => {
       }
     })
 
+    console.log('Detail response:', detailResponse.data)
+
     if (detailResponse.data.code !== 0) {
       throw new Error(`获取收藏夹内容失败: ${detailResponse.data.message}`)
     }
 
-    const videos = detailResponse.data.data.medias || []
+    const videos = detailResponse.data.data?.medias || []
+    console.log('Found videos:', videos.length)
+
     const processedVideos = []
 
     for (const video of videos) {
       try {
+        console.log('Processing video:', video.bvid, video.title)
         const playUrlResponse = await axios.get(API.PLAY_URL, {
           params: {
             bvid: video.bvid,
@@ -353,6 +359,8 @@ ipcMain.handle('get-favorite-videos', async (_event, mediaId: number) => {
           }
         })
 
+        console.log('Play URL response for', video.bvid, ':', playUrlResponse.data)
+
         if (playUrlResponse.data.code === 0) {
           const audioUrl = playUrlResponse.data.data.dash?.audio?.[0]?.baseUrl
           if (audioUrl) {
@@ -364,23 +372,108 @@ ipcMain.handle('get-favorite-videos', async (_event, mediaId: number) => {
               thumbnail: video.cover,
               audioUrl: audioUrl
             })
+            console.log('Added video to playlist:', video.title)
+          } else {
+            console.log('No audio URL found for video:', video.bvid)
           }
         }
       } catch (error) {
-        console.error(`Failed to get audio URL for video ${video.bvid}:`, error)
+        console.error(`Failed to get audio URL for video ${video.bvid}:`, error.response?.data || error)
       }
     }
 
+    console.log('Processed videos:', processedVideos.length)
     return {
       success: true,
       data: processedVideos
     }
 
   } catch (error) {
-    console.error('Error getting favorite videos:', error)
+    console.error('Error getting favorite videos:', error.response?.data || error)
     return {
       success: false,
       error: error.message || 'Failed to get favorite videos'
     }
+  }
+})
+
+// 获取用户信息
+ipcMain.handle('get-user-info', async () => {
+  try {
+    const cookieString = await getCookieString()
+    const response = await axios.get(API.USER_INFO, {
+      headers: {
+        ...headers,
+        Cookie: cookieString
+      }
+    })
+
+    if (response.data.code !== 0) {
+      throw new Error(response.data.message)
+    }
+
+    return {
+      success: true,
+      data: {
+        uname: response.data.data.uname,
+        face: response.data.data.face,
+        level: response.data.data.level
+      }
+    }
+  } catch (error) {
+    console.error('Error getting user info:', error)
+    return {
+      success: false,
+      error: error.message || 'Failed to get user info'
+    }
+  }
+})
+
+// 检查登录状态
+ipcMain.handle('check-login-status', async () => {
+  try {
+    const cookies = await session.defaultSession.cookies.get({
+      url: 'https://bilibili.com'
+    })
+
+    const sessdata = cookies.find(c => c.name === 'SESSDATA')?.value
+    if (!sessdata) {
+      return false
+    }
+
+    const response = await axios.get(API.USER_INFO, {
+      headers: {
+        ...headers,
+        Cookie: `SESSDATA=${sessdata}`
+      }
+    })
+
+    return response.data.code === 0
+  } catch (err) {
+    console.error('Error checking login status:', err)
+    return false
+  }
+})
+
+// 获取用户头像
+ipcMain.handle('get-image', async (_event, url: string) => {
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        ...headers,
+        'Accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'Sec-Fetch-Dest': 'image',
+        'Sec-Fetch-Mode': 'no-cors',
+        'Sec-Fetch-Site': 'same-site',
+      },
+      responseType: 'arraybuffer'
+    })
+
+    const base64 = Buffer.from(response.data, 'binary').toString('base64')
+    const contentType = response.headers['content-type']
+    return `data:${contentType};base64,${base64}`
+  } catch (error) {
+    console.error('Error getting image:', error)
+    return null
   }
 })
