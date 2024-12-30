@@ -41,7 +41,9 @@ export default function App() {
     isLoading: playlistLoading,
     error: playlistError,
     handleVideoSelect,
-  } = usePlaylist();
+  } = usePlaylist({
+    selectedFavorite,
+  });
 
   useEffect(() => {
     // 检查登录状态
