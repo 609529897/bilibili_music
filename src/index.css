@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 自定义滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;

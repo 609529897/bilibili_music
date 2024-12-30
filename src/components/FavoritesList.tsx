@@ -1,6 +1,4 @@
 import { useEffect } from 'react';
-import { clsx } from 'clsx';
-import LoadingSpinner from './LoadingSpinner';
 
 interface Favorite {
   id: number;
@@ -18,7 +16,6 @@ interface FavoritesListProps {
   onOpenSelectDialog: () => void;
   avatarUrl: string | null;
   onRefresh: () => void;
-  defaultAvatar: string;
 }
 
 export const FavoritesList = ({
@@ -31,7 +28,6 @@ export const FavoritesList = ({
   onOpenSelectDialog,
   avatarUrl,
   onRefresh,
-  defaultAvatar,
 }: FavoritesListProps) => {
   // 默认选中第一个收藏夹
   useEffect(() => {
@@ -41,7 +37,7 @@ export const FavoritesList = ({
   }, [favorites, selectedFavorite, onFavoriteSelect]);
 
   return (
-    <div className="w-64 border-r border-gray-200 flex flex-col h-screen overflow-y-auto">
+    <div className="w-64 border-r border-gray-200 flex flex-col h-full">
       <div className="h-4 app-drag-region" />
       <div className="p-4 flex-1 flex flex-col">
         {/* 操作按钮区域 */}
@@ -81,15 +77,9 @@ export const FavoritesList = ({
               </svg>
             </button>
           </div>
-          {avatarUrl ? (
+          {avatarUrl && (
             <img
               src={avatarUrl}
-              alt="avatar"
-              className="w-6 h-6 rounded-full"
-            />
-          ) : (
-            <img
-              src={defaultAvatar}
               alt="avatar"
               className="w-6 h-6 rounded-full"
             />
@@ -97,8 +87,8 @@ export const FavoritesList = ({
         </div>
 
         {/* 收藏夹列表区域 */}
-        <div className="flex-1 overflow-hidden flex flex-col">
-          <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto">
             <div className="space-y-1">
               {favorites.length === 0 && !isLoading && !error ? (
                 <div className="text-gray-500 text-sm px-3 py-2">

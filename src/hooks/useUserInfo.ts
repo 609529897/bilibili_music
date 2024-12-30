@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { UserInfo } from '../types/electron';
 
-export const useUser = () => {
+export const useUserInfo = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
