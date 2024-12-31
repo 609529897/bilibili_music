@@ -42,7 +42,7 @@ export const FavoritesList = ({
   }, [favorites, selectedFavorite, onFavoriteSelect]);
 
   return (
-    <div className="w-64 flex flex-col h-full glass-morphism">
+    <div className="w-64 flex flex-col h-full bg-white/5 backdrop-blur-2xl border-r border-white/10">
       <div className="h-4 app-drag-region" />
       <div className="p-4 flex-1 flex flex-col">
         {/* 操作按钮区域 */}
@@ -50,7 +50,7 @@ export const FavoritesList = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onOpenSelectDialog}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 no-drag"
+              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-gray-300 no-drag"
               title="选择收藏夹"
             >
               <svg
@@ -66,7 +66,7 @@ export const FavoritesList = ({
             </button>
             <button
               onClick={onRefresh}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 no-drag"
+              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-gray-300 no-drag"
               disabled={isLoading}
               title="刷新收藏夹"
             >
@@ -94,7 +94,7 @@ export const FavoritesList = ({
           <div className="h-full overflow-y-auto">
             <div className="space-y-1">
               {favorites.length === 0 && !isLoading && !error ? (
-                <div className="text-gray-500 text-sm px-3 py-2">
+                <div className="text-gray-400 text-sm px-3 py-2">
                   没有找到收藏夹
                 </div>
               ) : (
@@ -111,8 +111,8 @@ export const FavoritesList = ({
                       className={`w-full px-3 py-2 text-left rounded-lg transition-all no-drag
                         ${
                           selectedFavorite?.id === fav.id
-                            ? "bg-pink-500 text-white shadow-md"
-                            : "text-gray-600 hover:bg-gray-100"
+                            ? "bg-gradient-to-r from-pink-500/90 to-purple-500/90 text-white shadow-md"
+                            : "text-gray-900 hover:bg-white/5"
                         }`}
                     >
                       <div className="font-medium">{fav.title}</div>
@@ -120,7 +120,7 @@ export const FavoritesList = ({
                         className={`text-sm ${
                           selectedFavorite?.id === fav.id
                             ? "text-pink-100"
-                            : "text-gray-400"
+                            : "text-gray-500"
                         }`}
                       >
                         {fav.count} 个视频
@@ -130,12 +130,12 @@ export const FavoritesList = ({
               )}
             </div>
             {isLoading && (
-              <div className="mt-4 text-pink-500 text-center animate-pulse">
+              <div className="mt-4 text-pink-400 text-center animate-pulse">
                 加载中...
               </div>
             )}
             {error && (
-              <div className="mt-4 text-red-500 text-sm text-center">
+              <div className="mt-4 text-red-400 text-sm text-center">
                 {error}
               </div>
             )}
