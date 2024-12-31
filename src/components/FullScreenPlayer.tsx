@@ -20,19 +20,38 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
   if (!currentVideo) return null;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isVisible && (
         <motion.div
-          className="fixed h-screen inset-0 bottom-20 bg-black/90 backdrop-blur-xl z-40 flex items-center justify-center"
+          className="fixed h-screen inset-0 bottom-20 z-40 flex items-center justify-center"
           onClick={onClose}
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "100%" }}
-          transition={{ type: "spring", damping: 25, stiffness: 200 }}
+          initial={{ y: "100%", backgroundColor: "rgba(0, 0, 0, 0.9)", backdropFilter: "blur(16px)" }}
+          animate={{ y: 0, backgroundColor: "rgba(0, 0, 0, 0.9)", backdropFilter: "blur(16px)" }}
+          exit={{ y: "100%", backgroundColor: "rgba(0, 0, 0, 0.9)", backdropFilter: "blur(16px)" }}
+          transition={{ 
+            type: "spring", 
+            damping: 26, 
+            stiffness: 200,
+            backgroundColor: { duration: 0 },
+            backdropFilter: { duration: 0 }
+          }}
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            backdropFilter: "blur(16px)"
+          }}
         >
-          <div
+          <motion.div
             className="w-full max-w-4xl p-8 flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
+            initial={{ y: 0, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{
+              type: "spring",
+              damping: 26,
+              stiffness: 300,
+              opacity: { duration: 0.2 }
+            }}
           >
             <div className="relative group">
               <div className="w-[512px] h-[512px] mb-8 relative">
@@ -81,7 +100,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
