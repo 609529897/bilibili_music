@@ -2,6 +2,7 @@ import { Video } from "../types/electron";
 import { motion, AnimatePresence } from "framer-motion";
 import AudioSpectrum from "react-audio-spectrum";
 import { useRef, useEffect, useState } from "react";
+import TitleBar from "./TitleBar";
 
 interface FullScreenPlayerProps {
   currentVideo: Video | null;
@@ -23,7 +24,9 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
 
   useEffect(() => {
     if (currentVideo?.thumbnail) {
-      window.electronAPI.fetchImage(currentVideo.thumbnail).then(setThumbnailUrl);
+      window.electronAPI
+        .fetchImage(currentVideo.thumbnail)
+        .then(setThumbnailUrl);
     }
   }, [currentVideo?.thumbnail]);
 
@@ -65,13 +68,17 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
               // className="absolute inset-0 z-0 app-drag-region"
               style={{
                 backgroundImage: `url(${thumbnailUrl})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                filter: 'blur(32px) brightness(0.3)',
-                transform: 'scale(1.1)',
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                filter: "blur(32px) brightness(0.3)",
+                transform: "scale(1.1)",
               }}
             />
           )}
+
+          <div className="absolute top-3 left-3">
+            <TitleBar />
+          </div>
 
           <motion.div
             className="w-full max-w-4xl p-8 flex flex-col items-center relative z-10"

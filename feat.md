@@ -2,7 +2,11 @@ todo:
 
 - toolbar UI
 
+- 拖拽
+
 - 对齐
+
+- 外围 border
 
 ---
 

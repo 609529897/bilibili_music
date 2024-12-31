@@ -93,9 +93,9 @@ export const FavoritesList = ({
   return (
     <div className="w-64 flex flex-col h-full bg-[#F3F3F4]">
       {/* <div className="h-4 app-drag-region" /> */}
-      <div className="px-3 py-2 flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col">
         {/* 操作按钮区域 */}
-        <div className="flex items-center justify-between  py-3 px-1">
+        <div className="flex items-center justify-between  h-12 px-4 app-drag-region">
           <div>
             <TitleBar />
           </div>
@@ -142,7 +142,7 @@ export const FavoritesList = ({
         </div>
 
         {/* 收藏夹列表区域 */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden p-3">
           <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20 hover:scrollbar-thumb-white/30">
             <div className="space-y-0.5">
               {favorites.length === 0 && !isLoading && !error ? (

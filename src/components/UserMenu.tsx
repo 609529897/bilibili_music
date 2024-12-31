@@ -23,7 +23,7 @@ export function UserMenu({ avatarUrl, username, onLogout }: UserMenuProps) {
   }, []);
 
   return (
-    <div className="relative w-7 h-7" ref={menuRef}>
+    <div className="relative w-6 h-6" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={clsx(
