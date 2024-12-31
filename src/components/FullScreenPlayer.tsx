@@ -54,12 +54,12 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
         >
           <div className=" group w-14 h-14 absolute top-[-13px] left-14">
             <button
-              // onClick={() => setIsExpanded(false)}
+              onClick={onClose}
               className="text-gray-400 transition-colors duration-150 rounded-lg w-full h-full flex justify-center items-center"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8"
+                className="h-7 w-7"
                 viewBox="0 0 24 24"
               >
                 <path
