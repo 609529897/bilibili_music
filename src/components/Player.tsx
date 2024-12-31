@@ -25,7 +25,6 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   // 处理本地文件路径
   const getThumbnailUrl = (path: string) => {
     if (!path) return '';
-    // 直接使用本地路径
     return path;
   };
 
@@ -36,37 +35,47 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
     console.log('Processed Thumbnail URL:', thumbnailUrl);
   }, [currentVideo, thumbnailUrl]);
 
-  // 重置图片状态
   useEffect(() => {
-    if (thumbnailUrl) {
-      setIsLoadingImage(true);
-      setImageError(false);
-    } else {
-      setIsLoadingImage(false);
-      setImageError(false);
-    }
-  }, [thumbnailUrl]);
+    let isMounted = true;
 
-  useEffect(() => {
-    console.log('Loading thumbnail:', thumbnailUrl);
-    if (thumbnailUrl) {
-      setIsLoadingImage(true);
-      const img = new Image();
-      img.onload = () => {
-        console.log('Thumbnail loaded successfully');
+    const loadThumbnail = async () => {
+      if (!thumbnailUrl) {
         setIsLoadingImage(false);
         setImageError(false);
-      };
-      img.onerror = (e) => {
-        console.error('Failed to load thumbnail:', thumbnailUrl, e);
-        setIsLoadingImage(false);
-        setImageError(true);
-      };
-      img.src = thumbnailUrl;
-    } else {
-      setIsLoadingImage(false);
+        return;
+      }
+
+      console.log('Loading thumbnail:', thumbnailUrl);
+      setIsLoadingImage(true);
       setImageError(false);
-    }
+
+      try {
+        const img = new Image();
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = thumbnailUrl;
+        });
+
+        if (isMounted) {
+          console.log('Thumbnail loaded successfully');
+          setIsLoadingImage(false);
+          setImageError(false);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Failed to load thumbnail:', thumbnailUrl, error);
+          setIsLoadingImage(false);
+          setImageError(true);
+        }
+      }
+    };
+
+    loadThumbnail();
+
+    return () => {
+      isMounted = false;
+    };
   }, [thumbnailUrl]);
 
   useEffect(() => {

@@ -12,7 +12,10 @@ interface PlayListProps {
 }
 
 interface ImageCache {
-  [key: string]: string;
+  [key: string]: {
+    url: string;
+    error: boolean;
+  };
 }
 
 export const PlayList = ({
@@ -23,36 +26,44 @@ export const PlayList = ({
   selectedFavorite,
   onVideoSelect,
 }: PlayListProps) => {
-  const [imageUrls, setImageUrls] = useState<ImageCache>({});
+  const [imageCache, setImageCache] = useState<ImageCache>({});
   const [loadingImages, setLoadingImages] = useState<Set<string>>(new Set());
 
-  // 预加载图片
+  // 加载单个图片
+  const loadImage = async (thumbnail: string) => {
+    if (imageCache[thumbnail]?.url || loadingImages.has(thumbnail)) {
+      return;
+    }
+
+    try {
+      setLoadingImages(prev => new Set(prev).add(thumbnail));
+      const url = await fetchImage(thumbnail);
+      setImageCache(prev => ({
+        ...prev,
+        [thumbnail]: { url, error: false }
+      }));
+    } catch (error) {
+      console.error('Failed to load image:', thumbnail, error);
+      setImageCache(prev => ({
+        ...prev,
+        [thumbnail]: { url: '', error: true }
+      }));
+    } finally {
+      setLoadingImages(prev => {
+        const next = new Set(prev);
+        next.delete(thumbnail);
+        return next;
+      });
+    }
+  };
+
+  // 预加载可见的图片
   useEffect(() => {
-    const loadImages = async () => {
-      const newImageUrls: ImageCache = {};
-      const newLoadingImages = new Set<string>();
-      
-      for (const video of playlist) {
-        if (!imageUrls[video.thumbnail]) {
-          newLoadingImages.add(video.thumbnail);
-        }
+    playlist.forEach(video => {
+      if (video.thumbnail) {
+        loadImage(video.thumbnail);
       }
-      setLoadingImages(newLoadingImages);
-
-      for (const video of playlist) {
-        if (!imageUrls[video.thumbnail]) {
-          newImageUrls[video.thumbnail] = await fetchImage(video.thumbnail);
-          setLoadingImages(prev => {
-            const next = new Set(prev);
-            next.delete(video.thumbnail);
-            return next;
-          });
-        }
-      }
-      setImageUrls(prev => ({ ...prev, ...newImageUrls }));
-    };
-
-    loadImages();
+    });
   }, [playlist]);
 
   return (
@@ -106,14 +117,20 @@ export const PlayList = ({
                       <div className="w-full h-full flex items-center justify-center">
                         <div className="w-5 h-5 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
                       </div>
-                    ) : (
+                    ) : imageCache[video.thumbnail]?.error ? (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-gray-400" viewBox="0 0 24 24">
+                          <path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                        </svg>
+                      </div>
+                    ) : imageCache[video.thumbnail]?.url ? (
                       <img 
-                        src={imageUrls[video.thumbnail]}
+                        src={imageCache[video.thumbnail].url}
                         alt={video.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
                       />
-                    )}
+                    ) : null}
                   </div>
                   <div className={`absolute bottom-0 right-0 px-1 text-xs
                     ${currentVideo?.bvid === video.bvid ? 'text-white' : 'text-white bg-black/60'}`}>
