@@ -1,7 +1,7 @@
 import { Video } from "../types/electron";
 import { motion, AnimatePresence } from "framer-motion";
 import AudioSpectrum from "react-audio-spectrum";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 
 interface FullScreenPlayerProps {
   currentVideo: Video | null;
@@ -20,13 +20,19 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const audioElementId = audioRef?.current?.id;
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (currentVideo?.thumbnail) {
+      window.electronAPI.fetchImage(currentVideo.thumbnail).then(setThumbnailUrl);
+    }
+  }, [currentVideo?.thumbnail]);
 
   return (
     <AnimatePresence mode="wait">
       {isVisible && (
         <motion.div
-          className="fixed h-screen inset-0 bottom-20 z-40 flex items-center justify-center app-drag-region"
-          // onClick={onClose}
+          className="fixed h-screen inset-0 bottom-20 z-40 flex items-center justify-center overflow-hidden"
           initial={{
             y: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.9)",
@@ -54,25 +60,22 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
             backdropFilter: "blur(16px)",
           }}
         >
-          {/* <div className=" group w-14 h-14 absolute top-[-13px] left-14">
-            <button
-              onClick={onClose}
-              className="text-gray-400 transition-colors duration-150 rounded-lg w-full h-full flex justify-center items-center"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-7 w-7"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="currentColor"
-                  d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"
-                />
-              </svg>
-            </button>
-          </div> */}
+          {/* Background Image */}
+          {thumbnailUrl && (
+            <div
+              className="absolute inset-0 z-0 app-drag-region"
+              style={{
+                backgroundImage: `url(${thumbnailUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'blur(32px) brightness(0.3)',
+                transform: 'scale(1.1)',
+              }}
+            />
+          )}
+
           <motion.div
-            className="w-full max-w-4xl p-8 flex flex-col items-center"
+            className="w-full max-w-4xl p-8 flex flex-col items-center relative z-10"
             onClick={(e) => e.stopPropagation()}
             initial={{ y: 0, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
