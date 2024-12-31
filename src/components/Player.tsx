@@ -1,15 +1,10 @@
 import { Video } from "../types/electron";
 import useAudioPlayer from "../hooks/useAudioPlayer";
+import { formatTime } from "./utils";
 
 interface ModernPlayerProps {
   currentVideo: Video | null;
 }
-
-const formatTime = (time: number) => {
-  const minutes = Math.floor(time / 60);
-  const seconds = Math.floor(time % 60);
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-};
 
 export const ModernPlayer: React.FC<ModernPlayerProps> = ({ currentVideo }) => {
   const {
