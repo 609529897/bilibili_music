@@ -10,7 +10,6 @@
 * {
   margin: 0;
   padding: 0;
-  border: none !important;
   box-sizing: border-box;
   -webkit-app-region: no-drag;
 }
@@ -85,7 +84,6 @@ body {
 
 /* 确保内容区域没有边框 */
 .content-container {
-  border: none !important;
   height: calc(100vh - 96px);
   overflow: hidden;
   background: transparent;
