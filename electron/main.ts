@@ -520,10 +520,10 @@ ipcMain.handle('logout', async () => {
   }
 })
 
-ipcMain.handle('proxy-audio', async (_, url: string) => {
-  // 直接返回原始URL
-  return url;
-});
+// ipcMain.handle('proxy-audio', async (_, url: string) => {
+//   // 直接返回原始URL
+//   return url;
+// });
 
 ipcMain.handle('fetch-image', async (_, url: string) => {
   try {
