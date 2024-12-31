@@ -48,7 +48,6 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
     <>
       <FullScreenPlayer
         currentVideo={currentVideo}
-        thumbnailUrl={thumbnailUrl}
         isVisible={isExpanded}
         onClose={() => setIsExpanded(false)}
         audioRef={audioRef}
