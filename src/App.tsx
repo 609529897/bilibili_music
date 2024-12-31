@@ -89,7 +89,6 @@ const App: React.FC = () => {
 
         {/* 播放列表 */}
         <div className="flex-1 flex flex-col min-w-0">
-          <div className="h-4 app-drag-region" />
           {/* 移动端菜单按钮 */}
           <button
             onClick={() => setIsSidebarOpen(true)}
