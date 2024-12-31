@@ -1,6 +1,7 @@
 interface UserInfo {
   uname: string;
   level: number;
+  face: string;
 }
 
 interface Video {
@@ -9,6 +10,7 @@ interface Video {
   title: string;
   author: string;
   thumbnail: string;
+  duration: number;
 }
 
 interface Favorite {
@@ -37,6 +39,7 @@ interface ElectronAPI {
   getVideoAudioUrl: (bvid: string) => Promise<ApiResponse<AudioUrlResponse>>;
   onLoginSuccess: (callback: () => void) => void;
   fetchImage: (url: string) => Promise<string>;
+  logout: () => Promise<{ success: boolean; error?: string }>;
 }
 
 declare global {

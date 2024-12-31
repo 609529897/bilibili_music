@@ -27,7 +27,8 @@ export default function App() {
     currentVideo,
     handleVideoSelect,
     hasMore,
-    loadMore
+    loadMore,
+    isLoadLoading,
   } = usePlaylist({ selectedFavorite });
 
   const {
@@ -78,6 +79,7 @@ export default function App() {
           onVideoSelect={handleVideoSelect}
           hasMore={hasMore}
           loadMore={loadMore}
+          isLoadLoading={isLoadLoading}
         />
       </div>
 
