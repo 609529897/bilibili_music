@@ -103,7 +103,9 @@ export default function App() {
             }
             setSelectedFavoriteIds(newIds); // 更新状态
           }}
-          onShowAll={loadFavorites}
+          onShowAll={(ids) => {
+            setSelectedFavoriteIds(ids) 
+          }}
         />
       )}
     </div>

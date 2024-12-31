@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { UserMenu } from './UserMenu';
+import { useEffect, useMemo } from "react";
+import { UserMenu } from "./UserMenu";
 
 interface Favorite {
   id: number;
@@ -40,6 +40,44 @@ export const FavoritesList = ({
       onFavoriteSelect(favorites[0]);
     }
   }, [favorites, selectedFavorite, onFavoriteSelect]);
+
+  const favList = useMemo(() => {
+    const _list = favorites.filter((fav) => selectedFavoriteIds.has(fav.id));
+
+    if (_list.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center text-center p-4 text-gray-500 space-y-2">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 mb-1 text-gray-400" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          <div className="text-sm">点击左上角的加号按钮</div>
+          <div className="text-sm">选择要显示的收藏夹</div>
+        </div>
+      );
+    }
+
+    return _list.map((fav) => (
+      <button
+        key={fav.id}
+        onClick={() => onFavoriteSelect(fav)}
+        className={`w-full px-3 py-2 text-left rounded-lg transition-all no-drag
+          ${
+            selectedFavorite?.id === fav.id
+              ? "bg-pink-500 text-white shadow-md"
+              : "text-gray-900 hover:bg-white/10"
+          }`}
+      >
+        <div className="font-medium">{fav.title}</div>
+        <div
+          className={`text-sm ${
+            selectedFavorite?.id === fav.id ? "text-white/80" : "text-gray-500"
+          }`}
+        >
+          {fav.count} 个视频
+        </div>
+      </button>
+    ));
+  }, [favorites, selectedFavorite, selectedFavoriteIds, onFavoriteSelect]);
 
   return (
     <div className="w-64 flex flex-col h-full bg-white/5 backdrop-blur-2xl border-r border-white/10">
@@ -98,35 +136,7 @@ export const FavoritesList = ({
                   没有找到收藏夹
                 </div>
               ) : (
-                favorites
-                  .filter(
-                    (fav) =>
-                      selectedFavoriteIds.size === 0 ||
-                      selectedFavoriteIds.has(fav.id)
-                  )
-                  .map((fav) => (
-                    <button
-                      key={fav.id}
-                      onClick={() => onFavoriteSelect(fav)}
-                      className={`w-full px-3 py-2 text-left rounded-lg transition-all no-drag
-                        ${
-                          selectedFavorite?.id === fav.id
-                            ? "bg-pink-500 text-white shadow-md"
-                            : "text-gray-900 hover:bg-white/10"
-                        }`}
-                    >
-                      <div className="font-medium">{fav.title}</div>
-                      <div
-                        className={`text-sm ${
-                          selectedFavorite?.id === fav.id
-                            ? "text-white/80"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {fav.count} 个视频
-                      </div>
-                    </button>
-                  ))
+                favList
               )}
             </div>
             {isLoading && (
