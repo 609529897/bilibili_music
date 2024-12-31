@@ -52,6 +52,23 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
             backdropFilter: "blur(16px)",
           }}
         >
+          <div className=" group w-14 h-14 absolute top-[-13px] left-14">
+            <button
+              // onClick={() => setIsExpanded(false)}
+              className="text-gray-400 transition-colors duration-150 rounded-lg w-full h-full flex justify-center items-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"
+                />
+              </svg>
+            </button>
+          </div>
           <motion.div
             className="w-full max-w-4xl p-8 flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
