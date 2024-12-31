@@ -42,6 +42,9 @@ interface ElectronAPI {
   logout: () => Promise<{ success: boolean; error?: string }>;
   proxyAudio: (url: string) => Promise<string>;
   openExternal: (url: string) => Promise<void>;
+  closeWindow: () => Promise<void>;
+  minimizeWindow: () => Promise<void>;
+  maximizeWindow: () => Promise<void>;
 }
 
 declare global {

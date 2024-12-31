@@ -12,4 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   logout: () => ipcRenderer.invoke('logout'),
   proxyAudio: (url: string) => ipcRenderer.invoke('proxy-audio', url),
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+  closeWindow: () => ipcRenderer.invoke('window-close'),
+  minimizeWindow: () => ipcRenderer.invoke('window-minimize'),
+  maximizeWindow: () => ipcRenderer.invoke('window-maximize'),
 })

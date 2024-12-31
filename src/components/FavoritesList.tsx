@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { UserMenu } from "./UserMenu";
+import TitleBar from "./TitleBar";
 
 interface Favorite {
   id: number;
@@ -77,7 +78,9 @@ export const FavoritesList = ({
           </div>
           <div
             className={`text-xs ml-2 ${
-              selectedFavorite?.id === fav.id ? "text-white/70" : "text-gray-500/70"
+              selectedFavorite?.id === fav.id
+                ? "text-white/70"
+                : "text-gray-500/70"
             }`}
           >
             {fav.count}
@@ -89,14 +92,17 @@ export const FavoritesList = ({
 
   return (
     <div className="w-64 flex flex-col h-full bg-[#F3F3F4]">
-      <div className="h-4 app-drag-region" />
+      {/* <div className="h-4 app-drag-region" /> */}
       <div className="px-3 py-2 flex-1 flex flex-col">
         {/* 操作按钮区域 */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-between  py-3 px-1">
+          <div>
+            <TitleBar />
+          </div>
+          <div className="flex items-center gap-5">
             <button
               onClick={onOpenSelectDialog}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
+              className=" hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
               title="选择收藏夹"
             >
               <svg
@@ -112,7 +118,7 @@ export const FavoritesList = ({
             </button>
             <button
               onClick={onRefresh}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
+              className=" hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
               disabled={isLoading}
               title="刷新收藏夹"
             >
@@ -127,12 +133,12 @@ export const FavoritesList = ({
                 />
               </svg>
             </button>
+            <UserMenu
+              avatarUrl={avatarUrl || undefined}
+              username={username}
+              onLogout={onLogout}
+            />
           </div>
-          <UserMenu
-            avatarUrl={avatarUrl || undefined}
-            username={username}
-            onLogout={onLogout}
-          />
         </div>
 
         {/* 收藏夹列表区域 */}

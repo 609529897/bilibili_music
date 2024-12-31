@@ -28,8 +28,9 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    titleBarStyle: "hidden",
-    backgroundColor: '#ffffff',
+    // titleBarStyle: "hidden",
+    // backgroundColor: '#ffffff',
+    frame: false,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: true,
@@ -637,6 +638,23 @@ ipcMain.handle('fetch-image', async (_, url: string) => {
   } catch (error) {
     console.error('Image proxy error:', error);
     return null;
+  }
+});
+
+// 窗口控制
+ipcMain.handle('window-close', () => {
+  mainWindow?.close();
+});
+
+ipcMain.handle('window-minimize', () => {
+  mainWindow?.minimize();
+});
+
+ipcMain.handle('window-maximize', () => {
+  if (mainWindow?.isMaximized()) {
+    mainWindow?.unmaximize();
+  } else {
+    mainWindow?.maximize();
   }
 });
 
