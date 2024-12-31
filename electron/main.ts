@@ -32,6 +32,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: true,
       preload: path.join(__dirname, 'preload.js'),
+      webSecurity: false, // 允许跨域请求
     },
   })
 
@@ -520,48 +521,48 @@ ipcMain.handle('logout', async () => {
 })
 
 ipcMain.handle('proxy-audio', async (_, url: string) => {
+  // 直接返回原始URL
+  return url;
+});
+
+ipcMain.handle('fetch-image', async (_, url: string) => {
   try {
-    const response = await fetch(url, {
+    const response = await axios.get(url, {
+      responseType: 'arraybuffer',
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Referer': 'https://www.bilibili.com',
-        'Origin': 'https://www.bilibili.com'
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       }
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const buffer = await response.arrayBuffer();
-    // 将音频数据转换为 base64 格式
-    const base64 = Buffer.from(buffer).toString('base64');
-    // 创建 data URL
-    return `data:audio/mp4;base64,${base64}`;
+    const buffer = Buffer.from(response.data);
+    const base64 = buffer.toString('base64');
+    const contentType = response.headers['content-type'] || 'image/jpeg';
+    return `data:${contentType};base64,${base64}`;
   } catch (error) {
-    console.error('Error proxying audio:', error);
-    throw error;
+    console.error('Image proxy error:', error);
+    return null;
   }
 });
 
 export function setupImageProxy() {
-  ipcMain.handle('fetch-image', async (_, url: string) => {
-    try {
-      const response = await axios.get(url, {
-        responseType: 'arraybuffer',
-        headers: {
-          'Referer': 'https://www.bilibili.com',
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-      });
+  // ipcMain.handle('fetch-image', async (_, url: string) => {
+  //   try {
+  //     const response = await axios.get(url, {
+  //       responseType: 'arraybuffer',
+  //       headers: {
+  //         'Referer': 'https://www.bilibili.com',
+  //         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+  //       }
+  //     });
 
-      const buffer = Buffer.from(response.data);
-      const base64 = buffer.toString('base64');
-      const contentType = response.headers['content-type'] || 'image/jpeg';
-      return `data:${contentType};base64,${base64}`;
-    } catch (error) {
-      console.error('Image proxy error:', error);
-      return null;
-    }
-  });
+  //     const buffer = Buffer.from(response.data);
+  //     const base64 = buffer.toString('base64');
+  //     const contentType = response.headers['content-type'] || 'image/jpeg';
+  //     return `data:${contentType};base64,${base64}`;
+  //   } catch (error) {
+  //     console.error('Image proxy error:', error);
+  //     return null;
+  //   }
+  // });
 }
