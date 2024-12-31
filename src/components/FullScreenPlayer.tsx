@@ -19,7 +19,6 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
   if (!currentVideo) return null;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const audioElementId = audioRef?.current?.id;
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -96,7 +95,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
                   id="audio-canvas"
                   height={518}
                   width={518}
-                  audioId={audioElementId}
+                  audioId="audio-element"
                   capColor={"#FDF2F8"}
                   capHeight={2}
                   meterWidth={4}

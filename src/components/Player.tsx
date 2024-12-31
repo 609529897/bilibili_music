@@ -1,7 +1,7 @@
 import { Video } from "../types/electron";
 import useAudioPlayer from "../hooks/useAudioPlayer";
 import { formatTime } from "./utils";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FullScreenPlayer } from "./FullScreenPlayer";
 import { BilibiliPlayer } from "./BilibiliPlayer";
 
@@ -19,6 +19,36 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [showBilibiliPlayer, setShowBilibiliPlayer] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    if (!document.getElementById('audio-element')) {
+      const audio = document.createElement('audio');
+      audio.id = 'audio-element';
+      audio.preload = 'auto';
+      audio.crossOrigin = 'anonymous';
+      
+      // 添加更详细的错误处理
+      audio.addEventListener('error', (e) => {
+        const error = e.target as HTMLAudioElement;
+        console.error('Audio error details:', {
+          error: error.error,
+          networkState: error.networkState,
+          readyState: error.readyState,
+          currentSrc: error.currentSrc,
+          src: error.src
+        });
+      });
+
+      audio.addEventListener('loadstart', () => console.log('Audio load started'));
+      audio.addEventListener('loadedmetadata', () => console.log('Audio metadata loaded'));
+      audio.addEventListener('loadeddata', () => console.log('Audio data loaded'));
+      audio.addEventListener('canplay', () => console.log('Audio can play'));
+      audio.addEventListener('canplaythrough', () => console.log('Audio can play through'));
+      
+      document.body.appendChild(audio);
+    }
+  }, []);
+
   const {
     isPlaying,
     currentTime,
@@ -71,6 +101,12 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
             : "bg-white/90 border-pink-100/50 "
         }`}
       >
+        <audio
+          id="audio-element"
+          ref={audioRef}
+          preload="auto"
+          crossOrigin="anonymous"
+        />
         <div className="flex items-center justify-between h-full px-6 max-w-[1920px] mx-auto">
           {/* Left Section: Cover and Title */}
           <div className="flex items-center space-x-3 w-1/4 min-w-[220px]">
