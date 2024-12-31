@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { UserInfo } from '../types/electron';
-import { fetchImage } from '../utils/imageProxy';
+import { useState, useEffect } from "react";
+import { fetchImage } from "../utils/imageProxy";
+import { UserInfo } from "../types/electron";
 
 export const useUserInfo = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // 默认为 true
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   const loadUserInfo = async () => {
@@ -43,7 +43,6 @@ export const useUserInfo = () => {
 
   const handleLogout = async () => {
     setIsLoading(true);
-    setError(null);
     try {
       const result = await window.electronAPI.logout();
       if (result.success) {
@@ -61,12 +60,13 @@ export const useUserInfo = () => {
   };
 
   useEffect(() => {
-    // 检查登录状态
+    // 初始化时检查登录状态
     window.electronAPI.checkLoginStatus().then((isLoggedIn) => {
       setIsLoggedIn(isLoggedIn);
       if (isLoggedIn) {
         loadUserInfo();
       }
+      setIsLoading(false); // 检查完成后设置为 false
     });
 
     // 监听登录成功事件

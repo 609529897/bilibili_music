@@ -46,6 +46,17 @@ const App: React.FC = () => {
   const [isSelectingFavorites, setIsSelectingFavorites] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // 如果正在检查登录状态，显示淡入淡出文字效果
+  if (loginLoading) {
+    return (
+      <div className="h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-[fade_2s_ease-in-out_infinite]  text-sm font-medium tracking-wider">
+          LOADING...
+        </div>
+      </div>
+    );
+  }
+
   if (!isLoggedIn) {
     return (
       <LoginScreen
