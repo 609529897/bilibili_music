@@ -5,6 +5,6 @@
 
 /* 内容区域样式 */
 .content-container {
-  height: calc(100vh - 80px); /* 减去播放器高度 */
+  height: calc(100vh - 96px); /* 减去播放器高度 */
   overflow: hidden;
 }

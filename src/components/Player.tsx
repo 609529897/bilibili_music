@@ -1,7 +1,7 @@
 import { Video } from "../types/electron";
 import useAudioPlayer from "../hooks/useAudioPlayer";
 import { formatTime } from "./utils";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FullScreenPlayer } from "./FullScreenPlayer";
 
 interface ModernPlayerProps {
@@ -16,6 +16,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
   onNext,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const {
     isPlaying,
     currentTime,
@@ -48,18 +49,15 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
         thumbnailUrl={thumbnailUrl}
         isVisible={isExpanded}
         onClose={() => setIsExpanded(false)}
+        audioRef={audioRef}
       />
 
       <div
-        className={`fixed bottom-0 left-0 right-0 ${
+        className={`fixed bottom-0 left-0 right-0 shadow-2xl transition-all duration-300 h-24 border-t z-50 backdrop-blur-2xl ${
           isExpanded
-            ? "bg-black/85 backdrop-blur-2xl"
-            : "bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl"
-        } shadow-lg transition-all duration-300 h-20 border-t ${
-          isExpanded
-            ? "border-white/10"
-            : "border-pink-100/50 dark:border-pink-900/30"
-        } z-50`}
+            ? "bg-transparent border-white/10"
+            : "bg-white/90 border-pink-100/50"
+        }`}
       >
         <div className="flex items-center justify-between h-full px-6 max-w-[1920px] mx-auto">
           {/* Left Section: Cover and Title */}
