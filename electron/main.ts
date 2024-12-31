@@ -1,7 +1,6 @@
 import { app, BrowserWindow, ipcMain, session, protocol } from 'electron'
 import path from 'path'
 import axios from 'axios'
-import { setupImageProxy } from './main/image-proxy'
 
 // B站API接口
 const API = {
@@ -534,3 +533,25 @@ ipcMain.handle('proxy-audio', async (_, url: string) => {
     throw error;
   }
 });
+
+export function setupImageProxy() {
+  ipcMain.handle('fetch-image', async (_, url: string) => {
+    try {
+      const response = await axios.get(url, {
+        responseType: 'arraybuffer',
+        headers: {
+          'Referer': 'https://www.bilibili.com',
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      });
+
+      const buffer = Buffer.from(response.data);
+      const base64 = buffer.toString('base64');
+      const contentType = response.headers['content-type'] || 'image/jpeg';
+      return `data:${contentType};base64,${base64}`;
+    } catch (error) {
+      console.error('Image proxy error:', error);
+      return null;
+    }
+  });
+}
