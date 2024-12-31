@@ -2,13 +2,17 @@ todo:
 
 - toolbar UI
 
+- 外围 border
+
+- 切换收藏夹时会影响到音乐播放
+
 <!-- - 拖拽 -->
 
 <!-- full screen 样式 -->
 
 <!-- - 对齐 -->
 
-- 外围 border
+
 
 ---
 

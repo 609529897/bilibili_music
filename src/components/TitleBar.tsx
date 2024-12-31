@@ -18,13 +18,13 @@ const TitleBar = () => {
         className="w-3 h-3 rounded-full bg-[#FF5F57] hover:brightness-90 transition-all duration-200 flex items-center justify-center group -app-region-no-drag"
       >
         <svg
-          className="w-[6px] h-[6px] text-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          viewBox="0 0 24 24"
+          className="w-[8px] h-[8px] text-black opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          viewBox="0 0 12 12"
         >
           <path
-            d="M6.343 6.343l11.314 11.314 m-11.314 0l11.314-11.314"
+            d="M2.5 2.5l7 7m-7 0l7-7"
             stroke="currentColor"
-            strokeWidth="1.5"
+            strokeWidth="1.1"
             strokeLinecap="round"
           />
         </svg>
@@ -34,13 +34,13 @@ const TitleBar = () => {
         className="w-3 h-3 rounded-full bg-[#FFBD2E] hover:brightness-90 transition-all duration-200 flex items-center justify-center group -app-region-no-drag"
       >
         <svg
-          className="w-[6px] h-[6px] text-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          viewBox="0 0 24 24"
+          className="w-[8px] h-[8px] text-black opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          viewBox="0 0 12 12"
         >
           <path
-            d="M6 12h12"
+            d="M2.5 6h7"
             stroke="currentColor"
-            strokeWidth="1.5"
+            strokeWidth="1.1"
             strokeLinecap="round"
           />
         </svg>
@@ -50,15 +50,13 @@ const TitleBar = () => {
         className="w-3 h-3 rounded-full bg-[#28C940] hover:brightness-90 transition-all duration-200 flex items-center justify-center group -app-region-no-drag"
       >
         <svg
-          className="w-[6px] h-[6px] text-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          viewBox="0 0 24 24"
+          className="w-[8px] h-[8px] text-black opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          viewBox="0 0 12 12"
         >
           <path
-            d="M9 6h9v9 M6 9v9h9"
+            d="M3.5 3.5h5v5h-5z"
             stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            strokeWidth="1.1"
             fill="none"
           />
         </svg>

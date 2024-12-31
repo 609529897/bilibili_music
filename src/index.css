@@ -2,7 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-@import './styles/titlebar.css';
+.app-drag-region {
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+/* 内容区域样式 */
+.content-container {
+  height: calc(100vh - 96px); /* 减去播放器高度 */
+  overflow: hidden;
+}
+
+.-app-region-drag {
+  -webkit-app-region: drag;
+}
+
+.-app-region-no-drag {
+  -webkit-app-region: no-drag;
+}
+
 
 @keyframes fade {
   0%, 100% {
