@@ -36,7 +36,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
 
   if (!currentVideo) {
     return (
-      <div className="h-24 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-t border-gray-100 flex items-center justify-center text-gray-400">
+      <div className="h-24 bg-white/80 backdrop-blur-md border-t border-gray-100 flex items-center justify-center text-gray-400">
         <div className="flex flex-col items-center gap-1">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -88,10 +88,10 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 flex items-center justify-center">
+                    <div className="w-full h-full bg-gradient-to-br from-pink-50 to-pink-100 flex items-center justify-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 text-pink-300 dark:text-pink-500"
+                        className="h-6 w-6 text-pink-300"
                         viewBox="0 0 24 24"
                       >
                         <path
@@ -118,10 +118,10 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 flex items-center justify-center">
+                    <div className="w-full h-full bg-gradient-to-br from-pink-50 to-pink-100 flex items-center justify-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 text-pink-300 dark:text-pink-500"
+                        className="h-6 w-6 text-pink-300"
                         viewBox="0 0 24 24"
                       >
                         <path
@@ -137,16 +137,14 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
             <div className="flex-1 min-w-0">
               <div
                 className={`text-sm font-medium ${
-                  isExpanded ? "text-white" : "text-gray-900 dark:text-white"
-                } truncate group-hover:text-pink-500 dark:group-hover:text-pink-400 transition-colors duration-150`}
+                  isExpanded ? "text-white" : "text-gray-900"
+                } truncate group-hover:text-pink-500 transition-colors duration-150`}
               >
                 {currentVideo?.title || "No track selected"}
               </div>
               <div
                 className={`text-xs ${
-                  isExpanded
-                    ? "text-gray-300"
-                    : "text-gray-500 dark:text-gray-400"
+                  isExpanded ? "text-gray-300" : "text-gray-500"
                 } truncate mt-0.5 font-medium`}
               >
                 Music Player
@@ -162,8 +160,8 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 className={`${
                   isExpanded
                     ? "text-gray-300 hover:text-white"
-                    : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-                } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50 dark:hover:bg-pink-900/20`}
+                    : "text-gray-400 hover:text-gray-600"
+                } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
                 onClick={handlePrevious}
                 disabled={!onPrevious}
               >
@@ -183,10 +181,10 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 className={`${
                   isExpanded
                     ? "text-white hover:text-pink-400"
-                    : "text-gray-800 dark:text-gray-200 hover:text-pink-500 dark:hover:text-pink-400"
-                } transition-all duration-150 p-2 rounded-full hover:bg-pink-50 dark:hover:bg-pink-900/20 relative group`}
+                    : "text-gray-800 hover:text-pink-500"
+                } transition-all duration-150 p-2 rounded-full hover:bg-pink-50 relative group`}
               >
-                <div className="absolute inset-0 bg-pink-400/10 dark:bg-pink-400/10 rounded-full scale-0 group-hover:scale-100 transition-transform duration-150" />
+                <div className="absolute inset-0 bg-pink-400/10 rounded-full scale-0 group-hover:scale-100 transition-transform duration-150" />
                 {isPlaying ? (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -212,8 +210,8 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 className={`${
                   isExpanded
                     ? "text-gray-300 hover:text-white"
-                    : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-                } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50 dark:hover:bg-pink-900/20`}
+                    : "text-gray-400 hover:text-gray-600"
+                } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
                 onClick={handleNext}
                 disabled={!onNext}
               >
@@ -234,9 +232,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
             <div className="flex items-center space-x-2 w-full">
               <span
                 className={`text-[10px] font-medium ${
-                  isExpanded
-                    ? "text-gray-300"
-                    : "text-gray-500 dark:text-gray-400"
+                  isExpanded ? "text-gray-300" : "text-gray-500"
                 } w-8 text-right select-none`}
               >
                 {formatTime(currentTime)}
@@ -245,13 +241,11 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 <div className="absolute inset-y-0 w-full flex items-center">
                   <div
                     className={`h-[3px] w-full ${
-                      isExpanded
-                        ? "bg-gray-700"
-                        : "bg-gray-200 dark:bg-gray-700"
+                      isExpanded ? "bg-gray-700" : "bg-gray-200"
                     } rounded-full overflow-hidden`}
                   >
                     <div
-                      className="h-full bg-pink-500 dark:bg-pink-400 transition-all duration-150"
+                      className="h-full bg-pink-500 transition-all duration-150"
                       style={{ width: `${(currentTime / duration) * 100}%` }}
                     />
                   </div>
@@ -265,15 +259,13 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                   className="absolute inset-y-0 w-full opacity-0 cursor-pointer"
                 />
                 <div
-                  className="absolute h-2 w-2 bg-pink-500 dark:bg-pink-400 rounded-full shadow-sm top-1/2 -mt-1 -ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                  className="absolute h-2 w-2 bg-pink-500 rounded-full shadow-sm top-1/2 -mt-1 -ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
                   style={{ left: `${(currentTime / duration) * 100}%` }}
                 />
               </div>
               <span
                 className={`text-[10px] font-medium ${
-                  isExpanded
-                    ? "text-gray-300"
-                    : "text-gray-500 dark:text-gray-400"
+                  isExpanded ? "text-gray-300" : "text-gray-500"
                 } w-8 select-none`}
               >
                 {formatTime(duration)}
@@ -288,8 +280,8 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
               className={`${
                 isExpanded
                   ? "text-gray-300 hover:text-white"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50 dark:hover:bg-pink-900/20`}
+                  : "text-gray-500 hover:text-gray-700"
+              } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
             >
               {isMuted || volume === 0 ? (
                 <svg
@@ -319,11 +311,11 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
               <div className="absolute inset-y-0 w-full flex items-center">
                 <div
                   className={`h-[3px] w-full ${
-                    isExpanded ? "bg-gray-700" : "bg-gray-200 dark:bg-gray-700"
+                    isExpanded ? "bg-gray-700" : "bg-gray-200"
                   } rounded-full overflow-hidden`}
                 >
                   <div
-                    className="h-full bg-pink-500 dark:bg-pink-400 transition-all duration-150"
+                    className="h-full bg-pink-500 transition-all duration-150"
                     style={{ width: `${volume * 100}%` }}
                   />
                 </div>
@@ -338,7 +330,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 className="absolute inset-y-0 w-full opacity-0 cursor-pointer"
               />
               <div
-                className="absolute h-2 w-2 bg-pink-500 dark:bg-pink-400 rounded-full shadow-sm top-1/2 -mt-1 -ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                className="absolute h-2 w-2 bg-pink-500 rounded-full shadow-sm top-1/2 -mt-1 -ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
                 style={{ left: `${volume * 100}%` }}
               />
             </div>
