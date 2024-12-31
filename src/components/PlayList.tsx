@@ -141,20 +141,27 @@ export const PlayList = ({
             {error}
           </div>
         ) : playlist.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-32 text-gray-500">
+          <div className="flex-1 flex flex-col items-center justify-center min-h-[240px] text-gray-400">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8 mb-2 text-gray-400"
+              className="h-12 w-12 mb-4 opacity-80"
               viewBox="0 0 24 24"
             >
               <path
                 fill="currentColor"
-                d="M19 9H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1z"
+                d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
               />
             </svg>
-            {typeof selectedFavorite === "string"
-              ? "收藏夹是空的"
-              : "请选择一个收藏夹"}
+            <div className="text-base font-medium mb-1">
+              {typeof selectedFavorite === "string"
+                ? "收藏夹是空的"
+                : "请选择一个收藏夹"}
+            </div>
+            <div className="text-sm opacity-60">
+              {typeof selectedFavorite === "string"
+                ? "快去 B 站收藏一些音乐吧"
+                : "从左侧选择一个收藏夹开始播放"}
+            </div>
           </div>
         ) : (
           <div className="space-y-1 p-3">

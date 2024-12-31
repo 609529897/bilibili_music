@@ -37,7 +37,17 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
   if (!currentVideo) {
     return (
       <div className="h-24 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-t border-gray-100 flex items-center justify-center text-gray-400">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col items-center gap-1">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 mb-1 opacity-80"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"
+            />
+          </svg>
           <span className="text-sm font-medium">从列表中选择音乐开始播放</span>
         </div>
       </div>
