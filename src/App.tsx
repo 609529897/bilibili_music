@@ -4,9 +4,9 @@ import { usePlaylist } from "./hooks/usePlaylist";
 import { useUserInfo } from "./hooks/useUserInfo";
 import { FavoritesList } from "./components/FavoritesList";
 import { PlayList } from "./components/PlayList";
-import { SelectFavoritesDialog } from "./components/SelectFavoritesDialog";
 import { ModernPlayer } from "./components/Player";
 import { LoginScreen } from "./components/LoginScreen";
+import { FavoritesDialog } from "./components/FavoritesDialog";
 
 export default function App() {
   const {
@@ -89,13 +89,21 @@ export default function App() {
       </div>
 
       {isSelectingFavorites && (
-        <SelectFavoritesDialog
-          selectedIds={selectedFavoriteIds}
+        <FavoritesDialog
+          isOpen={isSelectingFavorites}
+          favorites={favorites}
+          selectedFavoriteIds={selectedFavoriteIds}
           onClose={() => setIsSelectingFavorites(false)}
-          onConfirm={(ids) => {
-            setSelectedFavoriteIds(ids);
-            setIsSelectingFavorites(false);
+          onToggleFavorite={(fav) => {
+            const newIds = new Set(selectedFavoriteIds); // 直接使用当前的 selectedFavoriteIds
+            if (newIds.has(fav.id)) {
+              newIds.delete(fav.id); // 如果已选中，则取消选择
+            } else {
+              newIds.add(fav.id); // 如果未选中，则添加
+            }
+            setSelectedFavoriteIds(newIds); // 更新状态
           }}
+          onShowAll={loadFavorites}
         />
       )}
     </div>

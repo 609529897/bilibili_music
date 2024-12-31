@@ -23,12 +23,30 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   const [imageError, setImageError] = useState(false);
 
   // 处理本地文件路径
-  const getThumbnailUrl = (path: string) => {
+  const getThumbnailUrl = async (path: string) => {
     if (!path) return '';
-    return path;
+    try {
+      const imageUrl = await fetchImage(path);
+      return imageUrl;
+    } catch (error) {
+      console.error('Error fetching image:', error);
+      return '';
+    }
   };
 
-  const thumbnailUrl = currentVideo?.thumbnail ? getThumbnailUrl(currentVideo.thumbnail) : '';
+  const [thumbnailUrl, setThumbnailUrl] = useState('');
+
+  useEffect(() => {
+    const loadThumbnail = async () => {
+      if (currentVideo?.thumbnail) {
+        const url = await getThumbnailUrl(currentVideo.thumbnail);
+        setThumbnailUrl(url);
+      } else {
+        setThumbnailUrl('');
+      }
+    };
+    loadThumbnail();
+  }, [currentVideo?.thumbnail]);
 
   useEffect(() => {
     console.log('Current Video:', currentVideo);
