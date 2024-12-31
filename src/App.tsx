@@ -8,7 +8,7 @@ import { ModernPlayer } from "./components/Player";
 import { LoginScreen } from "./components/LoginScreen";
 import { FavoritesDialog } from "./components/FavoritesDialog";
 
-export default function App() {
+const App: React.FC = () => {
   const {
     favorites,
     selectedFavorite,
@@ -44,6 +44,7 @@ export default function App() {
   } = useUserInfo();
 
   const [isSelectingFavorites, setIsSelectingFavorites] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   if (!isLoggedIn) {
     return (
@@ -58,30 +59,58 @@ export default function App() {
   return (
     <div className="window-frame">
       <div className="content-container flex min-h-0">
-        <FavoritesList
-          favorites={favorites}
-          selectedFavorite={selectedFavorite}
-          selectedFavoriteIds={selectedFavoriteIds}
-          isLoading={favoritesLoading}
-          error={favoritesError}
-          onFavoriteSelect={onFavoriteSelect}
-          onOpenSelectDialog={() => setIsSelectingFavorites(true)}
-          onRefresh={loadFavorites}
-          avatarUrl={avatarUrl}
-          username={userInfo?.uname}
-          onLogout={handleLogout}
-        />
-        <PlayList
-          playlist={playlist}
-          currentVideo={currentVideo}
-          isLoading={playlistLoading}
-          error={playlistError}
-          selectedFavorite={selectedFavorite?.title}
-          onVideoSelect={handleVideoSelect}
-          hasMore={hasMore}
-          loadMore={loadMore}
-          isLoadLoading={isLoadLoading}
-        />
+        {/* 收藏夹列表 - 在移动端默认隐藏 */}
+        <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block absolute md:relative z-20 h-full`}>
+          <FavoritesList
+            favorites={favorites}
+            selectedFavorite={selectedFavorite}
+            selectedFavoriteIds={selectedFavoriteIds}
+            isLoading={favoritesLoading}
+            error={favoritesError}
+            onFavoriteSelect={(fav) => {
+              onFavoriteSelect(fav);
+              setIsSidebarOpen(false); // 选择后自动关闭侧边栏
+            }}
+            onOpenSelectDialog={() => setIsSelectingFavorites(true)}
+            onRefresh={loadFavorites}
+            avatarUrl={avatarUrl}
+            username={userInfo?.uname}
+            onLogout={handleLogout}
+          />
+        </div>
+
+        {/* 遮罩层 - 仅在移动端显示 */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm md:hidden z-10"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* 播放列表 */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="h-4 app-drag-region" />
+          {/* 移动端菜单按钮 */}
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="md:hidden absolute top-6 left-3 p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-white/10 z-30"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+          </button>
+          <PlayList
+            playlist={playlist}
+            currentVideo={currentVideo}
+            isLoading={playlistLoading}
+            error={playlistError}
+            selectedFavorite={selectedFavorite?.title}
+            onVideoSelect={handleVideoSelect}
+            hasMore={hasMore}
+            loadMore={loadMore}
+            isLoadLoading={isLoadLoading}
+          />
+        </div>
       </div>
 
       <ModernPlayer
@@ -113,3 +142,5 @@ export default function App() {
     </div>
   );
 }
+
+export default App;
