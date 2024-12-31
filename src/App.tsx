@@ -84,9 +84,7 @@ export default function App() {
       </div>
 
       {/* 播放器 */}
-      <div className="player-container">
         <ModernPlayer currentVideo={currentVideo} />
-      </div>
 
       {isSelectingFavorites && (
         <FavoritesDialog
