@@ -55,10 +55,10 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
       />
 
       <div
-        className={`fixed bottom-0 left-0 right-0 shadow-2xl transition-all duration-300 h-24 border-t z-50 backdrop-blur-2xl ${
+        className={`fixed bottom-0 left-0 right-0 shadow-2xl transition-all duration-300 h-24  z-50 backdrop-blur-2xl ${
           isExpanded
             ? "bg-transparent border-white/10"
-            : "bg-white/90 border-pink-100/50"
+            : "bg-white/90 border-pink-100/50 border-t"
         }`}
       >
         <div className="flex items-center justify-between h-full px-6 max-w-[1920px] mx-auto">

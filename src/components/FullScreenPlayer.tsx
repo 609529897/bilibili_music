@@ -83,7 +83,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
             }}
           >
             <div className="relative group">
-              <div className="w-[660px] h-[660px] mb-4 relative">
+              <div className="w-[518px] h-[518px] mb-4 relative">
                 {thumbnailUrl ? (
                   <img
                     src={thumbnailUrl}
