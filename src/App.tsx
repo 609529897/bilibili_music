@@ -56,8 +56,7 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      {/* 内容区域 */}
+    <div className="window-frame">
       <div className="content-container flex min-h-0">
         <FavoritesList
           favorites={favorites}
