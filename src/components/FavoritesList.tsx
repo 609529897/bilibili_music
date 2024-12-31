@@ -42,7 +42,7 @@ export const FavoritesList = ({
   }, [favorites, selectedFavorite, onFavoriteSelect]);
 
   return (
-    <div className="w-64 flex flex-col h-full bg-gray-200/80 backdrop-blur-xl">
+    <div className="w-64 flex flex-col h-full glass-morphism">
       <div className="h-4 app-drag-region" />
       <div className="p-4 flex-1 flex flex-col">
         {/* 操作按钮区域 */}
@@ -50,7 +50,7 @@ export const FavoritesList = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onOpenSelectDialog}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 no-drag"
               title="选择收藏夹"
             >
               <svg
@@ -66,7 +66,7 @@ export const FavoritesList = ({
             </button>
             <button
               onClick={onRefresh}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 no-drag"
               disabled={isLoading}
               title="刷新收藏夹"
             >
@@ -108,11 +108,12 @@ export const FavoritesList = ({
                     <button
                       key={fav.id}
                       onClick={() => onFavoriteSelect(fav)}
-                      className={`w-full px-3 py-2 text-left rounded-lg transition-all text-gray-600 ${
-                        selectedFavorite?.id === fav.id
-                          ? "bg-pink-500 text-white"
-                          : "hover:bg-gray-100"
-                      }`}
+                      className={`w-full px-3 py-2 text-left rounded-lg transition-all no-drag
+                        ${
+                          selectedFavorite?.id === fav.id
+                            ? "bg-pink-500 text-white shadow-md"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
                     >
                       <div className="font-medium">{fav.title}</div>
                       <div
@@ -128,8 +129,16 @@ export const FavoritesList = ({
                   ))
               )}
             </div>
-            {isLoading && <div className="mt-4 text-pink-500">加载中...</div>}
-            {error && <div className="mt-4 text-red-500">{error}</div>}
+            {isLoading && (
+              <div className="mt-4 text-pink-500 text-center animate-pulse">
+                加载中...
+              </div>
+            )}
+            {error && (
+              <div className="mt-4 text-red-500 text-sm text-center">
+                {error}
+              </div>
+            )}
           </div>
         </div>
       </div>

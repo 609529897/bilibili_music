@@ -56,9 +56,9 @@ export const PlayList = ({
   }, [playlist]);
 
   return (
-    <div className="h-full flex flex-col flex-1 border-l border-gray-200">
+    <div className="h-full flex flex-col flex-1 glass-morphism border-l border-white/20">
       <div className="h-4 app-drag-region" />
-      <div className="p-3 border-b border-gray-200 bg-white">
+      <div className="p-3 border-b border-gray-200/50">
         <div className="flex items-center justify-between">
           <span className="text-gray-700 font-medium">
             {typeof selectedFavorite === 'string' ? selectedFavorite : '播放列表'}
@@ -77,57 +77,57 @@ export const PlayList = ({
             加载中...
           </div>
         ) : error ? (
-          <div className="flex items-center justify-center h-32 text-gray-500">
+          <div className="flex items-center justify-center h-32 text-red-500 text-sm">
             {error}
           </div>
         ) : playlist.length === 0 ? (
-          <div className="flex items-center justify-center h-32 text-gray-500">
+          <div className="flex flex-col items-center justify-center h-32 text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mb-2 text-gray-400" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M19 9H5c-.55 0-1 .45-1 1s.45 1 1 1h14c.55 0 1-.45 1-1s-.45-1-1-1zM5 15h14c.55 0 1-.45 1-1s-.45-1-1-1H5c-.55 0-1 .45-1 1s.45 1 1 1z"/>
+            </svg>
             {typeof selectedFavorite === 'string' ? '收藏夹是空的' : '请选择一个收藏夹'}
           </div>
         ) : (
-          <div className="space-y-0.5 p-3">
+          <div className="space-y-1 p-3">
             {playlist.map(video => (
               <div
                 key={video.bvid}
                 onClick={() => onVideoSelect(video)}
-                className={`group flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition-all ${
-                  currentVideo?.bvid === video.bvid
-                    ? 'bg-pink-500'
-                    : 'hover:bg-gray-50'
-                }`}
+                className={`group flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition-all animate-fade-in
+                  ${
+                    currentVideo?.bvid === video.bvid
+                      ? 'bg-pink-500 shadow-md'
+                      : 'hover:bg-white/50'
+                  }`}
               >
-                <div className="relative flex-shrink-0">
-                  <img 
-                    src={imageUrls[video.thumbnail] || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2U1ZTdlYiIgZD0iTTEyIDN2MTAuNTVjLS41OS0uMzQtMS4yNy0uNTUtMi0uNTVjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDRzNC0xLjc5IDQtNFY3aDRWM2gtNloiLz48L3N2Zz4='}
-                    alt={video.title}
-                    className="w-16 h-16 rounded object-cover"
-                  />
-                  {loadingImages.has(video.thumbnail) && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/5 rounded">
-                      <div className="w-5 h-5 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
-                    </div>
-                  )}
-                  <div className={`absolute inset-0 flex items-center justify-center rounded bg-black/40 transition-opacity ${
-                    currentVideo?.bvid === video.bvid ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                  }`}>
-                    {currentVideo?.bvid === video.bvid ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M14 19h4V5h-4M6 19h4V5H6v14Z"/>
-                      </svg>
+                <div className="relative flex-shrink-0 rounded-md overflow-hidden">
+                  <div className="w-24 h-16 bg-gray-100">
+                    {loadingImages.has(video.thumbnail) ? (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+                      </div>
                     ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M8 5v14l11-7l-11-7Z"/>
-                      </svg>
+                      <img 
+                        src={imageUrls[video.thumbnail]}
+                        alt={video.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     )}
                   </div>
+                  <div className={`absolute bottom-0 right-0 px-1 text-xs
+                    ${currentVideo?.bvid === video.bvid ? 'text-white' : 'text-white bg-black/60'}`}>
+                    {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className={`font-medium line-clamp-2 ${
-                    currentVideo?.bvid === video.bvid ? 'text-white' : 'text-gray-900'
+
+                <div className="flex-1 min-w-0">
+                  <div className={`font-medium text-sm line-clamp-2 ${
+                    currentVideo?.bvid === video.bvid ? 'text-white' : 'text-gray-700'
                   }`}>
                     {video.title}
                   </div>
-                  <div className={`text-sm mt-0.5 ${
+                  <div className={`mt-1 text-xs ${
                     currentVideo?.bvid === video.bvid ? 'text-pink-100' : 'text-gray-500'
                   }`}>
                     {video.author}

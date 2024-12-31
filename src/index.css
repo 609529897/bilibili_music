@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
 /* 自定义滚动条样式 */
 ::-webkit-scrollbar {
   width: 6px;
@@ -13,23 +19,54 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  @apply bg-gray-300 hover:bg-gray-400 transition-colors;
   border-radius: 3px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+/* 可拖动区域 */
+.app-drag-region {
+  -webkit-app-region: drag;
 }
 
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
+.no-drag {
+  -webkit-app-region: no-drag;
+}
 
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+/* 玻璃拟态效果 */
+.glass-morphism {
+  @apply bg-white/80 backdrop-blur-lg;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.glass-morphism-dark {
+  @apply bg-gray-900/80 backdrop-blur-lg;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* 渐变背景 */
+.gradient-bg {
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+}
+
+.gradient-text {
+  @apply text-transparent bg-clip-text;
+  background-image: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
 @keyframes spectrum {
@@ -44,4 +81,47 @@
 .spectrum-bar {
   --random-height: 10%;
   animation: spectrum 0.5s infinite;
+}
+
+/* 自定义组件样式 */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply btn bg-pink-500 text-white
+           hover:bg-pink-600
+           focus:ring-pink-500;
+  }
+
+  .btn-secondary {
+    @apply btn bg-gray-100 text-gray-700
+           hover:bg-gray-200
+           focus:ring-gray-500;
+  }
+
+  .input {
+    @apply px-4 py-2 rounded-lg border border-gray-300
+           focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent
+           transition-all duration-200;
+  }
+
+  .card {
+    @apply rounded-xl bg-white shadow-sm
+           hover:shadow-md transition-shadow duration-200;
+  }
+}
+
+/* 工具类 */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
