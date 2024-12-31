@@ -47,8 +47,12 @@ export const FavoritesList = ({
     if (_list.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center text-center p-4 text-gray-500 space-y-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 mb-1 text-gray-400" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-8 h-8 mb-1 text-gray-400"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
           </svg>
           <div className="text-sm">点击左上角的加号按钮</div>
           <div className="text-sm">选择要显示的收藏夹</div>
