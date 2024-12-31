@@ -44,6 +44,27 @@ export const usePlaylist = ({ selectedFavorite }: UsePlaylistProps) => {
     setCurrentVideo(video);
   }, []);
 
+  const handlePrevious = useCallback(() => {
+    if (!currentVideo || playlist.length === 0) return;
+    
+    const currentIndex = playlist.findIndex(video => video.bvid === currentVideo.bvid);
+    if (currentIndex > 0) {
+      setCurrentVideo(playlist[currentIndex - 1]);
+    }
+  }, [currentVideo, playlist]);
+
+  const handleNext = useCallback(() => {
+    if (!currentVideo || playlist.length === 0) return;
+    
+    const currentIndex = playlist.findIndex(video => video.bvid === currentVideo.bvid);
+    if (currentIndex < playlist.length - 1) {
+      setCurrentVideo(playlist[currentIndex + 1]);
+    } else if (hasMore) {
+      // 如果是最后一个视频且还有更多，加载下一页
+      loadMore();
+    }
+  }, [currentVideo, playlist, hasMore, loadMore]);
+
   useEffect(() => {
     if (selectedFavorite) {
       setIsLoading(true);
@@ -62,6 +83,8 @@ export const usePlaylist = ({ selectedFavorite }: UsePlaylistProps) => {
     isLoadLoading,
     error,
     handleVideoSelect,
+    handlePrevious,
+    handleNext,
     loadMore,
     hasMore,
   };

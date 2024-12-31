@@ -2,7 +2,13 @@ import { useEffect, useState, useRef } from "react";
 import { Video } from "../types/electron";
 import { fetchImage } from "../utils/imageProxy";
 
-const useAudioPlayer = (currentVideo: Video | null) => {
+interface UseAudioPlayerProps {
+  currentVideo: Video | null;
+  onPrevious?: () => void;
+  onNext?: () => void;
+}
+
+const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -123,6 +129,28 @@ const useAudioPlayer = (currentVideo: Video | null) => {
     }
   };
 
+  const handlePrevious = () => {
+    if (onPrevious) {
+      setIsPlaying(false);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      onPrevious();
+    }
+  };
+
+  const handleNext = () => {
+    if (onNext) {
+      setIsPlaying(false);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      onNext();
+    }
+  };
+
   return {
     isPlaying,
     currentTime,
@@ -134,6 +162,8 @@ const useAudioPlayer = (currentVideo: Video | null) => {
     toggleMute,
     handleVolumeChange,
     handleTimeSeek,
+    handlePrevious,
+    handleNext,
   };
 };
 

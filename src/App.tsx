@@ -29,6 +29,8 @@ export default function App() {
     hasMore,
     loadMore,
     isLoadLoading,
+    handleNext,
+    handlePrevious
   } = usePlaylist({ selectedFavorite });
 
   const {
@@ -83,8 +85,11 @@ export default function App() {
         />
       </div>
 
-      {/* 播放器 */}
-        <ModernPlayer currentVideo={currentVideo} />
+      <ModernPlayer
+        currentVideo={currentVideo}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+      />
 
       {isSelectingFavorites && (
         <FavoritesDialog
@@ -102,7 +107,7 @@ export default function App() {
             setSelectedFavoriteIds(newIds); // 更新状态
           }}
           onShowAll={(ids) => {
-            setSelectedFavoriteIds(ids) 
+            setSelectedFavoriteIds(ids);
           }}
         />
       )}

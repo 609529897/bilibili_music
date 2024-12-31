@@ -4,9 +4,11 @@ import { formatTime } from "./utils";
 
 interface ModernPlayerProps {
   currentVideo: Video | null;
+  onPrevious?: () => void;
+  onNext?: () => void;
 }
 
-export const ModernPlayer: React.FC<ModernPlayerProps> = ({ currentVideo }) => {
+export const ModernPlayer: React.FC<ModernPlayerProps> = ({ currentVideo, onPrevious, onNext }) => {
   const {
     isPlaying,
     currentTime,
@@ -18,7 +20,9 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({ currentVideo }) => {
     toggleMute,
     handleVolumeChange,
     handleTimeSeek,
-  } = useAudioPlayer(currentVideo);
+    handlePrevious,
+    handleNext,
+  } = useAudioPlayer({ currentVideo, onPrevious, onNext });
 
   if (!currentVideo) {
     return (
@@ -80,9 +84,8 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({ currentVideo }) => {
           <div className="flex items-center justify-center space-x-6 mb-2">
             <button
               className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50 dark:hover:bg-pink-900/20"
-              onClick={() => {
-                /* Previous track */
-              }}
+              onClick={handlePrevious}
+              disabled={!onPrevious}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -124,9 +127,8 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({ currentVideo }) => {
             </button>
             <button
               className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50 dark:hover:bg-pink-900/20"
-              onClick={() => {
-                /* Next track */
-              }}
+              onClick={handleNext}
+              disabled={!onNext}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
