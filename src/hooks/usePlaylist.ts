@@ -19,7 +19,7 @@ export const usePlaylist = ({ selectedFavorite }: UsePlaylistProps) => {
     try {
       const result = await window.electronAPI.getFavoriteVideos(favoriteId, currentPage);
       if (result.success) {
-        setPlaylist(prev => [...prev, ...result.data]);
+        setPlaylist(currentPage === 1 ? result.data : prev => [...prev, ...result.data]);
         setHasMore(result.hasMore || false);
         setPage(currentPage);
       } else if (result.error) {
@@ -29,7 +29,7 @@ export const usePlaylist = ({ selectedFavorite }: UsePlaylistProps) => {
       setError(err instanceof Error ? err.message : 'Failed to load playlist');
     } finally {
       setIsLoading(false);
-      setIsLoadLoading(false)
+      setIsLoadLoading(false);
     }
   }, []);
 
@@ -46,8 +46,9 @@ export const usePlaylist = ({ selectedFavorite }: UsePlaylistProps) => {
 
   useEffect(() => {
     if (selectedFavorite) {
-    setIsLoading(true);
-    loadPlaylist(selectedFavorite.id)
+      setIsLoading(true);
+      setPage(1); // 重置页码
+      loadPlaylist(selectedFavorite.id, 1);
     } else {
       setPlaylist([]);
       setCurrentVideo(null);
