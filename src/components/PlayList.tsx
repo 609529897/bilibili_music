@@ -180,7 +180,7 @@ export const PlayList = ({
                   <div className="w-24 h-16 bg-gray-100">
                     {loadingImages.has(video.thumbnail) ? (
                       <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-5 h-5 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-full h-full animate-pulse bg-gradient-to-r from-gray-100 to-gray-50 rounded-lg" />
                       </div>
                     ) : imageCache[video.thumbnail]?.error ? (
                       <div className="w-full h-full flex items-center justify-center bg-gray-200">
