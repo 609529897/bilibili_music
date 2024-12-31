@@ -41,6 +41,7 @@ interface ElectronAPI {
   fetchImage: (url: string) => Promise<string>;
   logout: () => Promise<{ success: boolean; error?: string }>;
   proxyAudio: (url: string) => Promise<string>;
+  openExternal: (url: string) => Promise<void>;
 }
 
 declare global {

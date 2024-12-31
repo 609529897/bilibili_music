@@ -42,7 +42,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
           }}
           transition={{
             type: "spring",
-            damping: 26,
+            damping: 27,
             stiffness: 200,
             backgroundColor: { duration: 0 },
             backdropFilter: { duration: 0 },

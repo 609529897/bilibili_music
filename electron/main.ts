@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, session, protocol } from 'electron'
+import { app, BrowserWindow, ipcMain, session, protocol, shell } from 'electron'
 import path from 'path'
 import axios from 'axios'
 
@@ -133,6 +133,16 @@ app.whenReady().then(() => {
 
   createWindow()
   setupImageProxy()  // 注册图片代理服务
+
+  // 处理外部链接
+  ipcMain.handle('open-external', async (_event, url: string) => {
+    try {
+      await shell.openExternal(url)
+    } catch (error) {
+      console.error('Failed to open external URL:', error)
+      throw error
+    }
+  })
 
   // 注册 IPC 处理函数
   ipcMain.handle('open-bilibili-login', openBilibiliLogin)

@@ -55,16 +55,46 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
       />
 
       <div
-        className={`fixed bottom-0 left-0 right-0 shadow-2xl transition-all duration-300 h-24  z-50 backdrop-blur-2xl ${
+        className={`fixed bottom-0 left-0 right-0 shadow-2xl transition-all duration-300 h-24 border-t z-50 backdrop-blur-2xl ${
           isExpanded
-            ? "bg-transparent border-white/10"
-            : "bg-white/90 border-pink-100/50 border-t"
+            ? "bg-transparent border-transparent"
+            : "bg-white/90 border-pink-100/50 "
         }`}
       >
         <div className="flex items-center justify-between h-full px-6 max-w-[1920px] mx-auto">
           {/* Left Section: Cover and Title */}
           <div className="flex items-center space-x-3 w-1/4 min-w-[220px]">
-            {isExpanded ? null : (
+            {isExpanded ? (
+              <div
+                className="relative group cursor-pointer transition-opacity duration-300 opacity-100"
+                onClick={() => setIsExpanded(false)}
+              >
+                <div
+                  className={`w-14 h-14 flex-shrink-0 rounded-xl shadow-lg overflow-hidden ring-1 ring-black/5 transition-transform duration-300 group-hover:scale-105`}
+                >
+                  {thumbnailUrl ? (
+                    <img
+                      src={thumbnailUrl}
+                      alt="Cover"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6 text-pink-300 dark:text-pink-500"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          fill="currentColor"
+                          d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
               <div
                 className="relative group cursor-pointer transition-opacity duration-300 opacity-100"
                 onClick={() => setIsExpanded(true)}
@@ -243,7 +273,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
           </div>
 
           {/* Right Section: Volume Control */}
-          <div className="flex items-center justify-end space-x-3 w-1/4 min-w-[180px]">
+          <div className="flex items-center justify-end space-x-2 w-1/4 min-w-[180px]">
             <button
               onClick={toggleMute}
               className={`${
@@ -304,8 +334,12 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
               />
             </div>
             {/* Bilibili Icon */}
-            <button
-              onClick={() => setShowBilibiliPlayer(true)}
+            {/* <button
+              onClick={() =>
+                window.electronAPI.openExternal(
+                  `https://www.bilibili.com/video/${currentVideo.bvid}`
+                )
+              }
               className={`ml-2 text-[#00a1d6] hover:text-[#00b5e5] transition-colors duration-150 p-1.5 rounded-full hover:bg-[#00a1d6]/5`}
               title="在 B 站观看"
             >
@@ -319,7 +353,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                   d="M306.005333 117.632L444.330667 256h135.296l138.368-138.325333a42.666667 42.666667 0 0 1 60.373333 60.373333L700.330667 256H789.333333A149.333333 149.333333 0 0 1 938.666667 405.333333v341.333334a149.333333 149.333333 0 0 1-149.333334 149.333333h-554.666666A149.333333 149.333333 0 0 1 85.333333 746.666667v-341.333334A149.333333 149.333333 0 0 1 234.666667 256h88.96L245.632 177.962667a42.666667 42.666667 0 0 1 60.373333-60.373334zM789.333333 341.333333h-554.666666a64 64 0 0 0-63.701334 57.856L170.666667 405.333333v341.333334a64 64 0 0 0 57.856 63.701333L234.666667 810.666667h554.666666a64 64 0 0 0 63.701334-57.856L853.333333 746.666667v-341.333334A64 64 0 0 0 789.333333 341.333333zM341.333333 469.333333a42.666667 42.666667 0 0 1 42.666667 42.666667v85.333333a42.666667 42.666667 0 0 1-85.333333 0v-85.333333a42.666667 42.666667 0 0 1 42.666666-42.666667z m341.333334 0a42.666667 42.666667 0 0 1 42.666666 42.666667v85.333333a42.666667 42.666667 0 0 1-85.333333 0v-85.333333a42.666667 42.666667 0 0 1 42.666667-42.666667z"
                 />
               </svg>
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

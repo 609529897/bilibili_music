@@ -11,4 +11,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   fetchImage: (url: string) => ipcRenderer.invoke('fetch-image', url),
   logout: () => ipcRenderer.invoke('logout'),
   proxyAudio: (url: string) => ipcRenderer.invoke('proxy-audio', url),
+  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
 })
