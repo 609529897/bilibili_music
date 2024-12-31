@@ -112,10 +112,10 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
       setIsPlaying(false);
       setCurrentTime(0);
       setDuration(0);
+      setIsLoading(true);
 
       try {
         console.log('Loading audio for video:', currentVideo.bvid);
-        setIsLoading(true);
 
         // 检查是否已被取消
         if (abortController.signal.aborted) {
@@ -263,12 +263,11 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
               return;
             }
 
-            // 开始播放
-            if (isPlaying) {
-              console.log('Starting playback...');
-              await audioElement.play();
-              console.log('Playback started successfully');
-            }
+            // 自动开始播放
+            console.log('Starting playback...');
+            await audioElement.play();
+            setIsPlaying(true);
+            console.log('Playback started successfully');
 
             return () => {
               audioElement.removeEventListener('timeupdate', handleTimeUpdate);
