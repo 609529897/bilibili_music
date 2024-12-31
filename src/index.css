@@ -7,12 +7,6 @@
   user-select: none;
 }
 
-/* 内容区域样式 */
-.content-container {
-  height: calc(100vh - 96px); /* 减去播放器高度 */
-  overflow: hidden;
-}
-
 .-app-region-drag {
   -webkit-app-region: drag;
 }
@@ -113,7 +107,7 @@ body {
 
 /* 确保内容区域没有边框 */
 .content-container {
-  height: calc(100vh - 96px);
+  height: calc(100vh - 88px);
   overflow: hidden;
   background: transparent;
 }

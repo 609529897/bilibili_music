@@ -109,7 +109,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
       />
 
       <div
-        className={`fixed bottom-0 left-0 right-0 shadow-2xl transition-all duration-300 h-24 border-t z-50 backdrop-blur-2xl ${
+        className={`fixed bottom-0 left-0 right-0 shadow-2xl transition-all duration-300 h-[88px] border-t z-50 backdrop-blur-2xl ${
           isExpanded
             ? "bg-transparent border-transparent"
             : "bg-white/90 border-pink-100/50 "
