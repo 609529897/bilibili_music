@@ -179,8 +179,8 @@ export const PlayList = ({
                 <div className="relative flex-shrink-0 rounded-md overflow-hidden">
                   <div className="w-24 h-16 bg-gray-100">
                     {loadingImages.has(video.thumbnail) ? (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-full h-full animate-pulse bg-gradient-to-r from-gray-100 to-gray-50 rounded-lg" />
+                      <div className="w-full h-full">
+                        <div className="w-full h-full bg-gray-50 animate-pulse opacity-50" />
                       </div>
                     ) : imageCache[video.thumbnail]?.error ? (
                       <div className="w-full h-full flex items-center justify-center bg-gray-200">
