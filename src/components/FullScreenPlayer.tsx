@@ -34,7 +34,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
     <AnimatePresence mode="wait">
       {isVisible && (
         <motion.div
-          className="fixed h-screen inset-0 bottom-20 z-40 flex items-center justify-center overflow-hidden"
+          className="fixed h-screen inset-0 bottom-20 z-40 flex items-center justify-center overflow-hidden app-drag-region"
           initial={{
             y: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.9)",
@@ -76,7 +76,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
             />
           )}
 
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-5 left-3">
             <TitleBar />
           </div>
 

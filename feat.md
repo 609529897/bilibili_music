@@ -2,9 +2,11 @@ todo:
 
 - toolbar UI
 
-- 拖拽
+<!-- - 拖拽 -->
 
-- 对齐
+<!-- full screen 样式 -->
+
+<!-- - 对齐 -->
 
 - 外围 border
 
