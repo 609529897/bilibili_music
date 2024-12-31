@@ -14,6 +14,7 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
     null
   );
@@ -49,6 +50,7 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
       if (!currentVideo?.bvid) return;
 
       try {
+        setIsLoading(true);
         const result = await window.electronAPI.getVideoAudioUrl(
           currentVideo.bvid
         );
@@ -67,6 +69,10 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
 
         audio.addEventListener("loadedmetadata", () => {
           setDuration(audio.duration);
+          setIsLoading(false);
+          // 自动播放新选择的音频
+          audio.play();
+          setIsPlaying(true);
         });
 
         audio.addEventListener("timeupdate", () => {
@@ -76,13 +82,15 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
         audio.addEventListener("ended", () => {
           setIsPlaying(false);
           setCurrentTime(0);
+          // 播放结束后自动播放下一首
+          if (onNext) {
+            handleNext();
+          }
         });
 
-        if (isPlaying) {
-          audio.play();
-        }
       } catch (error) {
         console.error("Error loading audio:", error);
+        setIsLoading(false);
       }
     };
 
@@ -94,7 +102,7 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
         audioRef.current.src = "";
       }
     };
-  }, [currentVideo, isPlaying, volume, isMuted]);
+  }, [currentVideo]);
 
   const togglePlay = () => {
     if (audioElement) {
@@ -158,6 +166,7 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
     volume,
     isMuted,
     thumbnailUrl,
+    isLoading,
     togglePlay,
     toggleMute,
     handleVolumeChange,
