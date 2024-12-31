@@ -20,6 +20,7 @@ export const useFavorites = () => {
       const result = await window.electronAPI.getFavorites();
       if (result.success && result.data) {
         setFavorites(result.data);
+        setSelectedFavoriteIds(new Set(result.data.map(f => f.id)));
       } else {
         setError(result.error || '获取收藏夹失败');
       }
