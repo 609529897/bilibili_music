@@ -46,16 +46,16 @@ export const FavoritesList = ({
 
     if (_list.length === 0) {
       return (
-        <div className="flex flex-col items-center justify-center text-center p-4 text-gray-500 space-y-2">
+        <div className="flex flex-col items-center justify-center text-center p-3 text-gray-500/80 space-y-1.5">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="w-8 h-8 mb-1 text-gray-400"
+            className="w-6 h-6 mb-0.5 text-gray-400/80"
             viewBox="0 0 24 24"
           >
             <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
           </svg>
-          <div className="text-sm">点击左上角的加号按钮</div>
-          <div className="text-sm">选择要显示的收藏夹</div>
+          <div className="text-xs">点击左上角的加号按钮</div>
+          <div className="text-xs">选择要显示的收藏夹</div>
         </div>
       );
     }
@@ -64,40 +64,44 @@ export const FavoritesList = ({
       <button
         key={fav.id}
         onClick={() => onFavoriteSelect(fav)}
-        className={`w-full px-3 py-2 text-left rounded-lg transition-all no-drag
+        className={`w-full px-2.5 py-1.5 text-left rounded-lg transition-all no-drag
           ${
             selectedFavorite?.id === fav.id
-              ? "bg-pink-500 text-white shadow-md"
+              ? "bg-pink-500 text-white shadow-sm"
               : "text-gray-900 hover:bg-white/10"
           }`}
       >
-        <div className="font-medium">{fav.title}</div>
-        <div
-          className={`text-sm ${
-            selectedFavorite?.id === fav.id ? "text-white/80" : "text-gray-500"
-          }`}
-        >
-          {fav.count} 个视频
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-medium leading-tight truncate">
+            {fav.title}
+          </div>
+          <div
+            className={`text-xs ml-2 ${
+              selectedFavorite?.id === fav.id ? "text-white/70" : "text-gray-500/70"
+            }`}
+          >
+            {fav.count}
+          </div>
         </div>
       </button>
     ));
   }, [favorites, selectedFavorite, selectedFavoriteIds, onFavoriteSelect]);
 
   return (
-    <div className="w-64 flex flex-col h-full bg-white/5 backdrop-blur-2xl border-r border-white/10">
+    <div className="w-60 flex flex-col h-full bg-white/5 backdrop-blur-2xl border-r border-white/10">
       <div className="h-4 app-drag-region" />
-      <div className="p-4 flex-1 flex flex-col">
+      <div className="px-3 py-2 flex-1 flex flex-col">
         {/* 操作按钮区域 */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={onOpenSelectDialog}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
+              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
               title="选择收藏夹"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5"
+                className="w-4 h-4"
                 viewBox="0 0 24 24"
               >
                 <path
@@ -108,13 +112,13 @@ export const FavoritesList = ({
             </button>
             <button
               onClick={onRefresh}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
+              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
               disabled={isLoading}
               title="刷新收藏夹"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+                className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`}
                 viewBox="0 0 24 24"
               >
                 <path
@@ -133,10 +137,10 @@ export const FavoritesList = ({
 
         {/* 收藏夹列表区域 */}
         <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            <div className="space-y-1">
+          <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20 hover:scrollbar-thumb-white/30">
+            <div className="space-y-0.5">
               {favorites.length === 0 && !isLoading && !error ? (
-                <div className="text-gray-400 text-sm px-3 py-2">
+                <div className="text-gray-400 text-xs px-2 py-1.5">
                   没有找到收藏夹
                 </div>
               ) : (
@@ -144,12 +148,12 @@ export const FavoritesList = ({
               )}
             </div>
             {isLoading && (
-              <div className="mt-4 text-center animate-pulse text-pink-500">
+              <div className="mt-3 text-center text-xs text-pink-500/80">
                 加载中...
               </div>
             )}
             {error && (
-              <div className="mt-4 text-sm text-center text-red-500">
+              <div className="mt-3 text-xs text-center text-red-400">
                 {error}
               </div>
             )}
