@@ -76,9 +76,9 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
             />
           )}
 
-          <div className="absolute top-5 left-3">
+          {/* <div className="absolute top-5 left-3">
             <TitleBar />
-          </div>
+          </div> */}
 
           <motion.div
             className="w-full max-w-4xl p-8 flex flex-col items-center relative z-10"

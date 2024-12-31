@@ -98,7 +98,7 @@ export const PlayList = ({
   return (
     <div className="h-full flex flex-col flex-1 bg-white">
       {/* <div className="h-4 app-drag-region" /> */}
-      <div className="h-12 px-4 flex items-center justify-between w-full  border-b border-gray-200/50 app-drag-region">
+      <div className="h-14 px-4 flex items-center justify-between w-full  border-b border-gray-200/50 app-drag-region">
         <div className="flex items-center justify-between w-full">
           <span className="text-gray-700 font-medium">
             {typeof selectedFavorite === "string"

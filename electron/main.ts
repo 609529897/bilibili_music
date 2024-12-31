@@ -28,9 +28,9 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    // titleBarStyle: "hidden",
-    // backgroundColor: '#ffffff',
-    frame: false,
+    titleBarStyle: "hidden",
+    backgroundColor: '#ffffff',
+    // frame: false,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: true,

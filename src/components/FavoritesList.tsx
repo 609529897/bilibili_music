@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from "react";
 import { UserMenu } from "./UserMenu";
-import TitleBar from "./TitleBar";
 
 interface Favorite {
   id: number;
@@ -95,19 +94,20 @@ export const FavoritesList = ({
       {/* <div className="h-4 app-drag-region" /> */}
       <div className="flex-1 flex flex-col">
         {/* 操作按钮区域 */}
-        <div className="flex items-center justify-between  h-12 px-4 app-drag-region">
-          <div>
+        <div className="flex items-center justify-between h-14 px-4 app-drag-region">
+          {/* <div>
             <TitleBar />
-          </div>
-          <div className="flex items-center gap-5">
+          </div> */}
+          <div></div>
+          <div className="flex items-center gap-4">
             <button
               onClick={onOpenSelectDialog}
-              className=" hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
+              className="relative top-[-0.7px] hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
               title="选择收藏夹"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5"
+                className="w-6 h-6"
                 viewBox="0 0 24 24"
               >
                 <path
@@ -124,7 +124,7 @@ export const FavoritesList = ({
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className={`w-5 h-5 ${isLoading ? "animate-spin" : ""}`}
+                className={`w-6 h-6 ${isLoading ? "animate-spin" : ""}`}
                 viewBox="0 0 24 24"
               >
                 <path
