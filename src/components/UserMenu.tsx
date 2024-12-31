@@ -23,11 +23,11 @@ export function UserMenu({ avatarUrl, username, onLogout }: UserMenuProps) {
   }, []);
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative w-7 h-7" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={clsx(
-          'w-8 h-8 rounded-full overflow-hidden',
+          'rounded-full overflow-hidden w-full h-full',
           'ring-2 ring-offset-2 ring-transparent',
           'hover:ring-pink-500 transition-all duration-200',
           'focus:outline-none focus:ring-pink-500'
