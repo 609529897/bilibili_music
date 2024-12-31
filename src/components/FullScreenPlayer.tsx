@@ -1,6 +1,6 @@
 import { Video } from "../types/electron";
 import { motion, AnimatePresence } from "framer-motion";
-import AudioSpectrum from 'react-audio-spectrum';
+import AudioSpectrum from "react-audio-spectrum";
 
 interface FullScreenPlayerProps {
   currentVideo: Video | null;
@@ -25,19 +25,31 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
         <motion.div
           className="fixed h-screen inset-0 bottom-20 z-40 flex items-center justify-center"
           onClick={onClose}
-          initial={{ y: "100%", backgroundColor: "rgba(0, 0, 0, 0.9)", backdropFilter: "blur(16px)" }}
-          animate={{ y: 0, backgroundColor: "rgba(0, 0, 0, 0.9)", backdropFilter: "blur(16px)" }}
-          exit={{ y: "100%", backgroundColor: "rgba(0, 0, 0, 0.9)", backdropFilter: "blur(16px)" }}
-          transition={{ 
-            type: "spring", 
-            damping: 26, 
+          initial={{
+            y: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            backdropFilter: "blur(16px)",
+          }}
+          animate={{
+            y: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            backdropFilter: "blur(16px)",
+          }}
+          exit={{
+            y: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            backdropFilter: "blur(16px)",
+          }}
+          transition={{
+            type: "spring",
+            damping: 26,
             stiffness: 200,
             backgroundColor: { duration: 0 },
-            backdropFilter: { duration: 0 }
+            backdropFilter: { duration: 0 },
           }}
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.9)",
-            backdropFilter: "blur(16px)"
+            backdropFilter: "blur(16px)",
           }}
         >
           <motion.div
@@ -50,16 +62,16 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
               type: "spring",
               damping: 26,
               stiffness: 300,
-              opacity: { duration: 0.2 }
+              opacity: { duration: 0.2 },
             }}
           >
             <div className="relative group">
-              <div className="w-[512px] h-[512px] mb-8 relative">
+              <div className="w-[660px] h-[660px] mb-4 relative">
                 {thumbnailUrl ? (
                   <img
                     src={thumbnailUrl}
                     alt="Cover"
-                    className="w-full h-full object-cover rounded-3xl shadow-2xl transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-full object-cover rounded-3xl shadow-2xl transition-transform duration-700"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 flex items-center justify-center rounded-3xl">
@@ -75,7 +87,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
                     </svg>
                   </div>
                 )}
-                
+
                 {/* Audio Spectrum Overlay */}
                 <div className="absolute inset-x-0 bottom-0 h-32 flex items-end justify-center overflow-hidden rounded-b-3xl">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -85,14 +97,14 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
                       height={100}
                       width={512}
                       audioId={audioRef.current.id}
-                      capColor={'#fff'}
+                      capColor={"#fff"}
                       capHeight={2}
                       meterWidth={2}
                       meterCount={512}
                       meterColor={[
-                        {stop: 0, color: '#f472b6'},
-                        {stop: 0.5, color: '#ec4899'},
-                        {stop: 1, color: '#be185d'}
+                        { stop: 0, color: "#f472b6" },
+                        { stop: 0.5, color: "#ec4899" },
+                        { stop: 1, color: "#be185d" },
                       ]}
                       gap={1}
                     />
