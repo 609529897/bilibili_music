@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, session } from 'electron'
+import { app, BrowserWindow, ipcMain, session, protocol } from 'electron'
 import path from 'path'
 import axios from 'axios'
 import { setupImageProxy } from './main/image-proxy'
@@ -121,6 +121,17 @@ async function getCookieString() {
 }
 
 app.whenReady().then(() => {
+  protocol.registerFileProtocol('left', (request, callback) => {
+    const url = request.url.replace('left://local-file/', '');
+    try {
+      const decodedPath = decodeURIComponent(url);
+      callback({ path: decodedPath });
+    } catch (error) {
+      console.error('Protocol error:', error);
+      callback({ error: -2 /* net::FAILED */ });
+    }
+  });
+
   createWindow()
   setupImageProxy()  // 注册图片代理服务
 
