@@ -146,11 +146,11 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
       />
       
       {isFullscreen ? (
-        <div className="fixed inset-0 bg-gradient-to-br from-gray-900/95 to-black backdrop-blur-2xl z-50">
+        <div className="fixed inset-0 bg-pink-500 z-50">
           <div className="h-full w-full flex flex-col items-center justify-center p-8">
             {/* 全屏封面 */}
             <div className="relative">
-              <div className="w-[40vh] h-[40vh] rounded-3xl overflow-hidden bg-gradient-to-br from-pink-500 to-purple-500 p-0.5 shadow-2xl">
+              <div className="w-[40vh] h-[40vh] rounded-3xl overflow-hidden bg-pink-500 p-0.5 shadow-2xl">
                 <div className="w-full h-full relative rounded-[calc(1.5rem-1px)] overflow-hidden bg-black/20">
                   <img
                     src={thumbnailUrl}
@@ -170,7 +170,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                 {Array.from({ length: 32 }, (_, i) => (
                   <div
                     key={i}
-                    className="w-1.5 bg-gradient-to-t from-pink-500/60 to-purple-500/60 rounded-t spectrum-bar"
+                    className="w-1.5 bg-pink-500 rounded-t spectrum-bar"
                     style={{
                       '--random-height': `${30 + Math.random() * 70}%`,
                       animationDelay: `${i * 0.05}s`
@@ -181,7 +181,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
             </div>
 
             {/* 控制栏 */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent pt-32 pb-8 px-8">
+            <div className="absolute bottom-0 left-0 right-0 bg-pink-500 pt-32 pb-8 px-8">
               <div className="w-full max-w-3xl mx-auto">
                 {/* 标题和作者 */}
                 <div className="mb-8 text-center">
@@ -197,7 +197,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                   </div>
                   <div className="relative h-1.5 bg-white/20 rounded-full overflow-hidden group">
                     <div
-                      className="h-full bg-gradient-to-r from-pink-500 to-purple-500 rounded-full relative group-hover:shadow-lg transition-shadow"
+                      className="h-full bg-pink-500 rounded-full relative group-hover:shadow-lg transition-shadow"
                       style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
                     >
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform duration-200" />
@@ -221,7 +221,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                       onClick={() => {}}
                       disabled={true}
                       className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                        true ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-white/30'
+                        true ? 'text-white/80 hover:text-white hover:bg-gray-100' : 'text-white/30'
                       }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24">
@@ -232,7 +232,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                     {/* 播放/暂停 */}
                     <button
                       onClick={handlePlayPause}
-                      className="w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                      className="w-16 h-16 rounded-full bg-pink-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
                     >
                       {isPlaying ? (
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24">
@@ -250,7 +250,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                       onClick={() => {}}
                       disabled={true}
                       className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                        true ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-white/30'
+                        true ? 'text-white/80 hover:text-white hover:bg-gray-100' : 'text-white/30'
                       }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24">
@@ -264,7 +264,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setVolume((v) => (v === 0 ? 1 : 0))}
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-gray-100 transition-colors"
                       >
                         {volume === 0 ? (
                           <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
@@ -279,7 +279,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                       <div className="w-24 group">
                         <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-pink-500 to-purple-500 rounded-full group-hover:shadow-lg transition-shadow"
+                            className="h-full bg-pink-500 rounded-full group-hover:shadow-lg transition-shadow"
                             style={{ width: `${volume * 100}%` }}
                           />
                           <input
@@ -298,7 +298,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                     {/* 全屏按钮 */}
                     <button
                       onClick={toggleFullscreen}
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-gray-100 transition-colors"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
@@ -317,7 +317,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
               {/* 封面和信息 */}
               <div className="flex items-center gap-4 w-80">
                 <div className="relative group">
-                  <div className="w-16 h-16 relative rounded-xl overflow-hidden bg-gradient-to-br from-pink-500 to-purple-500 p-0.5">
+                  <div className="w-16 h-16 relative rounded-xl overflow-hidden bg-pink-500 p-0.5">
                     <div className="w-full h-full relative rounded-[calc(0.75rem-1px)] overflow-hidden bg-black/20">
                       <img
                         src={thumbnailUrl}
@@ -374,7 +374,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                   {/* 播放/暂停 */}
                   <button
                     onClick={handlePlayPause}
-                    className="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                    className="w-12 h-12 rounded-full bg-pink-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
                   >
                     {isPlaying ? (
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24">
@@ -411,12 +411,12 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                   >
                     <div className="h-1 bg-gray-200/50 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-pink-500 to-purple-500 rounded-full relative group-hover:shadow-lg transition-shadow"
+                        className="h-full bg-pink-500 rounded-full relative group-hover:shadow-lg transition-shadow"
                         style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
                       >
                         <div
                           className={`absolute right-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full transition-transform duration-200
-                            bg-gradient-to-r from-pink-500 to-purple-500 shadow-lg ${
+                            bg-pink-500 shadow-lg ${
                             isHoveringProgress ? "scale-100" : "scale-0"
                           }`}
                         />
@@ -458,7 +458,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
                   <div className="flex items-center w-20 h-9 group">
                     <div className="w-full h-1 bg-gray-200/50 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-pink-500 to-purple-500 rounded-full group-hover:shadow-lg transition-shadow"
+                        className="h-full bg-pink-500 rounded-full group-hover:shadow-lg transition-shadow"
                         style={{ width: `${volume * 100}%` }}
                       />
                       <input

@@ -50,7 +50,7 @@ export const FavoritesList = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onOpenSelectDialog}
-              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-gray-300 no-drag"
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
               title="选择收藏夹"
             >
               <svg
@@ -66,7 +66,7 @@ export const FavoritesList = ({
             </button>
             <button
               onClick={onRefresh}
-              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-gray-300 no-drag"
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
               disabled={isLoading}
               title="刷新收藏夹"
             >
@@ -111,15 +111,15 @@ export const FavoritesList = ({
                       className={`w-full px-3 py-2 text-left rounded-lg transition-all no-drag
                         ${
                           selectedFavorite?.id === fav.id
-                            ? "bg-gradient-to-r from-pink-500/90 to-purple-500/90 text-white shadow-md"
-                            : "text-gray-900 hover:bg-white/5"
+                            ? "bg-pink-500 text-white shadow-md"
+                            : "text-gray-900 hover:bg-white/10"
                         }`}
                     >
                       <div className="font-medium">{fav.title}</div>
                       <div
                         className={`text-sm ${
                           selectedFavorite?.id === fav.id
-                            ? "text-pink-100"
+                            ? "text-white/80"
                             : "text-gray-500"
                         }`}
                       >
@@ -130,12 +130,12 @@ export const FavoritesList = ({
               )}
             </div>
             {isLoading && (
-              <div className="mt-4 text-pink-400 text-center animate-pulse">
+              <div className="mt-4 text-center animate-pulse text-pink-500">
                 加载中...
               </div>
             )}
             {error && (
-              <div className="mt-4 text-red-400 text-sm text-center">
+              <div className="mt-4 text-sm text-center text-red-500">
                 {error}
               </div>
             )}

@@ -97,7 +97,7 @@ export const PlayList = ({
                   ${
                     currentVideo?.bvid === video.bvid
                       ? 'bg-pink-500 shadow-md'
-                      : 'hover:bg-white/50'
+                      : 'hover:bg-gray-100'
                   }`}
               >
                 <div className="relative flex-shrink-0 rounded-md overflow-hidden">
@@ -123,12 +123,12 @@ export const PlayList = ({
 
                 <div className="flex-1 min-w-0">
                   <div className={`font-medium text-sm line-clamp-2 ${
-                    currentVideo?.bvid === video.bvid ? 'text-white' : 'text-gray-700'
+                    currentVideo?.bvid === video.bvid ? 'text-white' : 'text-gray-900'
                   }`}>
                     {video.title}
                   </div>
                   <div className={`mt-1 text-xs ${
-                    currentVideo?.bvid === video.bvid ? 'text-pink-100' : 'text-gray-500'
+                    currentVideo?.bvid === video.bvid ? 'text-white/80' : 'text-gray-500'
                   }`}>
                     {video.author}
                   </div>
