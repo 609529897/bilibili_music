@@ -60,7 +60,7 @@ const App: React.FC = () => {
     <div className="window-frame">
       <div className="content-container flex min-h-0">
         {/* 收藏夹列表 - 在移动端默认隐藏 */}
-        <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block absolute md:relative z-20 h-full`}>
+        <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block mt-10 md:mt-0 absolute md:relative z-20 h-full`}>
           <FavoritesList
             favorites={favorites}
             selectedFavorite={selectedFavorite}
