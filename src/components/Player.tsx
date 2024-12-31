@@ -29,21 +29,35 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
       
       // 添加更详细的错误处理
       audio.addEventListener('error', (e) => {
-        const error = e.target as HTMLAudioElement;
+        const target = e.target as HTMLAudioElement;
         console.error('Audio error details:', {
-          error: error.error,
-          networkState: error.networkState,
-          readyState: error.readyState,
-          currentSrc: error.currentSrc,
-          src: error.src
+          error: target.error,
+          networkState: target.networkState,
+          readyState: target.readyState,
+          currentSrc: target.currentSrc,
+          src: target.src,
+          errorCode: target.error?.code,
+          errorMessage: target.error?.message
         });
       });
 
-      audio.addEventListener('loadstart', () => console.log('Audio load started'));
-      audio.addEventListener('loadedmetadata', () => console.log('Audio metadata loaded'));
-      audio.addEventListener('loadeddata', () => console.log('Audio data loaded'));
-      audio.addEventListener('canplay', () => console.log('Audio can play'));
-      audio.addEventListener('canplaythrough', () => console.log('Audio can play through'));
+      // 添加调试事件
+      const debugEvents = [
+        'loadstart', 'durationchange', 'loadedmetadata',
+        'loadeddata', 'progress', 'canplay', 'canplaythrough'
+      ];
+      
+      debugEvents.forEach(event => {
+        audio.addEventListener(event, () => {
+          console.log(`Audio event: ${event}`, {
+            currentTime: audio.currentTime,
+            duration: audio.duration,
+            readyState: audio.readyState,
+            networkState: audio.networkState,
+            src: audio.src
+          });
+        });
+      });
       
       document.body.appendChild(audio);
     }
