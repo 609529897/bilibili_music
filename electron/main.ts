@@ -509,3 +509,28 @@ ipcMain.handle('logout', async () => {
     }
   }
 })
+
+ipcMain.handle('proxy-audio', async (_, url: string) => {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.bilibili.com',
+        'Origin': 'https://www.bilibili.com'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const buffer = await response.arrayBuffer();
+    // 将音频数据转换为 base64 格式
+    const base64 = Buffer.from(buffer).toString('base64');
+    // 创建 data URL
+    return `data:audio/mp4;base64,${base64}`;
+  } catch (error) {
+    console.error('Error proxying audio:', error);
+    throw error;
+  }
+});

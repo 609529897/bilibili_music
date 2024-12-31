@@ -21,6 +21,7 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   const [isHoveringProgress, setIsHoveringProgress] = useState(false);
   const [isLoadingImage, setIsLoadingImage] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
 
   // 处理本地文件路径
   const getThumbnailUrl = async (path: string) => {
@@ -90,66 +91,97 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   }, [thumbnailUrl]);
 
   useEffect(() => {
-    if (currentVideo && audioRef.current) {
-      // 重置播放状态
-      setIsPlaying(false);
-      setCurrentTime(0);
-      setDuration(0);
+    let isMounted = true;
 
-      // 设置新的音频源
-      const handleAudio = async () => {
-        try {
-          const result = await window.electronAPI.getVideoAudioUrl(
-            currentVideo.bvid
-          );
-          if (result.success && result.data.audioUrl) {
-            audioRef.current!.src = result.data.audioUrl;
-            audioRef.current!.load();
-            // 自动播放
-            await audioRef.current!.play();
-            setIsPlaying(true);
-          } else {
-            console.error("Failed to get audio URL:", result.error);
+    const handleAudio = async () => {
+
+      if (!currentVideo?.bvid) {
+        return;
+      }
+
+      try {
+        // 获取音频 URL
+        const result = await window.electronAPI.getVideoAudioUrl(currentVideo.bvid);
+
+
+        if (!result.success || !result.data.audioUrl) {
+          throw new Error(result.error || '获取音频地址失败');
+        }
+
+
+        console.log(result.data.audioUrl, 'audioUrl')
+
+        // 代理音频请求
+        const audioUrl = await window.electronAPI.proxyAudio(result.data.audioUrl);
+        if (!isMounted) return;
+
+
+        const audio = new Audio(audioUrl);
+        setAudioElement(audio);
+
+        // 设置音频事件监听器
+        audio.addEventListener('loadedmetadata', () => {
+          if (isMounted) {
+            setDuration(audio.duration);
+          }
+        });
+
+        audio.addEventListener('timeupdate', handleTimeUpdate);
+        audio.addEventListener('ended', () => {
+          if (isMounted) {
             setIsPlaying(false);
           }
-        } catch (error) {
-          console.error("Failed to play audio:", error);
-          setIsPlaying(false);
-        }
-      };
+        });
 
-      handleAudio();
-    }
-  }, [currentVideo]);
+        // 如果之前是在播放状态，则继续播放
+        if (isPlaying) {
+          audio.play();
+        }
+      } catch (error) {
+        console.error('Error loading audio:', error);
+        // message.error('加载音频失败');
+      }
+    };
+
+    handleAudio();
+
+    return () => {
+      isMounted = false;
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.src = '';
+        audioElement.remove();
+      }
+    };
+  }, [currentVideo, isPlaying]);
 
   const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-      setDuration(audioRef.current.duration);
+    if (audioElement) {
+      setCurrentTime(audioElement.currentTime);
     }
   };
 
   const handlePlayPause = () => {
-    if (audioRef.current) {
+    if (audioElement) {
       if (isPlaying) {
-        audioRef.current.pause();
+        audioElement.pause();
       } else {
-        audioRef.current.play().catch(console.error);
+        audioElement.play().catch(console.error);
       }
       setIsPlaying(!isPlaying);
     }
   };
 
   const handleSeek = (time: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
+    if (audioElement) {
+      audioElement.currentTime = time;
       setCurrentTime(time);
     }
   };
 
   const handleVolumeChange = (newVolume: number) => {
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
+    if (audioElement) {
+      audioElement.volume = newVolume;
       setVolume(newVolume);
     }
   };
@@ -181,16 +213,6 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
 
   return (
     <>
-      {/* 音频元素 */}
-      <audio
-        ref={audioRef}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleTimeUpdate}
-        onEnded={handleEnded}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      />
-      
       {/* 底部播放器 */}
       <div className="h-24 glass-morphism border-t border-white/10">
         <div className="h-full px-8">

@@ -40,6 +40,7 @@ interface ElectronAPI {
   onLoginSuccess: (callback: () => void) => void;
   fetchImage: (url: string) => Promise<string>;
   logout: () => Promise<{ success: boolean; error?: string }>;
+  proxyAudio: (url: string) => Promise<string>;
 }
 
 declare global {
