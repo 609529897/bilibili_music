@@ -12,7 +12,6 @@ const formatTime = (time: number) => {
 };
 
 export const ModernPlayer: React.FC<ModernPlayerProps> = ({ currentVideo }) => {
-  // 使用自定义音频播放器 Hook
   const {
     isPlaying,
     currentTime,
