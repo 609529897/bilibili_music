@@ -239,7 +239,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 <div className="absolute inset-0 bg-pink-400/10 rounded-full scale-0 group-hover:scale-100 transition-transform duration-150" />
                 {isLoading ? (
                   <svg
-                    className="animate-spin h-6 w-6"
+                    className="animate-spin h-7 w-7"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"

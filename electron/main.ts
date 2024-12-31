@@ -133,7 +133,7 @@ app.whenReady().then(() => {
   });
 
   createWindow()
-  setupImageProxy()  // 注册图片代理服务
+  // setupImageProxy()  // 注册图片代理服务
 
   // 处理外部链接
   ipcMain.handle('open-external', async (_event, url: string) => {
