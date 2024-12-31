@@ -138,12 +138,6 @@ app.whenReady().then(() => {
   // 注册 IPC 处理函数
   ipcMain.handle('open-bilibili-login', openBilibiliLogin)
   ipcMain.handle('check-login-status', checkLoginStatus)
-  ipcMain.handle('get-user-info', getUserInfo)
-  ipcMain.handle('get-favorites', getFavorites)
-  ipcMain.handle('get-favorite-videos', getFavoriteVideos)
-  ipcMain.handle('get-video-audio-url', getVideoAudioUrl)
-  ipcMain.handle('fetch-image', fetchImage)
-  ipcMain.handle('logout', handleLogout)
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
