@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Video } from "../types/electron";
 import { fetchImage } from "../utils/imageProxy";
 
@@ -68,6 +68,26 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
     };
     loadThumbnail();
   }, [currentVideo?.thumbnail]);
+
+  useEffect(() => {
+    if (audioElement) {
+      audioElement.volume = volume;
+      audioElement.muted = isMuted;
+    }
+  }, [volume, isMuted, audioElement]);
+
+  const handleSeek = useCallback(async (newTime: number) => {
+    if (!audioElement) return;
+
+    try {
+      audioElement.currentTime = newTime;
+      if (isPlaying) {
+        await audioElement.play();
+      }
+    } catch (error) {
+      console.error('Error seeking:', error);
+    }
+  }, [audioElement, isPlaying]);
 
   useEffect(() => {
     const handleAudio = async () => {
@@ -142,11 +162,6 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
               audioElement.removeEventListener('canplay', handleCanPlay);
               audioElement.removeEventListener('error', handleError);
               audioElement.removeEventListener('loadedmetadata', handleMetadata);
-              audioElement.removeEventListener('loadstart', handleLoadStart);
-            };
-
-            const handleLoadStart = () => {
-              console.log('Audio load started with src:', audioElement.src);
             };
 
             const handleCanPlay = () => {
@@ -156,7 +171,7 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
                 return;
               }
 
-              console.log('Audio can play now, readyState:', audioElement.readyState);
+              console.log('Audio can play now');
               cleanup();
               resolve();
             };
@@ -167,8 +182,7 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
                   duration: audioElement.duration,
                   currentTime: audioElement.currentTime,
                   readyState: audioElement.readyState,
-                  networkState: audioElement.networkState,
-                  src: audioElement.src
+                  networkState: audioElement.networkState
                 });
                 setDuration(audioElement.duration);
               }
@@ -181,12 +195,10 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
                 networkState: target.networkState,
                 readyState: target.readyState,
                 currentSrc: target.currentSrc,
-                src: target.src,
-                errorCode: target.error?.code,
-                errorMessage: target.error?.message
+                src: target.src
               });
               cleanup();
-              reject(new Error(`Failed to load audio: ${target.error?.message || 'Unknown error'}`));
+              reject(new Error('Failed to load audio'));
             };
 
             // 设置超时
@@ -195,28 +207,16 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
               reject(new Error('Audio loading timeout'));
             }, 10000);
 
-            // 先移除所有事件监听器
-            cleanup();
-
-            // 添加事件监听器
-            audioElement.addEventListener('loadstart', handleLoadStart);
             audioElement.addEventListener('canplay', handleCanPlay);
             audioElement.addEventListener('error', handleError);
             audioElement.addEventListener('loadedmetadata', handleMetadata);
 
-            // 重置音频元素状态
-            audioElement.pause();
-            audioElement.currentTime = 0;
-            
             // 设置音频属性
             audioElement.crossOrigin = 'anonymous';
             audioElement.preload = 'auto';
+            audioElement.src = audioUrl;
             audioElement.volume = volume;
             audioElement.muted = isMuted;
-            
-            // 设置新的 src（使用完整的 URL）
-            console.log('Setting audio source:', audioUrl);
-            audioElement.src = audioUrl;
 
             // 开始加载
             console.log('Starting audio load...');
@@ -250,7 +250,7 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
                 setIsPlaying(false);
                 setCurrentTime(0);
                 if (onNext) {
-                  handleNext();
+                  onNext();
                 }
               }
             };
@@ -263,10 +263,12 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
               return;
             }
 
-            console.log('Starting playback...');
-            await audioElement.play();
-            console.log('Playback started successfully');
-            setIsPlaying(true);
+            // 开始播放
+            if (isPlaying) {
+              console.log('Starting playback...');
+              await audioElement.play();
+              console.log('Playback started successfully');
+            }
 
             return () => {
               audioElement.removeEventListener('timeupdate', handleTimeUpdate);
@@ -281,7 +283,6 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
             console.error(`Attempt ${retryCount + 1} failed:`, error);
             retryCount++;
             
-            // 在重试之前完全重置音频元素
             audioElement.pause();
             audioElement.removeAttribute('src');
             audioElement.load();
@@ -317,18 +318,26 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
         audioElement.load();
       }
     };
-  }, [currentVideo, volume, isMuted, audioElement]);
+  }, [currentVideo, audioElement]);
 
-  // 在组件卸载时清理
   useEffect(() => {
-    return () => {
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.src = "";
-        audioElement.load();
+    if (!audioElement) return;
+
+    const playAudio = async () => {
+      try {
+        if (isPlaying) {
+          await audioElement.play();
+        } else {
+          audioElement.pause();
+        }
+      } catch (error) {
+        console.error('Playback error:', error);
+        setIsPlaying(false);
       }
     };
-  }, [audioElement]);
+
+    playAudio();
+  }, [isPlaying, audioElement]);
 
   const togglePlay = () => {
     if (audioElement) {
@@ -399,6 +408,7 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
     handleTimeSeek,
     handlePrevious,
     handleNext,
+    handleSeek,
   };
 };
 
