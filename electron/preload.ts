@@ -4,7 +4,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openBilibiliLogin: () => ipcRenderer.invoke('open-bilibili-login'),
   checkLoginStatus: () => ipcRenderer.invoke('check-login-status'),
   getFavorites: () => ipcRenderer.invoke('get-favorites'),
-  getFavoriteVideos: (mediaId: number) => ipcRenderer.invoke('get-favorite-videos', mediaId),
+  getFavoriteVideos: (mediaId: number, currentPage?: number) => ipcRenderer.invoke('get-favorite-videos', mediaId, currentPage),
   getUserInfo: () => ipcRenderer.invoke('get-user-info'),
   getVideoAudioUrl: (bvid: string) => ipcRenderer.invoke('get-video-audio-url', bvid),
   onLoginSuccess: (callback: () => void) => ipcRenderer.on('bilibili-login-success', callback),

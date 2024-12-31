@@ -327,7 +327,7 @@ ipcMain.handle('get-favorites', async () => {
 })
 
 // 获取收藏夹内容
-ipcMain.handle('get-favorite-videos', async (_event, mediaId: number) => {
+ipcMain.handle('get-favorite-videos', async (_event, mediaId: number, currentPage: number = 1) => {
   console.log('Starting to fetch favorite videos for media ID:', mediaId)
   try {
     console.log('Getting favorite videos for media ID:', mediaId)
@@ -336,7 +336,7 @@ ipcMain.handle('get-favorite-videos', async (_event, mediaId: number) => {
     const detailResponse = await axios.get(API.FAVORITE_DETAIL, {
       params: {
         media_id: mediaId,
-        pn: 1,
+        pn: currentPage,
         ps: 20,
         platform: 'web'
       },
@@ -359,7 +359,8 @@ ipcMain.handle('get-favorite-videos', async (_event, mediaId: number) => {
         thumbnail: video.cover
       }))
       
-      return { success: true, data: processedVideos }
+      const hasMore = detailResponse.data.data?.has_more || false
+      return { success: true, data: processedVideos, hasMore };
     }
     
     return { 

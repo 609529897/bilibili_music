@@ -19,8 +19,9 @@ interface Favorite {
 
 interface ApiResponse<T> {
   success: boolean;
-  data?: T;
+  data: T;
   error?: string;
+  hasMore?: boolean;
 }
 
 interface AudioUrlResponse {
@@ -31,7 +32,7 @@ interface ElectronAPI {
   openBilibiliLogin: () => Promise<void>;
   checkLoginStatus: () => Promise<boolean>;
   getFavorites: () => Promise<ApiResponse<Favorite[]>>;
-  getFavoriteVideos: (id: number) => Promise<ApiResponse<Video[]>>;
+  getFavoriteVideos: (id: number, currentPage?: number) => Promise<ApiResponse<Video[]>>;
   getUserInfo: () => Promise<ApiResponse<UserInfo>>;
   getVideoAudioUrl: (bvid: string) => Promise<ApiResponse<AudioUrlResponse>>;
   onLoginSuccess: (callback: () => void) => void;

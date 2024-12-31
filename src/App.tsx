@@ -26,6 +26,8 @@ export default function App() {
     error: playlistError,
     currentVideo,
     handleVideoSelect,
+    hasMore,
+    loadMore
   } = usePlaylist({ selectedFavorite });
 
   const {
@@ -74,6 +76,8 @@ export default function App() {
           error={playlistError}
           selectedFavorite={selectedFavorite?.title}
           onVideoSelect={handleVideoSelect}
+          hasMore={hasMore}
+          loadMore={loadMore}
         />
       </div>
 

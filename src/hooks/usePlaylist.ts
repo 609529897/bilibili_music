@@ -9,15 +9,19 @@ export const usePlaylist = ({ selectedFavorite }: UsePlaylistProps) => {
   const [playlist, setPlaylist] = useState<Video[]>([]);
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadLoading, setIsLoadLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const loadPlaylist = useCallback(async (favoriteId: number) => {
-    setIsLoading(true);
+  const loadPlaylist = useCallback(async (favoriteId: number, currentPage: number = 1) => {
     setError(null);
     try {
-      const result = await window.electronAPI.getFavoriteVideos(favoriteId);
+      const result = await window.electronAPI.getFavoriteVideos(favoriteId, currentPage);
       if (result.success) {
-        setPlaylist(result.data);
+        setPlaylist(prev => [...prev, ...result.data]);
+        setHasMore(result.hasMore || false);
+        setPage(currentPage);
       } else if (result.error) {
         setError(result.error);
       }
@@ -25,8 +29,16 @@ export const usePlaylist = ({ selectedFavorite }: UsePlaylistProps) => {
       setError(err instanceof Error ? err.message : 'Failed to load playlist');
     } finally {
       setIsLoading(false);
+      setIsLoadLoading(false)
     }
   }, []);
+
+  const loadMore = useCallback(() => {
+    if (hasMore && !isLoadLoading && selectedFavorite) {
+      setIsLoadLoading(true); // 设置加载状态
+      loadPlaylist(selectedFavorite.id, page + 1);
+    }
+  }, [hasMore, isLoadLoading, selectedFavorite, loadPlaylist, page]);
 
   const handleVideoSelect = useCallback((video: Video) => {
     setCurrentVideo(video);
@@ -34,7 +46,8 @@ export const usePlaylist = ({ selectedFavorite }: UsePlaylistProps) => {
 
   useEffect(() => {
     if (selectedFavorite) {
-      loadPlaylist(selectedFavorite.id);
+    setIsLoading(true);
+    loadPlaylist(selectedFavorite.id)
     } else {
       setPlaylist([]);
       setCurrentVideo(null);
@@ -45,7 +58,10 @@ export const usePlaylist = ({ selectedFavorite }: UsePlaylistProps) => {
     playlist,
     currentVideo,
     isLoading,
+    isLoadLoading,
     error,
     handleVideoSelect,
+    loadMore,
+    hasMore,
   };
 };
