@@ -532,11 +532,13 @@ ipcMain.handle('proxy-audio', async (_, url: string) => {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Referer': 'https://www.bilibili.com',
         'Origin': 'https://www.bilibili.com'
-      }
+      },
+      maxRedirects: 5,
+      timeout: 30000,
     });
 
     // 创建本地服务器来代理音频流
-    const server = http.createServer((req, res) => {
+    const server = http.createServer(async (req, res) => {
       // 设置CORS头
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -549,15 +551,61 @@ ipcMain.handle('proxy-audio', async (_, url: string) => {
         return;
       }
 
-      // 设置响应头
-      res.writeHead(200, {
-        'Content-Type': response.headers['content-type'] || 'audio/mp4',
-        'Content-Length': response.headers['content-length'],
-        'Accept-Ranges': 'bytes'
-      });
+      // 处理范围请求
+      const range = req.headers.range;
+      if (range) {
+        try {
+          const rangeResponse = await axios({
+            method: 'get',
+            url: url,
+            headers: {
+              ...response.config.headers,
+              'Range': range
+            },
+            responseType: 'stream',
+            maxRedirects: 5,
+            timeout: 30000,
+          });
 
-      // 直接pipe响应流
-      response.data.pipe(res);
+          res.writeHead(206, {
+            'Content-Type': rangeResponse.headers['content-type'] || 'audio/mp4',
+            'Content-Range': rangeResponse.headers['content-range'],
+            'Content-Length': rangeResponse.headers['content-length'],
+            'Accept-Ranges': 'bytes'
+          });
+
+          rangeResponse.data.pipe(res);
+        } catch (error) {
+          console.error('Range request error:', error);
+          res.writeHead(500);
+          res.end('Range request failed');
+        }
+        return;
+      }
+
+      // 普通请求
+      try {
+        const fullResponse = await axios({
+          method: 'get',
+          url: url,
+          responseType: 'stream',
+          headers: response.config.headers,
+          maxRedirects: 5,
+          timeout: 30000,
+        });
+
+        res.writeHead(200, {
+          'Content-Type': fullResponse.headers['content-type'] || 'audio/mp4',
+          'Content-Length': fullResponse.headers['content-length'],
+          'Accept-Ranges': 'bytes'
+        });
+
+        fullResponse.data.pipe(res);
+      } catch (error) {
+        console.error('Full request error:', error);
+        res.writeHead(500);
+        res.end('Full request failed');
+      }
     });
 
     // 随机端口启动服务器
