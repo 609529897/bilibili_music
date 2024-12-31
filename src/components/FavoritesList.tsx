@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { UserMenu } from './UserMenu';
 
 interface Favorite {
   id: number;
@@ -15,6 +16,8 @@ interface FavoritesListProps {
   onFavoriteSelect: (favorite: Favorite) => void;
   onOpenSelectDialog: () => void;
   avatarUrl: string | null;
+  username?: string;
+  onLogout: () => void;
   onRefresh: () => void;
 }
 
@@ -27,6 +30,8 @@ export const FavoritesList = ({
   onFavoriteSelect,
   onOpenSelectDialog,
   avatarUrl,
+  username,
+  onLogout,
   onRefresh,
 }: FavoritesListProps) => {
   // 默认选中第一个收藏夹
@@ -77,13 +82,11 @@ export const FavoritesList = ({
               </svg>
             </button>
           </div>
-          {avatarUrl && (
-            <img
-              src={avatarUrl}
-              alt="avatar"
-              className="w-6 h-6 rounded-full"
-            />
-          )}
+          <UserMenu
+            avatarUrl={avatarUrl || undefined}
+            username={username}
+            onLogout={onLogout}
+          />
         </div>
 
         {/* 收藏夹列表区域 */}

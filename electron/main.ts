@@ -124,6 +124,16 @@ app.whenReady().then(() => {
   createWindow()
   setupImageProxy()  // 注册图片代理服务
 
+  // 注册 IPC 处理函数
+  ipcMain.handle('open-bilibili-login', openBilibiliLogin)
+  ipcMain.handle('check-login-status', checkLoginStatus)
+  ipcMain.handle('get-user-info', getUserInfo)
+  ipcMain.handle('get-favorites', getFavorites)
+  ipcMain.handle('get-favorite-videos', getFavoriteVideos)
+  ipcMain.handle('get-video-audio-url', getVideoAudioUrl)
+  ipcMain.handle('fetch-image', fetchImage)
+  ipcMain.handle('logout', handleLogout)
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
@@ -473,5 +483,23 @@ ipcMain.handle('check-login-status', async () => {
   } catch (err) {
     console.error('Error checking login status:', err)
     return false
+  }
+})
+
+// 退出登录
+ipcMain.handle('logout', async () => {
+  try {
+    // 清除所有 bilibili.com 域名下的 cookie
+    await session.defaultSession.clearStorageData({
+      origin: 'https://bilibili.com',
+      storages: ['cookies']
+    })
+    return { success: true }
+  } catch (error) {
+    console.error('Error logging out:', error)
+    return { 
+      success: false, 
+      error: error.message || 'Failed to logout' 
+    }
   }
 })

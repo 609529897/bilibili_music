@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useFavorites } from "./hooks/useFavorites";
 import { usePlaylist } from "./hooks/usePlaylist";
 import { useUserInfo } from "./hooks/useUserInfo";
@@ -6,6 +6,7 @@ import { FavoritesList } from "./components/FavoritesList";
 import { PlayList } from "./components/PlayList";
 import { SelectFavoritesDialog } from "./components/SelectFavoritesDialog";
 import { ModernPlayer } from "./components/Player";
+import { LoginScreen } from "./components/LoginScreen";
 
 export default function App() {
   const {
@@ -27,8 +28,27 @@ export default function App() {
     handleVideoSelect,
   } = usePlaylist({ selectedFavorite });
 
-  const { avatarUrl } = useUserInfo();
+  const {
+    isLoggedIn,
+    isLoading: loginLoading,
+    error: loginError,
+    avatarUrl,
+    userInfo,
+    handleLogin,
+    handleLogout,
+  } = useUserInfo();
+
   const [isSelectingFavorites, setIsSelectingFavorites] = useState(false);
+
+  if (!isLoggedIn) {
+    return (
+      <LoginScreen
+        onLogin={handleLogin}
+        isLoading={loginLoading}
+        error={loginError}
+      />
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -44,6 +64,8 @@ export default function App() {
           onOpenSelectDialog={() => setIsSelectingFavorites(true)}
           onRefresh={loadFavorites}
           avatarUrl={avatarUrl}
+          username={userInfo?.uname}
+          onLogout={handleLogout}
         />
         <PlayList
           playlist={playlist}
