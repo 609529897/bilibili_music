@@ -49,11 +49,6 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
   }, [currentVideo?.thumbnail]);
 
   useEffect(() => {
-    console.log('Current Video:', currentVideo);
-    console.log('Processed Thumbnail URL:', thumbnailUrl);
-  }, [currentVideo, thumbnailUrl]);
-
-  useEffect(() => {
     let isMounted = true;
 
     const loadThumbnail = async () => {
@@ -63,7 +58,6 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
         return;
       }
 
-      console.log('Loading thumbnail:', thumbnailUrl);
       setIsLoadingImage(true);
       setImageError(false);
 
@@ -76,7 +70,6 @@ export const ModernPlayer = ({ currentVideo }: ModernPlayerProps) => {
         });
 
         if (isMounted) {
-          console.log('Thumbnail loaded successfully');
           setIsLoadingImage(false);
           setImageError(false);
         }
