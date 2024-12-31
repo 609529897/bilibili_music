@@ -119,11 +119,9 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
           throw new Error(result.error || "获取音频地址失败");
         }
 
-        // const audioUrl = await window.electronAPI.proxyAudio(
-        //   result.data.audioUrl
-        // );
-
-        const audioUrl =  result.data.audioUrl
+        const audioUrl = await window.electronAPI.proxyAudio(
+          result.data.audioUrl
+        );
 
         // 再次检查是否已被取消
         if (abortController.signal.aborted) {

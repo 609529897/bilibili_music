@@ -1,6 +1,8 @@
 import { app, BrowserWindow, ipcMain, session, protocol, shell } from 'electron'
 import path from 'path'
 import axios from 'axios'
+import http from 'http'
+import { AddressInfo } from 'net'
 
 // B站API接口
 const API = {
@@ -520,10 +522,55 @@ ipcMain.handle('logout', async () => {
   }
 })
 
-// ipcMain.handle('proxy-audio', async (_, url: string) => {
-//   // 直接返回原始URL
-//   return url;
-// });
+ipcMain.handle('proxy-audio', async (_, url: string) => {
+  try {
+    const response = await axios({
+      method: 'get',
+      url: url,
+      responseType: 'stream',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.bilibili.com',
+        'Origin': 'https://www.bilibili.com'
+      }
+    });
+
+    // 创建本地服务器来代理音频流
+    const server = http.createServer((req, res) => {
+      // 设置CORS头
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Range');
+
+      // 处理预检请求
+      if (req.method === 'OPTIONS') {
+        res.writeHead(204);
+        res.end();
+        return;
+      }
+
+      // 设置响应头
+      res.writeHead(200, {
+        'Content-Type': response.headers['content-type'] || 'audio/mp4',
+        'Content-Length': response.headers['content-length'],
+        'Accept-Ranges': 'bytes'
+      });
+
+      // 直接pipe响应流
+      response.data.pipe(res);
+    });
+
+    // 随机端口启动服务器
+    await new Promise<void>((resolve) => server.listen(0, 'localhost', () => resolve()));
+    const port = (server.address() as AddressInfo).port;
+
+    // 返回本地代理URL
+    return `http://localhost:${port}`;
+  } catch (error) {
+    console.error('Error proxying audio:', error);
+    throw error;
+  }
+});
 
 ipcMain.handle('fetch-image', async (_, url: string) => {
   try {

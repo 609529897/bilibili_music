@@ -10,6 +10,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onLoginSuccess: (callback: () => void) => ipcRenderer.on('bilibili-login-success', callback),
   fetchImage: (url: string) => ipcRenderer.invoke('fetch-image', url),
   logout: () => ipcRenderer.invoke('logout'),
-  // proxyAudio: (url: string) => ipcRenderer.invoke('proxy-audio', url),
+  proxyAudio: (url: string) => ipcRenderer.invoke('proxy-audio', url),
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
 })
