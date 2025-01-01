@@ -44,13 +44,37 @@
   "build": {
     "appId": "com.bilibili.music",
     "productName": "BiliMusic",
+    "asar": true,
+    "asarUnpack": "**/*.{node,dll}",
     "mac": {
       "icon": "build/icon.icns",
       "category": "public.app-category.music",
       "target": [
         {
+          "target": "dir",
+          "arch": ["arm64"]
+        },
+        {
           "target": "dmg",
           "arch": ["arm64"]
+        }
+      ],
+      "identity": null,
+      "hardenedRuntime": false
+    },
+    "dmg": {
+      "title": "BiliMusic",
+      "icon": "build/icon.icns",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
         }
       ]
     },
