@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, session, protocol, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, session, protocol, shell, BrowserView } from 'electron'
 import path from 'path'
 import axios from 'axios'
 import http from 'http'
@@ -23,6 +23,7 @@ const headers = {
 }
 
 let mainWindow: BrowserWindow | null = null
+let playerView: BrowserView | null = null
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -46,7 +47,7 @@ function createWindow() {
   }
 
   // 默认打开开发者工具
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
 // 打开B站登录页面
@@ -160,6 +161,7 @@ app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => {
+  playerView = null;
   if (process.platform !== 'darwin') {
     app.quit()
   }
@@ -655,6 +657,71 @@ ipcMain.handle('window-maximize', () => {
     mainWindow?.unmaximize();
   } else {
     mainWindow?.maximize();
+  }
+});
+
+// 创建播放器视图
+ipcMain.handle('create-player-view', (_, bvid: string) => {
+  if (!mainWindow) return;
+  
+  // 如果已存在播放器视图，先移除
+  if (playerView) {
+    mainWindow.removeBrowserView(playerView);
+    playerView = null;
+  }
+
+  // 创建新的播放器视图
+  playerView = new BrowserView({
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      webSecurity: true,
+    }
+  });
+
+  mainWindow.addBrowserView(playerView);
+
+  // 设置播放器视图的位置和大小
+  const bounds = mainWindow.getBounds();
+  const titleBarHeight = process.platform === 'darwin' ? 28 : 32; // 标题栏高度
+  playerView.setBounds({
+    x: 0,
+    y: titleBarHeight,
+    width: bounds.width,
+    height: bounds.height - titleBarHeight
+  });
+  playerView.setBackgroundColor('#000000');
+
+  // 加载 B 站播放器
+  playerView.webContents.loadURL(
+    `https://player.bilibili.com/player.html?bvid=${bvid}&high_quality=1&danmaku=0&autoplay=1&theater=1&t=0&p=1&as_wide=1&widescale=1`
+  );
+
+  // 监听窗口大小变化
+  mainWindow.on('resize', () => {
+    if (!mainWindow || !playerView) return;
+    const newBounds = mainWindow.getBounds();
+    playerView.setBounds({
+      x: 0,
+      y: titleBarHeight,
+      width: newBounds.width,
+      height: newBounds.height - titleBarHeight
+    });
+  });
+});
+
+// 关闭播放器视图
+ipcMain.handle('close-player-view', () => {
+  if (!mainWindow || !playerView) return;
+  mainWindow.removeBrowserView(playerView);
+  playerView = null;
+});
+
+// 在窗口关闭时清理播放器视图
+app.on('window-all-closed', () => {
+  playerView = null;
+  if (process.platform !== 'darwin') {
+    app.quit();
   }
 });
 

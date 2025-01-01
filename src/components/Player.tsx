@@ -347,7 +347,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
           </div>
 
           {/* Right Section: Volume Control */}
-          <div className="flex items-center justify-end space-x-2 w-1/4 min-w-[180px]">
+          <div className="flex items-center justify-end w-1/4 min-w-[180px]">
             <button
               onClick={toggleMute}
               className={`${
@@ -356,31 +356,31 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                   : "text-gray-500 hover:text-gray-700"
               } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
             >
-              {isMuted || volume === 0 ? (
+              {isMuted ? (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
+                  className="w-6 h-6"
                   viewBox="0 0 24 24"
                 >
                   <path
                     fill="currentColor"
-                    d="M3.63 3.63a.996.996 0 000 1.41L7.29 8.7 7 9H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71v-4.17l4.18 4.18c-.49.37-1.02.68-1.6.91-.36.15-.58.53-.58.92 0 .72.73 1.18 1.39.91.8-.33 1.55-.77 2.22-1.31l1.34 1.34a.996.996 0 101.41-1.41L5.05 3.63c-.39-.39-1.02-.39-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53c.56-1.17.88-2.48.88-3.87 0-3.83-2.4-7.11-5.78-8.4-.59-.23-1.22.23-1.22.86v.19c0 .38.25.71.61.85C17.18 6.54 19 9.06 19 12zm-8.71-6.29l-.17.17L12 7.76V6.41c0-.89-1.08-1.33-1.71-.7zM16.5 12A4.5 4.5 0 0014 7.97v1.79l2.48 2.48c.01-.08.02-.16.02-.24z"
+                    d="M3.63 3.63a.996.996 0 0 0 0 1.41L7.29 8.7L7 9H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71v-4.17l4.18 4.18c-.49.37-1.02.68-1.6.91-.36.15-.58.53-.58.92 0 .72.73 1.18 1.39.91.8-.33 1.55-.77 2.22-1.31l1.34 1.34a.996.996 0 1 0 1.41-1.41L5.05 3.63c-.39-.39-1.02-.39-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53c.56-1.17.88-2.48.88-3.87 0-3.83-2.4-7.11-5.78-8.4-.59-.23-1.22.23-1.22.86v.19c0 .38.25.71.61.85C17.18 6.54 19 9.06 19 12zm-8.71-6.29l-.17.17L12 7.76V6.41c0-.89-1.08-1.33-1.71-.7zM16.5 12A4.5 4.5 0 0 0 14 7.97v1.79l2.48 2.48c.01-.08.02-.16.02-.24z"
                   />
                 </svg>
               ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
+                  className="w-6 h-6"
                   viewBox="0 0 24 24"
                 >
                   <path
                     fill="currentColor"
-                    d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+                    d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
                   />
                 </svg>
               )}
             </button>
-            <div className="w-24 group relative h-1.5">
+            <div className="w-24 group relative h-1.5 ml-2">
               <div className="absolute inset-y-0 w-full flex items-center">
                 <div
                   className={`h-[3px] w-full ${
@@ -397,7 +397,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 type="range"
                 min={0}
                 max={1}
-                step={0.1}
+                step={0.01}
                 value={volume}
                 onChange={(e) => handleVolumeChange(e.target.valueAsNumber)}
                 className="absolute inset-y-0 w-full opacity-0 cursor-pointer"
@@ -407,25 +407,17 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 style={{ left: `${volume * 100}%` }}
               />
             </div>
-            {/* Bilibili Icon */}
             {/* <button
-              onClick={() =>
-                window.electronAPI.openExternal(
-                  `https://www.bilibili.com/video/${currentVideo.bvid}`
-                )
-              }
-              className={`ml-2 text-[#00a1d6] hover:text-[#00b5e5] transition-colors duration-150 p-1.5 rounded-full hover:bg-[#00a1d6]/5`}
-              title="在 B 站观看"
+              onClick={() => setShowBilibiliPlayer(true)}
+              className={`ml-6 ${
+                isExpanded
+                  ? "text-gray-300 hover:text-white"
+                  : "text-gray-400 hover:text-gray-600"
+              } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
+              title="观看视频"
             >
-              <svg
-                className="w-5 h-5"
-                viewBox="0 0 1024 1024"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill="currentColor"
-                  d="M306.005333 117.632L444.330667 256h135.296l138.368-138.325333a42.666667 42.666667 0 0 1 60.373333 60.373333L700.330667 256H789.333333A149.333333 149.333333 0 0 1 938.666667 405.333333v341.333334a149.333333 149.333333 0 0 1-149.333334 149.333333h-554.666666A149.333333 149.333333 0 0 1 85.333333 746.666667v-341.333334A149.333333 149.333333 0 0 1 234.666667 256h88.96L245.632 177.962667a42.666667 42.666667 0 0 1 60.373333-60.373334zM789.333333 341.333333h-554.666666a64 64 0 0 0-63.701334 57.856L170.666667 405.333333v341.333334a64 64 0 0 0 57.856 63.701333L234.666667 810.666667h554.666666a64 64 0 0 0 63.701334-57.856L853.333333 746.666667v-341.333334A64 64 0 0 0 789.333333 341.333333zM341.333333 469.333333a42.666667 42.666667 0 0 1 42.666667 42.666667v85.333333a42.666667 42.666667 0 0 1-85.333333 0v-85.333333a42.666667 42.666667 0 0 1 42.666666-42.666667z m341.333334 0a42.666667 42.666667 0 0 1 42.666666 42.666667v85.333333a42.666667 42.666667 0 0 1-85.333333 0v-85.333333a42.666667 42.666667 0 0 1 42.666667-42.666667z"
-                />
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
               </svg>
             </button> */}
           </div>

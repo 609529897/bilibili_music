@@ -15,4 +15,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   closeWindow: () => ipcRenderer.invoke('window-close'),
   minimizeWindow: () => ipcRenderer.invoke('window-minimize'),
   maximizeWindow: () => ipcRenderer.invoke('window-maximize'),
+  createPlayerView: (bvid: string) => ipcRenderer.invoke('create-player-view', bvid),
+  closePlayerView: () => ipcRenderer.invoke('close-player-view'),
 })

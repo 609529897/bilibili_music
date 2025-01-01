@@ -45,6 +45,8 @@ interface ElectronAPI {
   closeWindow: () => Promise<void>;
   minimizeWindow: () => Promise<void>;
   maximizeWindow: () => Promise<void>;
+  createPlayerView: (bvid: string) => Promise<void>;
+  closePlayerView: () => Promise<void>;
 }
 
 declare global {
