@@ -65,7 +65,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
           {/* Background Image */}
           {thumbnailUrl && (
             <div
-              // className="absolute inset-0 z-0 app-drag-region"
+              className="absolute inset-0 z-0 app-drag-region"
               style={{
                 backgroundImage: `url(${thumbnailUrl})`,
                 backgroundSize: "cover",
