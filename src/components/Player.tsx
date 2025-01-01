@@ -138,28 +138,20 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 onClick={() => setIsExpanded(false)}
               >
                 <div
-                  className={`w-14 h-14 flex-shrink-0 rounded-xl shadow-lg overflow-hidden ring-1 ring-black/5 transition-transform duration-300 group-hover:scale-105`}
+                  className={`w-14 h-14 flex-shrink-0 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105 group-hover:ring-1 group-hover:ring-white/10`}
                 >
-                  {thumbnailUrl ? (
-                    <img
-                      src={thumbnailUrl}
-                      alt="Cover"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-pink-50 to-pink-100 flex items-center justify-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 text-pink-300"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
-                        />
-                      </svg>
-                    </div>
-                  )}
+                  <div className="w-full h-full flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-gray-400"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"
+                      />
+                    </svg>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -218,7 +210,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
               <button
                 className={`${
                   isExpanded
-                    ? "text-gray-300 hover:text-white"
+                    ? "text-gray-300 hover:text-pink-400"
                     : "text-gray-400 hover:text-gray-600"
                 } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
                 onClick={handlePrevious}
@@ -290,7 +282,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
               <button
                 className={`${
                   isExpanded
-                    ? "text-gray-300 hover:text-white"
+                    ? "text-gray-300 hover:text-pink-400"
                     : "text-gray-400 hover:text-gray-600"
                 } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
                 onClick={handleNext}
@@ -360,7 +352,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
               onClick={toggleMute}
               className={`${
                 isExpanded
-                  ? "text-gray-300 hover:text-white"
+                  ? "text-gray-300 hover:text-pink-400"
                   : "text-gray-500 hover:text-gray-700"
               } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
             >
