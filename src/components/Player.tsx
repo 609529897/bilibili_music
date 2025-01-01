@@ -212,7 +212,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                   isExpanded
                     ? "text-gray-300 hover:text-pink-400"
                     : "text-gray-400 hover:text-gray-600"
-                } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
+                } transition-colors duration-150 p-1.5 rounded-full hover:bg-white/10`}
                 onClick={handlePrevious}
                 disabled={!onPrevious}
               >
@@ -233,7 +233,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                   isExpanded
                     ? "text-white hover:text-pink-400"
                     : "text-gray-800 hover:text-pink-500"
-                } transition-all duration-150 p-2 rounded-full hover:bg-pink-50 relative group`}
+                } transition-all duration-150 p-2 rounded-full hover:bg-white/10 relative group`}
                 disabled={isLoading}
               >
                 <div className="absolute inset-0 bg-pink-400/10 rounded-full scale-0 group-hover:scale-100 transition-transform duration-150" />
@@ -284,7 +284,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                   isExpanded
                     ? "text-gray-300 hover:text-pink-400"
                     : "text-gray-400 hover:text-gray-600"
-                } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
+                } transition-colors duration-150 p-1.5 rounded-full hover:bg-white/10`}
                 onClick={handleNext}
                 disabled={!onNext}
               >
@@ -354,7 +354,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 isExpanded
                   ? "text-gray-300 hover:text-pink-400"
                   : "text-gray-500 hover:text-gray-700"
-              } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
+              } transition-colors duration-150 p-1.5 rounded-full hover:bg-white/10`}
             >
               {isMuted ? (
                 <svg
@@ -413,7 +413,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 isExpanded
                   ? "text-gray-300 hover:text-white"
                   : "text-gray-400 hover:text-gray-600"
-              } transition-colors duration-150 p-1.5 rounded-full hover:bg-pink-50`}
+              } transition-colors duration-150 p-1.5 rounded-full hover:bg-white/10`}
               title="观看视频"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24">
