@@ -99,7 +99,7 @@ export const FavoritesList = ({
             <TitleBar />
           </div> */}
           <div></div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
             <button
               onClick={onOpenSelectDialog}
               className="relative top-[-0.7px] hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
