@@ -1,8 +1,7 @@
 import { Video } from "../types/electron";
 import { motion, AnimatePresence } from "framer-motion";
 import AudioSpectrum from "react-audio-spectrum";
-import { useRef, useEffect, useState } from "react";
-import TitleBar from "./TitleBar";
+import { useEffect, useState } from "react";
 
 interface FullScreenPlayerProps {
   currentVideo: Video | null;
@@ -14,12 +13,9 @@ interface FullScreenPlayerProps {
 export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
   currentVideo,
   isVisible,
-  onClose,
-  audioRef,
 }) => {
   if (!currentVideo) return null;
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -76,9 +72,6 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
             />
           )}
 
-          {/* <div className="absolute top-5 left-3">
-            <TitleBar />
-          </div> */}
 
           <motion.div
             className="w-full max-w-4xl p-8 flex flex-col items-center relative z-10"
@@ -96,7 +89,6 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
             <div className="relative group">
               <div
                 className="w-[518px] h-[518px] mb-4 relative flex items-center justify-center"
-                ref={containerRef}
               >
                 <AudioSpectrum
                   id="audio-canvas"
