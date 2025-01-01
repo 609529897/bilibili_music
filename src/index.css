@@ -182,3 +182,61 @@ body {
     scrollbar-width: none;
   }
 }
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.music-ripple {
+  position: relative;
+}
+
+.music-ripple::before,
+.music-ripple::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  animation: ripple 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.music-ripple::after {
+  animation-delay: -1.5s;
+}
+
+.animation-paused,
+.animation-paused::before,
+.animation-paused::after {
+  animation-play-state: paused !important;
+}
+
+.rotate-animation {
+  animation: rotate 30s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.rotate-animation-slow {
+  animation: rotate 40s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}

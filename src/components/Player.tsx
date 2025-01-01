@@ -1,14 +1,14 @@
-import { Video } from "../types/electron";
-import useAudioPlayer from "../hooks/useAudioPlayer";
-import { formatTime } from "./utils";
-import { useState, useRef, useEffect } from "react";
-import { FullScreenPlayer } from "./FullScreenPlayer";
-import { BilibiliPlayer } from "./BilibiliPlayer";
+import { Video } from "../types/electron"
+import useAudioPlayer from "../hooks/useAudioPlayer"
+import { formatTime } from "./utils"
+import { useState, useRef, useEffect } from "react"
+import { FullScreenPlayer } from "./FullScreenPlayer"
+import { BilibiliPlayer } from "./BilibiliPlayer"
 
 interface ModernPlayerProps {
-  currentVideo: Video | null;
-  onPrevious?: () => void;
-  onNext?: () => void;
+  currentVideo: Video | null
+  onPrevious?: () => void
+  onNext?: () => void
 }
 
 export const ModernPlayer: React.FC<ModernPlayerProps> = ({
@@ -16,52 +16,60 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
   onPrevious,
   onNext,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [showBilibiliPlayer, setShowBilibiliPlayer] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [showBilibiliPlayer, setShowBilibiliPlayer] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null) as {
+    current: HTMLAudioElement | null
+  }
 
   useEffect(() => {
-    if (!document.getElementById('audio-element')) {
-      const audio = document.createElement('audio');
-      audio.id = 'audio-element';
-      audio.preload = 'auto';
-      audio.crossOrigin = 'anonymous';
-      
+    if (!document.getElementById("audio-element")) {
+      const audio = document.createElement("audio")
+      audio.id = "audio-element"
+      audio.preload = "auto"
+      audio.crossOrigin = "anonymous"
+
       // 添加更详细的错误处理
-      audio.addEventListener('error', (e) => {
-        const target = e.target as HTMLAudioElement;
-        console.error('Audio error details:', {
+      audio.addEventListener("error", (e) => {
+        const target = e.target as HTMLAudioElement
+        console.error("Audio error details:", {
           error: target.error,
           networkState: target.networkState,
           readyState: target.readyState,
           currentSrc: target.currentSrc,
           src: target.src,
           errorCode: target.error?.code,
-          errorMessage: target.error?.message
-        });
-      });
+          errorMessage: target.error?.message,
+        })
+      })
 
       // 添加调试事件
       const debugEvents = [
-        'loadstart', 'durationchange', 'loadedmetadata',
-        'loadeddata', 'progress', 'canplay', 'canplaythrough'
-      ];
-      
-      debugEvents.forEach(event => {
+        "loadstart",
+        "durationchange",
+        "loadedmetadata",
+        "loadeddata",
+        "progress",
+        "canplay",
+        "canplaythrough",
+      ]
+
+      debugEvents.forEach((event) => {
         audio.addEventListener(event, () => {
           console.log(`Audio event: ${event}`, {
             currentTime: audio.currentTime,
             duration: audio.duration,
             readyState: audio.readyState,
             networkState: audio.networkState,
-            src: audio.src
-          });
-        });
-      });
-      
-      document.body.appendChild(audio);
+            src: audio.src,
+          })
+        })
+      })
+
+      document.body.appendChild(audio)
+      audioRef.current = audio
     }
-  }, []);
+  }, [])
 
   const {
     isPlaying,
@@ -77,7 +85,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
     handleTimeSeek,
     handlePrevious,
     handleNext,
-  } = useAudioPlayer({ currentVideo, onPrevious, onNext });
+  } = useAudioPlayer({ currentVideo, onPrevious, onNext })
 
   if (!currentVideo) {
     return (
@@ -96,7 +104,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
           <span className="text-sm font-medium">从列表中选择音乐开始播放</span>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -115,12 +123,12 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
             : "bg-white/90 border-pink-100/50 "
         }`}
       >
-        <audio
+        {/* <audio
           id="audio-element"
           ref={audioRef}
           preload="auto"
           crossOrigin="anonymous"
-        />
+        /> */}
         <div className="flex items-center justify-between h-full px-6 max-w-[1920px] mx-auto">
           {/* Left Section: Cover and Title */}
           <div className="flex items-center space-x-3 w-1/4 min-w-[220px]">
@@ -431,5 +439,5 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
         />
       )}
     </>
-  );
-};
+  )
+}
