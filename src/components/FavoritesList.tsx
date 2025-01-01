@@ -1,24 +1,24 @@
-import { useEffect, useMemo } from "react";
-import { UserMenu } from "./UserMenu";
+import { useEffect, useMemo } from "react"
+import { UserMenu } from "./UserMenu"
 
 interface Favorite {
-  id: number;
-  title: string;
-  count: number;
+  id: number
+  title: string
+  count: number
 }
 
 interface FavoritesListProps {
-  favorites: Favorite[];
-  selectedFavorite: Favorite | null;
-  selectedFavoriteIds: Set<number>;
-  isLoading: boolean;
-  error: string | null;
-  onFavoriteSelect: (favorite: Favorite) => void;
-  onOpenSelectDialog: () => void;
-  avatarUrl: string | null;
-  username?: string;
-  onLogout: () => void;
-  onRefresh: () => void;
+  favorites: Favorite[]
+  selectedFavorite: Favorite | null
+  selectedFavoriteIds: Set<number>
+  isLoading: boolean
+  error: string | null
+  onFavoriteSelect: (favorite: Favorite) => void
+  onOpenSelectDialog: () => void
+  avatarUrl: string | null
+  username?: string
+  onLogout: () => void
+  onRefresh: () => void
 }
 
 export const FavoritesList = ({
@@ -37,12 +37,12 @@ export const FavoritesList = ({
   // 默认选中第一个收藏夹
   useEffect(() => {
     if (!selectedFavorite && favorites.length > 0) {
-      onFavoriteSelect(favorites[0]);
+      onFavoriteSelect(favorites[0])
     }
-  }, [favorites, selectedFavorite, onFavoriteSelect]);
+  }, [favorites, selectedFavorite, onFavoriteSelect])
 
   const favList = useMemo(() => {
-    const _list = favorites.filter((fav) => selectedFavoriteIds.has(fav.id));
+    const _list = favorites.filter((fav) => selectedFavoriteIds.has(fav.id))
 
     if (_list.length === 0) {
       return (
@@ -57,7 +57,7 @@ export const FavoritesList = ({
           <div className="text-xs">点击左上角的加号按钮</div>
           <div className="text-xs">选择要显示的收藏夹</div>
         </div>
-      );
+      )
     }
 
     return _list.map((fav) => (
@@ -86,12 +86,11 @@ export const FavoritesList = ({
           </div>
         </div>
       </button>
-    ));
-  }, [favorites, selectedFavorite, selectedFavoriteIds, onFavoriteSelect]);
+    ))
+  }, [favorites, selectedFavorite, selectedFavoriteIds, onFavoriteSelect])
 
   return (
     <div className="w-64 flex flex-col h-full bg-[#F3F3F4]">
-      {/* <div className="h-4 app-drag-region" /> */}
       <div className="flex-1 flex flex-col">
         {/* 操作按钮区域 */}
         <div className="flex items-center justify-between h-14 px-4 app-drag-region">
@@ -100,22 +99,6 @@ export const FavoritesList = ({
           </div> */}
           <div></div>
           <div className="flex items-center gap-5">
-            <button
-              onClick={onOpenSelectDialog}
-              className="relative top-[-0.7px] hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
-              title="选择收藏夹"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="currentColor"
-                  d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"
-                />
-              </svg>
-            </button>
             <button
               onClick={onRefresh}
               className=" hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
@@ -130,6 +113,22 @@ export const FavoritesList = ({
                 <path
                   fill="currentColor"
                   d="M12 20q-3.35 0-5.675-2.325T4 12q0-3.35 2.325-5.675T12 4q1.725 0 3.3.712T18 6.75V4h2v7h-7V9h4.2q-.8-1.4-2.187-2.2T12 6Q9.5 6 7.75 7.75T6 12q0 2.5 1.75 4.25T12 18q1.925 0 3.475-1.1T17.65 14h2.1q-.7 2.65-2.85 4.325T12 20Z"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={onOpenSelectDialog}
+              className="relative top-[-0.7px] hover:bg-white/10 rounded-lg transition-colors text-gray-900 no-drag"
+              title="选择收藏夹"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"
                 />
               </svg>
             </button>
@@ -167,5 +166,5 @@ export const FavoritesList = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
