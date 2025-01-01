@@ -2,6 +2,10 @@
   "name": "bilibili-music-player",
   "private": true,
   "version": "0.0.1",
+  "description": "A beautiful music player for Bilibili",
+  "author": {
+    "name": "BiliMusic Team"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
@@ -12,7 +16,6 @@
     "@heroicons/react": "^2.1.1",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
-    "electron": "^28.1.0",
     "framer-motion": "^11.15.0",
     "react": "^18.2.0",
     "react-audio-spectrum": "^0.1.5",
@@ -26,6 +29,7 @@
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
+    "electron": "^28.1.0",
     "electron-builder": "^24.9.1",
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
@@ -36,5 +40,27 @@
     "vite-plugin-electron": "^0.15.5",
     "vite-plugin-electron-renderer": "^0.14.5"
   },
-  "main": "dist-electron/main.js"
+  "main": "dist-electron/main.js",
+  "build": {
+    "appId": "com.bilibili.music",
+    "productName": "BiliMusic",
+    "mac": {
+      "icon": "build/icon.icns",
+      "category": "public.app-category.music",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64"]
+        }
+      ]
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "release"
+    }
+  }
 }
