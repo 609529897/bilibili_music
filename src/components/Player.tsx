@@ -198,7 +198,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                   isExpanded ? "text-gray-300" : "text-gray-500"
                 } truncate mt-0.5 font-medium`}
               >
-                Music Player
+                {currentVideo?.author || "Unknown Artist"}
               </div>
             </div>
           </div>

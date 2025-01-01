@@ -333,7 +333,11 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
   }, [currentVideo, audioElement, volume, isMuted, onNext]);
 
   useEffect(() => {
-    handleAudio();
+    // 只在视频ID改变时重新加载音频
+    const currentVideoId = currentVideo?.bvid;
+    if (currentVideoId) {
+      handleAudio();
+    }
 
     return () => {
       if (abortControllerRef.current) {
@@ -347,7 +351,7 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
         audioElement.load();
       }
     };
-  }, [handleAudio]);
+  }, [currentVideo?.bvid]); // 只依赖视频ID
 
   useEffect(() => {
     if (!audioElement) return;
@@ -379,20 +383,28 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
     }
   };
 
-  const toggleMute = () => {
+  const toggleMute = useCallback(() => {
     if (audioElement) {
-      audioElement.muted = !isMuted;
-      setIsMuted(!isMuted);
+      const newMutedState = !isMuted;
+      audioElement.muted = newMutedState;
+      setIsMuted(newMutedState);
+      // 如果取消静音，恢复之前的音量
+      if (!newMutedState && volume === 0) {
+        const newVolume = 0.5;
+        audioElement.volume = newVolume;
+        setVolume(newVolume);
+      }
     }
-  };
+  }, [audioElement, isMuted, volume]);
 
-  const handleVolumeChange = (newVolume: number) => {
+  const handleVolumeChange = useCallback((newVolume: number) => {
     if (audioElement) {
+      // 直接设置音量，不触发其他操作
       audioElement.volume = newVolume;
       setVolume(newVolume);
       setIsMuted(newVolume === 0);
     }
-  };
+  }, [audioElement]);
 
   const handleTimeSeek = (newTime: number) => {
     if (audioElement) {

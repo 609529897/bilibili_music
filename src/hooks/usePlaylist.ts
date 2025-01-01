@@ -69,10 +69,18 @@ export const usePlaylist = ({ selectedFavorite }: UsePlaylistProps) => {
     if (selectedFavorite) {
       setIsLoading(true);
       setPage(1); // 重置页码
-      loadPlaylist(selectedFavorite.id, 1);
+      // 保存当前播放的视频信息
+      const currentPlayingVideo = currentVideo;
+      
+      loadPlaylist(selectedFavorite.id, 1).then(() => {
+        // 如果当前有正在播放的视频，保持不变
+        if (currentPlayingVideo) {
+          setCurrentVideo(currentPlayingVideo);
+        }
+      });
     } else {
+      // 只更新播放列表，不影响当前播放
       setPlaylist([]);
-      setCurrentVideo(null);
     }
   }, [selectedFavorite, loadPlaylist]);
 
