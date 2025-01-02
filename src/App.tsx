@@ -8,6 +8,7 @@ import { ModernPlayer } from "./components/Player";
 import { LoginScreen } from "./components/LoginScreen";
 import { FavoritesDialog } from "./components/FavoritesDialog";
 import { DisclaimerDialog } from "./components/DisclaimerDialog";
+// import { FeedbackButton } from './components/FeedbackButton';
 
 const App: React.FC = () => {
   const {
@@ -153,6 +154,8 @@ const App: React.FC = () => {
         onNext={handleNext}
         onPrevious={handlePrevious}
       />
+
+      {/* <FeedbackButton /> */}
 
       {isSelectingFavorites && (
         <FavoritesDialog
