@@ -7,6 +7,7 @@ import { PlayList } from "./components/PlayList";
 import { ModernPlayer } from "./components/Player";
 import { LoginScreen } from "./components/LoginScreen";
 import { FavoritesDialog } from "./components/FavoritesDialog";
+import { DisclaimerDialog } from "./components/DisclaimerDialog";
 
 const App: React.FC = () => {
   const {
@@ -45,6 +46,14 @@ const App: React.FC = () => {
 
   const [isSelectingFavorites, setIsSelectingFavorites] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(() => {
+    return !localStorage.getItem('disclaimer-accepted')
+  });
+
+  const handleAcceptDisclaimer = () => {
+    localStorage.setItem('disclaimer-accepted', 'true');
+    setShowDisclaimer(false);
+  };
 
   // 如果正在检查登录状态，显示淡入淡出文字效果
   if (loginLoading) {
@@ -59,11 +68,17 @@ const App: React.FC = () => {
 
   if (!isLoggedIn) {
     return (
-      <LoginScreen
-        onLogin={handleLogin}
-        isLoading={loginLoading}
-        error={loginError}
-      />
+      <>
+        <LoginScreen
+          onLogin={handleLogin}
+          isLoading={loginLoading}
+          error={loginError}
+        />
+        <DisclaimerDialog 
+          isOpen={showDisclaimer} 
+          onAccept={handleAcceptDisclaimer} 
+        />
+      </>
     );
   }
 

@@ -6,7 +6,7 @@ interface LoginScreenProps {
 
 export const LoginScreen = ({ isLoading, error, onLogin }: LoginScreenProps) => {
   return (
-    <div className="h-screen flex items-center justify-center">
+    <div className="h-screen flex items-center justify-center app-drag-region">
       <div className="text-center">
         <div className="mb-6 flex flex-col items-center">
           <div className="relative">

@@ -40,10 +40,27 @@ function createWindow() {
     },
   })
 
+  // 添加加载错误处理
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Main window load failed:', errorCode, errorDescription);
+  });
+
+  // 添加渲染进程错误处理
+  mainWindow.webContents.on('render-process-gone', (event, details) => {
+    console.error('Render process gone:', details);
+  });
+
+  // 添加崩溃处理
+  mainWindow.webContents.on('crashed', (event) => {
+    console.error('Window crashed');
+  });
+
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
+      .catch(err => console.error('Failed to load dev server:', err));
   } else {
     mainWindow.loadFile('dist/index.html')
+      .catch(err => console.error('Failed to load file:', err));
   }
 
   // 默认打开开发者工具
@@ -746,3 +763,55 @@ export function setupImageProxy() {
   //   }
   // });
 }
+
+// 禁用右键菜单和开发者工具
+app.on('browser-window-created', (_, window) => {
+  window.webContents.on('context-menu', (e) => {
+    e.preventDefault();
+  });
+  
+  // 禁用开发者工具
+  if (app.isPackaged) {
+    window.webContents.on('devtools-opened', () => {
+      window.webContents.closeDevTools();
+    });
+  }
+});
+
+// 修改请求过滤规则，允许必要的资源请求
+app.on('web-contents-created', (event, contents) => {
+  contents.session.webRequest.onBeforeRequest((details, callback) => {
+    const url = details.url;
+    // 允许以下请求:
+    // - B站 API 请求
+    // - 本地资源请求
+    // - Vite 开发服务器请求
+    // - B站图片资源
+    // - Electron 相关请求
+    if (
+      url.startsWith('https://api.bilibili.com/') || 
+      url.startsWith('file://') || 
+      url.startsWith('data:') ||
+      url.startsWith('http://localhost') || // 允许本地开发服务器
+      url.startsWith('https://i0.hdslb.com/') || // B站图片资源
+      url.startsWith('https://i1.hdslb.com/') ||
+      url.startsWith('https://i2.hdslb.com/') ||
+      url.startsWith('ws://') || // WebSocket 连接
+      url.startsWith('wss://') ||
+      url.startsWith('devtools://') || // 开发工具
+      url.startsWith('chrome-extension://') || // Chrome 扩展
+      url.includes('vite') || // Vite 相关资源
+      url.includes('sourcemap') // Source maps
+    ) {
+      callback({cancel: false});
+    } else {
+      console.log('Blocked request to:', url); // 添加日志以便调试
+      callback({cancel: false}); // 临时改为允许所有请求，方便调试
+    }
+  });
+
+  // 添加错误处理
+  contents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Page load failed:', errorCode, errorDescription);
+  });
+});
