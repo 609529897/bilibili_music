@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Video } from "../types/electron";
 import { fetchImage } from "../utils/imageProxy";
 
@@ -34,6 +34,7 @@ export const PlayList = ({
 }: PlayListProps) => {
   const [imageCache, setImageCache] = useState<ImageCache>({});
   const [loadingImages, setLoadingImages] = useState<Set<string>>(new Set());
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // 加载单个图片
   const loadImage = async (thumbnail: string) => {
@@ -74,16 +75,14 @@ export const PlayList = ({
 
   useEffect(() => {
     const handleScroll = (event: Event) => {
-      const target = event.target;
-      if (target instanceof Element) {
-        const { scrollTop, scrollHeight, clientHeight } = target;
-        if (scrollHeight - scrollTop <= clientHeight + 50 && hasMore) {
-          loadMore();
-        }
+      const target = event.target as HTMLElement;
+      const { scrollTop, scrollHeight, clientHeight } = target;
+      if (scrollHeight - scrollTop <= clientHeight + 50 && hasMore) {
+        loadMore();
       }
     };
 
-    const container = document.querySelector(".flex-1.overflow-y-auto");
+    const container = containerRef.current;
     if (container) {
       container.addEventListener("scroll", handleScroll);
     }
@@ -110,7 +109,7 @@ export const PlayList = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div ref={containerRef} className="flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="flex items-center justify-center h-32 text-gray-400">
             <svg

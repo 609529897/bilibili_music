@@ -26,48 +26,38 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
     if (!document.getElementById("audio-element")) {
       const audio = document.createElement("audio")
       audio.id = "audio-element"
-      audio.preload = "auto"
+      audio.preload = "none"
       audio.crossOrigin = "anonymous"
 
-      // 添加更详细的错误处理
+      // 只在实际播放时才添加错误处理
       audio.addEventListener("error", (e) => {
         const target = e.target as HTMLAudioElement
-        console.error("Audio error details:", {
-          error: target.error,
-          networkState: target.networkState,
-          readyState: target.readyState,
-          currentSrc: target.currentSrc,
-          src: target.src,
-          errorCode: target.error?.code,
-          errorMessage: target.error?.message,
-        })
-      })
-
-      // 添加调试事件
-      const debugEvents = [
-        "loadstart",
-        "durationchange",
-        "loadedmetadata",
-        "loadeddata",
-        "progress",
-        "canplay",
-        "canplaythrough",
-      ]
-
-      debugEvents.forEach((event) => {
-        audio.addEventListener(event, () => {
-          console.log(`Audio event: ${event}`, {
-            currentTime: audio.currentTime,
-            duration: audio.duration,
-            readyState: audio.readyState,
-            networkState: audio.networkState,
-            src: audio.src,
+        // 只有在有src的情况下才报错
+        if (target.src && target.src !== window.location.href) {
+          console.error("Audio error details:", {
+            error: target.error,
+            networkState: target.networkState,
+            readyState: target.readyState,
+            currentSrc: target.currentSrc,
+            src: target.src,
+            errorCode: target.error?.code,
+            errorMessage: target.error?.message,
           })
-        })
+        }
       })
 
       document.body.appendChild(audio)
       audioRef.current = audio
+    }
+
+    return () => {
+      const audio = document.getElementById("audio-element") as HTMLAudioElement | null;
+      if (audio) {
+        audio.pause();
+        audio.src = '';
+        document.body.removeChild(audio);
+        audioRef.current = null;
+      }
     }
   }, [])
 
