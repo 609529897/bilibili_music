@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Video } from "../types/electron";
 import { fetchImage } from "../utils/imageProxy";
+import { ApiClient } from "../utils/apiClient";
 
 interface UseAudioPlayerProps {
   currentVideo: Video | null;
@@ -120,30 +121,41 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
   }, [audioElement, isPlaying, currentVideo]);
 
   const handleAudio = useCallback(async () => {
-    if (!currentVideo?.bvid || !audioElement) {
-      return;
-    }
-
-    // 如果有正在进行的加载过程，取消它
-    if (abortControllerRef.current) {
-      console.log('Aborting previous audio loading...');
-      abortControllerRef.current.abort();
-    }
-
-    // 创建新的 AbortController
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
-
-    // 清理之前的音频状态
-    audioElement.pause();
-    audioElement.removeAttribute('src');
-    audioElement.load();
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
-    setIsLoading(true);
+    if (!currentVideo?.bvid || !audioElement) return;
 
     try {
+      setIsLoading(true);
+      const result = await ApiClient.request(
+        () => window.electronAPI.getVideoAudioUrl(currentVideo.bvid),
+        { maxRetries: 2 }
+      );
+
+      if (!result.success) {
+        throw new Error(result.error || "获取音频地址失败");
+      }
+
+      const audioUrl = await ApiClient.request(
+        () => window.electronAPI.proxyAudio(result.data.audioUrl)
+      );
+
+      // 如果有正在进行的加载过程，取消它
+      if (abortControllerRef.current) {
+        console.log('Aborting previous audio loading...');
+        abortControllerRef.current.abort();
+      }
+
+      // 创建新的 AbortController
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
+      // 清理之前的音频状态
+      audioElement.pause();
+      audioElement.removeAttribute('src');
+      audioElement.load();
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+
       console.log('Loading audio for video:', currentVideo.bvid);
 
       // 检查是否已被取消
@@ -151,10 +163,6 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
         console.log('Audio loading aborted');
         return;
       }
-      
-      const result = await window.electronAPI.getVideoAudioUrl(
-        currentVideo.bvid
-      );
       
       // 再次检查是否已被取消
       if (abortController.signal.aborted) {
@@ -166,16 +174,6 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
       
       if (!result.success || !result.data.audioUrl) {
         throw new Error(result.error || "获取音频地址失败");
-      }
-
-      const audioUrl = await window.electronAPI.proxyAudio(
-        result.data.audioUrl
-      );
-
-      // 再次检查是否已被取消
-      if (abortController.signal.aborted) {
-        console.log('Audio loading aborted after getting proxy URL');
-        return;
       }
 
       console.log('Got proxied audio URL:', audioUrl);
@@ -325,12 +323,12 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
       }
 
     } catch (error) {
-      if (!abortController.signal.aborted) {
-        console.error("Error loading audio:", error);
-        setIsLoading(false);
-      }
+      console.error('Failed to load audio:', error);
+      // 显示错误提示
+    } finally {
+      setIsLoading(false);
     }
-  }, [currentVideo, audioElement, volume, isMuted, onNext]);
+  }, [currentVideo, audioElement]);
 
   useEffect(() => {
     // 只在视频ID改变时重新加载音频
