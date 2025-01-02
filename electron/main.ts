@@ -64,7 +64,7 @@ function createWindow() {
   }
 
   // 默认打开开发者工具
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 }
 
 // 打开B站登录页面

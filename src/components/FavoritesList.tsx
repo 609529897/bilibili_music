@@ -132,6 +132,9 @@ export const FavoritesList = ({
                 />
               </svg>
             </button>
+            <span className="px-1.5 py-0.5 text-[10px] font-medium bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-full leading-none">
+              内测版
+            </span>
             <UserMenu
               avatarUrl={avatarUrl || undefined}
               username={username}
