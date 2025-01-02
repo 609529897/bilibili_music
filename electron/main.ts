@@ -64,7 +64,7 @@ function createWindow() {
   }
 
   // 默认打开开发者工具
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 }
 
 // 打开B站登录页面
@@ -527,20 +527,57 @@ ipcMain.handle('check-login-status', async () => {
 // 退出登录
 ipcMain.handle('logout', async () => {
   try {
-    // 清除所有 bilibili.com 域名下的 cookie
-    await session.defaultSession.clearStorageData({
-      origin: 'https://bilibili.com',
-      storages: ['cookies']
-    })
-    return { success: true }
-  } catch (error) {
-    console.error('Error logging out:', error)
-    return { 
-      success: false, 
-      error: error.message || 'Failed to logout' 
+    // 清除所有 bilibili 相关域名的 cookie 和存储数据
+    const domains = [
+      'bilibili.com',
+      '.bilibili.com',
+      'www.bilibili.com',
+      'passport.bilibili.com',
+      'api.bilibili.com'
+    ];
+
+    for (const domain of domains) {
+      // 清除 cookies
+      await session.defaultSession.clearStorageData({
+        origin: `https://${domain}`,
+        storages: [
+          'cookies',
+          'localstorage',
+          'indexdb',
+          'shadercache',
+          'websql',
+          'serviceworkers',
+        ]
+      });
+
+      // 额外清除特定的 cookies
+      const cookies = await session.defaultSession.cookies.get({ domain });
+      for (const cookie of cookies) {
+        await session.defaultSession.cookies.remove(
+          `https://${domain}`,
+          cookie.name
+        );
+      }
     }
+
+    // 清除本地存储的登录状态
+    if (mainWindow) {
+      mainWindow.webContents.executeJavaScript(`
+        localStorage.removeItem('disclaimer-accepted');
+        localStorage.removeItem('login-status');
+        sessionStorage.clear();
+      `);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error logging out:', error);
+    return {
+      success: false,
+      error: error.message || 'Failed to logout'
+    };
   }
-})
+});
 
 ipcMain.handle('proxy-audio', async (_, url: string) => {
   try {
@@ -815,3 +852,17 @@ app.on('web-contents-created', (event, contents) => {
     console.error('Page load failed:', errorCode, errorDescription);
   });
 });
+
+// 退出登录后强制刷新
+if (mainWindow) {
+  mainWindow.webContents.reload();
+}
+
+// 退出登录后重新创建窗口
+if (mainWindow) {
+  const bounds = mainWindow.getBounds();
+  mainWindow.close();
+  mainWindow = null;
+  createWindow();
+  mainWindow?.setBounds(bounds);
+}
