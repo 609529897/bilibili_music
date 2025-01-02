@@ -55,6 +55,16 @@ const App: React.FC = () => {
     setShowDisclaimer(false);
   };
 
+  const handleLoginClick = async () => {
+    try {
+      await handleLogin();
+      // 只有在登录成功后才会执行到这里
+      await loadFavorites();
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  };
+
   // 如果正在检查登录状态，显示淡入淡出文字效果
   if (loginLoading) {
     return (
@@ -70,7 +80,7 @@ const App: React.FC = () => {
     return (
       <>
         <LoginScreen
-          onLogin={handleLogin}
+          onLogin={handleLoginClick}
           isLoading={loginLoading}
           error={loginError}
         />

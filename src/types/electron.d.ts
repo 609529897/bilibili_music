@@ -37,7 +37,7 @@ interface ElectronAPI {
   getFavoriteVideos: (id: number, currentPage?: number) => Promise<ApiResponse<Video[]>>;
   getUserInfo: () => Promise<ApiResponse<UserInfo>>;
   getVideoAudioUrl: (bvid: string) => Promise<ApiResponse<AudioUrlResponse>>;
-  onLoginSuccess: (callback: () => void) => void;
+  onLoginSuccess: (callback: () => void | Promise<void>) => () => void;
   fetchImage: (url: string) => Promise<string>;
   logout: () => Promise<{ success: boolean; error?: string }>;
   proxyAudio: (url: string) => Promise<string>;

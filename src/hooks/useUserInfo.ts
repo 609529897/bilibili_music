@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { fetchImage } from "../utils/imageProxy";
 import { UserInfo } from "../types/electron";
 
@@ -6,10 +6,10 @@ export const useUserInfo = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // 默认为 true
+  const [isLoading, setIsLoading] = useState(true);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
-  const loadUserInfo = async () => {
+  const loadUserInfo = useCallback(async () => {
     try {
       const result = await window.electronAPI.getUserInfo();
       if (result.success) {
@@ -24,18 +24,59 @@ export const useUserInfo = () => {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load user info");
     }
-  };
+  }, []);
+
+  // 检查登录状态
+  const checkLoginStatus = useCallback(async () => {
+    try {
+      const isLoggedIn = await window.electronAPI.checkLoginStatus();
+      setIsLoggedIn(isLoggedIn);
+      if (isLoggedIn) {
+        await loadUserInfo();
+      }
+      return isLoggedIn;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to check login status');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadUserInfo]);
+
+  // 初始化时检查登录状态
+  useEffect(() => {
+    checkLoginStatus();
+  }, [checkLoginStatus]);
+
+
 
   const handleLogin = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      await window.electronAPI.openBilibiliLogin();
-      setIsLoggedIn(true);
-      await loadUserInfo();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to login");
       setIsLoggedIn(false);
+      await window.electronAPI.openBilibiliLogin();
+      
+      await new Promise<void>((resolve, reject) => {
+        const cleanup = window.electronAPI.onLoginSuccess(async () => {
+          try {
+            const isLoggedIn = await checkLoginStatus();
+            if (isLoggedIn) {
+              resolve();
+            } else {
+              reject(new Error('Login failed'));
+            }
+          } catch (error) {
+            reject(error);
+          } finally {
+            cleanup();
+          }
+        });
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to login');
+      setIsLoggedIn(false);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -58,23 +99,6 @@ export const useUserInfo = () => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    // 初始化时检查登录状态
-    window.electronAPI.checkLoginStatus().then((isLoggedIn) => {
-      setIsLoggedIn(isLoggedIn);
-      if (isLoggedIn) {
-        loadUserInfo();
-      }
-      setIsLoading(false); // 检查完成后设置为 false
-    });
-
-    // 监听登录成功事件
-    window.electronAPI.onLoginSuccess(() => {
-      setIsLoggedIn(true);
-      loadUserInfo();
-    });
-  }, []);
 
   return {
     isLoggedIn,
