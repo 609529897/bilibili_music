@@ -10,7 +10,7 @@ export const FeedbackButton = () => {
         onClick={() => setShowQRCode(true)}
         className="fixed bottom-24 right-6 bg-white/40 hover:bg-white/60 backdrop-blur-sm 
                  text-gray-500/80 hover:text-gray-600 rounded-full p-2.5 
-                 shadow-sm hover:shadow transition-all duration-200"
+                  hover:shadow transition-all duration-200 ease-in-out"
         title="反馈"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">

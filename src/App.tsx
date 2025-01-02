@@ -10,7 +10,6 @@ import { FavoritesDialog } from "./components/FavoritesDialog";
 import { DisclaimerDialog } from "./components/DisclaimerDialog";
 import { SWRConfig } from 'swr';
 import { ErrorBoundary } from "./components/ErrorBoundary";
-// import { FeedbackButton } from './components/FeedbackButton';
 
 const App: React.FC = () => {
   const {
@@ -182,8 +181,6 @@ const App: React.FC = () => {
               onPrevious={handlePrevious}
             />
           </ErrorBoundary>
-
-          {/* <FeedbackButton /> */}
 
           {isSelectingFavorites && (
             <FavoritesDialog
