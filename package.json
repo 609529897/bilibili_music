@@ -53,11 +53,11 @@
       "target": [
         {
           "target": "dir",
-          "arch": ["arm64"]
+          "arch": ["arm64", "x64"]
         },
         {
           "target": "dmg",
-          "arch": ["arm64"]
+          "arch": ["arm64", "x64"]
         }
       ],
       "identity": null,
