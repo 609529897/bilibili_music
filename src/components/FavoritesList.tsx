@@ -94,9 +94,6 @@ export const FavoritesList = ({
       <div className="flex-1 flex flex-col">
         {/* 操作按钮区域 */}
         <div className="flex items-center justify-between h-14 px-4 app-drag-region">
-          {/* <div>
-            <TitleBar />
-          </div> */}
           <div></div>
           <div className="flex items-center gap-5">
             <button

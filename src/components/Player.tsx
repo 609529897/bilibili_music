@@ -3,7 +3,6 @@ import useAudioPlayer from "../hooks/useAudioPlayer";
 import { formatTime } from "./utils";
 import { useState, useRef, useEffect } from "react";
 import { FullScreenPlayer } from "./FullScreenPlayer";
-import { BilibiliPlayer } from "./BilibiliPlayer";
 import { useMediaSession } from "../hooks/useMediaSession";
 
 interface ModernPlayerProps {
@@ -18,7 +17,6 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
   onNext,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showBilibiliPlayer, setShowBilibiliPlayer] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null) as {
     current: HTMLAudioElement | null;
   };
@@ -438,29 +436,9 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
                 style={{ left: `${volume * 100}%` }}
               />
             </div>
-            {/* <button
-              onClick={() => setShowBilibiliPlayer(true)}
-              className={`ml-6 ${
-                isExpanded
-                  ? "text-gray-300 hover:text-white"
-                  : "text-gray-400 hover:text-gray-600"
-              } transition-colors duration-150 p-1.5 rounded-full hover:bg-white/10`}
-              title="观看视频"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
-              </svg>
-            </button> */}
           </div>
         </div>
       </div>
-      {/* Bilibili Player */}
-      {showBilibiliPlayer && (
-        <BilibiliPlayer
-          currentVideo={currentVideo}
-          onClose={() => setShowBilibiliPlayer(false)}
-        />
-      )}
     </>
   );
 };
