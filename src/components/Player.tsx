@@ -1,14 +1,15 @@
-import { Video } from "../types/electron"
-import useAudioPlayer from "../hooks/useAudioPlayer"
-import { formatTime } from "./utils"
-import { useState, useRef, useEffect } from "react"
-import { FullScreenPlayer } from "./FullScreenPlayer"
-import { BilibiliPlayer } from "./BilibiliPlayer"
+import { Video } from "../types/electron";
+import useAudioPlayer from "../hooks/useAudioPlayer";
+import { formatTime } from "./utils";
+import { useState, useRef, useEffect } from "react";
+import { FullScreenPlayer } from "./FullScreenPlayer";
+import { BilibiliPlayer } from "./BilibiliPlayer";
+import { useMediaSession } from "../hooks/useMediaSession";
 
 interface ModernPlayerProps {
-  currentVideo: Video | null
-  onPrevious?: () => void
-  onNext?: () => void
+  currentVideo: Video | null;
+  onPrevious?: () => void;
+  onNext?: () => void;
 }
 
 export const ModernPlayer: React.FC<ModernPlayerProps> = ({
@@ -16,22 +17,22 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
   onPrevious,
   onNext,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [showBilibiliPlayer, setShowBilibiliPlayer] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showBilibiliPlayer, setShowBilibiliPlayer] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null) as {
-    current: HTMLAudioElement | null
-  }
+    current: HTMLAudioElement | null;
+  };
 
   useEffect(() => {
     if (!document.getElementById("audio-element")) {
-      const audio = document.createElement("audio")
-      audio.id = "audio-element"
-      audio.preload = "none"
-      audio.crossOrigin = "anonymous"
+      const audio = document.createElement("audio");
+      audio.id = "audio-element";
+      audio.preload = "none";
+      audio.crossOrigin = "anonymous";
 
       // 只在实际播放时才添加错误处理
       audio.addEventListener("error", (e) => {
-        const target = e.target as HTMLAudioElement
+        const target = e.target as HTMLAudioElement;
         // 只有在有src的情况下才报错
         if (target.src && target.src !== window.location.href) {
           console.error("Audio error details:", {
@@ -42,24 +43,26 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
             src: target.src,
             errorCode: target.error?.code,
             errorMessage: target.error?.message,
-          })
+          });
         }
-      })
+      });
 
-      document.body.appendChild(audio)
-      audioRef.current = audio
+      document.body.appendChild(audio);
+      audioRef.current = audio;
     }
 
     return () => {
-      const audio = document.getElementById("audio-element") as HTMLAudioElement | null;
+      const audio = document.getElementById(
+        "audio-element"
+      ) as HTMLAudioElement | null;
       if (audio) {
         audio.pause();
-        audio.src = '';
+        audio.src = "";
         document.body.removeChild(audio);
         audioRef.current = null;
       }
-    }
-  }, [])
+    };
+  }, []);
 
   const {
     isPlaying,
@@ -75,7 +78,45 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
     handleTimeSeek,
     handlePrevious,
     handleNext,
-  } = useAudioPlayer({ currentVideo, onPrevious, onNext })
+    setIsPlaying,
+  } = useAudioPlayer({ currentVideo, onPrevious, onNext });
+
+  useMediaSession({
+    title: currentVideo?.title,
+    artist: currentVideo?.author,
+    artwork: thumbnailUrl,
+    onPlay: togglePlay,
+    onPause: togglePlay,
+    onPrevious: handlePrevious,
+    onNext: handleNext,
+    onSeek: handleTimeSeek,
+  });
+
+  useEffect(() => {
+    // 注册媒体控制监听
+    const cleanup = window.electronAPI.onMediaControl((action) => {
+      switch (action) {
+        case 'play-pause':
+          togglePlay();
+          break;
+        case 'next':
+          handleNext();
+          break;
+        case 'previous':
+          handlePrevious();
+          break;
+        case 'stop':
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            setIsPlaying(false);
+          }
+          break;
+      }
+    });
+
+    return cleanup;
+  }, [togglePlay, handleNext, handlePrevious]);
 
   if (!currentVideo) {
     return (
@@ -94,7 +135,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
           <span className="text-sm font-medium">从列表中选择音乐开始播放</span>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -421,5 +462,5 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
         />
       )}
     </>
-  )
-}
+  );
+};

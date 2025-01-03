@@ -47,6 +47,7 @@ interface ElectronAPI {
   maximizeWindow: () => Promise<void>;
   createPlayerView: (bvid: string) => Promise<void>;
   closePlayerView: () => Promise<void>;
+  onMediaControl: (callback: (action: string) => void) => () => void;
 }
 
 declare global {

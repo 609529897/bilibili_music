@@ -441,6 +441,7 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
     isMuted,
     thumbnailUrl,
     isLoading,
+    setIsPlaying,
     togglePlay,
     toggleMute,
     handleVolumeChange,

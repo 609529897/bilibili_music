@@ -23,4 +23,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   maximizeWindow: () => ipcRenderer.invoke('window-maximize'),
   createPlayerView: (bvid: string) => ipcRenderer.invoke('create-player-view', bvid),
   closePlayerView: () => ipcRenderer.invoke('close-player-view'),
+  onMediaControl: (callback: (action: string) => void) => {
+    const handler = (_: Electron.IpcRendererEvent, action: string) => callback(action);
+    ipcRenderer.on('media-control', handler);
+    return () => {
+      ipcRenderer.removeListener('media-control', handler);
+    };
+  },
 })

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, session, protocol, shell, BrowserView } from 'electron'
+import { app, BrowserWindow, ipcMain, session, protocol, shell, BrowserView, globalShortcut } from 'electron'
 import path from 'path'
 import axios from 'axios'
 import http from 'http'
@@ -141,6 +141,28 @@ async function getCookieString() {
   return cookies.map(c => `${c.name}=${c.value}`).join('; ')
 }
 
+function registerMediaShortcuts() {
+  // 播放/暂停
+  globalShortcut.register('MediaPlayPause', () => {
+    mainWindow?.webContents.send('media-control', 'play-pause');
+  });
+
+  // 下一曲
+  globalShortcut.register('MediaNextTrack', () => {
+    mainWindow?.webContents.send('media-control', 'next');
+  });
+
+  // 上一曲
+  globalShortcut.register('MediaPreviousTrack', () => {
+    mainWindow?.webContents.send('media-control', 'previous');
+  });
+
+  // 停止
+  globalShortcut.register('MediaStop', () => {
+    mainWindow?.webContents.send('media-control', 'stop');
+  });
+}
+
 app.whenReady().then(() => {
   protocol.registerFileProtocol('left', (request, callback) => {
     const url = request.url.replace('left://local-file/', '');
@@ -154,6 +176,7 @@ app.whenReady().then(() => {
   });
 
   createWindow()
+  registerMediaShortcuts()
   // setupImageProxy()  // 注册图片代理服务
 
   // 处理外部链接
@@ -866,3 +889,8 @@ if (mainWindow) {
   createWindow();
   mainWindow?.setBounds(bounds);
 }
+
+// 在应用退出时注销快捷键
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
+});
