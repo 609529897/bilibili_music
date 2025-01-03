@@ -13,15 +13,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@heroicons/react": "^2.1.1",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "framer-motion": "^11.15.0",
     "react": "^18.2.0",
-    "react-audio-spectrum": "^0.1.5",
     "react-dom": "^18.2.0",
-    "tailwindcss": "^3.4.0",
-    "swr": "^2.2.5"
+    "swr": "^2.2.5",
+    "tailwindcss": "^3.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
@@ -45,7 +43,9 @@
   "build": {
     "appId": "com.bilibili.music",
     "productName": "BiliMusic",
-    "asar": true,
+    "asar": {
+      "smartUnpack": true
+    },
     "asarUnpack": "**/*.{node,dll}",
     "mac": {
       "icon": "build/icon.icns",
@@ -53,11 +53,17 @@
       "target": [
         {
           "target": "dir",
-          "arch": ["arm64", "x64"]
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         },
         {
           "target": "dmg",
-          "arch": ["arm64", "x64"]
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         }
       ],
       "identity": null,
@@ -86,6 +92,15 @@
     "directories": {
       "buildResources": "build",
       "output": "release"
-    }
+    },
+    "extraResources": [
+      {
+        "from": "build/",
+        "to": "build",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
   }
 }
