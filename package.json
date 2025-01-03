@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
+    "build:arm64": "tsc && vite build && electron-builder --arm64",
+    "build:x64": "tsc && vite build && electron-builder --x64",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -50,22 +52,12 @@
     "mac": {
       "icon": "build/icon.icns",
       "category": "public.app-category.music",
-      "target": [
-        {
-          "target": "dir",
-          "arch": [
-            "arm64",
-            "x64"
-          ]
-        },
-        {
-          "target": "dmg",
-          "arch": [
-            "arm64",
-            "x64"
-          ]
-        }
-      ],
+      "target": {
+        "target": "dmg",
+        "arch": [
+          "arm64"
+        ]
+      },
       "identity": null,
       "hardenedRuntime": false
     },
