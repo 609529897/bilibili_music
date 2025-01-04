@@ -30,7 +30,7 @@ export const SeriesList: React.FC<SeriesListProps> = ({
   const rowVirtualizer = useVirtualizer({
     count: playlist.length,
     getScrollElement: () => scrollParentRef.current,
-    estimateSize: () => 84,
+    estimateSize: () => 72,
     overscan: 5,
   });
 
@@ -76,12 +76,12 @@ export const SeriesList: React.FC<SeriesListProps> = ({
   return (
     <div 
       ref={parentRef} 
-      className="h-full flex flex-col min-h-0 bg-gray-50/50"
+      className="h-full flex flex-col min-h-0 bg-gray-50/30"
     >
       {/* 标题区域 */}
-      <div className="flex-none px-4 py-3 text-sm font-medium sticky top-0 z-10 text-gray-900 bg-gray-50/80 backdrop-blur-sm border-b border-gray-100">
+      <div className="flex-none px-4 py-2.5 text-sm font-medium sticky top-0 z-10 text-gray-700 bg-gray-50/60 backdrop-blur-sm border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24">
             <path fill="currentColor" d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
           </svg>
           {seriesTitle}
@@ -93,7 +93,7 @@ export const SeriesList: React.FC<SeriesListProps> = ({
         ref={scrollParentRef}
         className="flex-1 overflow-auto"
         style={{
-          height: 'calc(100% - 45px)',
+          height: 'calc(100% - 40px)',
           contain: 'strict',
         }}
       >
@@ -111,7 +111,7 @@ export const SeriesList: React.FC<SeriesListProps> = ({
               <div
                 key={virtualRow.index}
                 className={`absolute top-0 left-0 w-full ${
-                  isPlaying ? 'bg-pink-50 shadow-sm before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-pink-500' : 'hover:bg-white/80'
+                  isPlaying ? 'bg-pink-50/70 shadow-sm before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-pink-500' : 'hover:bg-white/60'
                 }`}
                 style={{
                   height: `${virtualRow.size}px`,
@@ -119,31 +119,31 @@ export const SeriesList: React.FC<SeriesListProps> = ({
                 }}
               >
                 <button
-                  className="w-full h-full px-4 py-3 flex items-center gap-4 text-left"
+                  className="w-full h-full px-4 py-2.5 flex items-center gap-3 text-left"
                   onClick={() => onVideoSelect(video)}
                 >
                   {/* 序号或播放状态 */}
-                  <div className="w-8 flex-none flex items-center justify-center">
+                  <div className="w-7 flex-none flex items-center justify-center">
                     {isPlaying ? (
-                      <div className="flex items-end gap-0.5 h-3">
+                      <div className="flex items-end gap-0.5 h-2.5">
                         <div className="w-0.5 h-full bg-pink-500 origin-bottom animate-bar-1" />
                         <div className="w-0.5 h-full bg-pink-500 origin-bottom animate-bar-2" />
                         <div className="w-0.5 h-full bg-pink-500 origin-bottom animate-bar-3" />
                       </div>
                     ) : (
-                      <span className="text-sm text-gray-900">
+                      <span className="text-xs text-gray-700">
                         P{virtualRow.index + 1}
                       </span>
                     )}
                   </div>
 
                   {/* 缩略图 */}
-                  <div className="w-20 h-14 flex-none rounded overflow-hidden bg-gray-100">
+                  <div className="w-16 h-12 flex-none rounded overflow-hidden bg-gray-100">
                     {loadingImages.has(video.thumbnail) ? (
                       <div className="w-full h-full bg-gray-50 animate-pulse" />
                     ) : imageCache[video.thumbnail]?.error ? (
                       <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-gray-400" viewBox="0 0 24 24">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-gray-400" viewBox="0 0 24 24">
                           <path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
                         </svg>
                       </div>
@@ -159,10 +159,10 @@ export const SeriesList: React.FC<SeriesListProps> = ({
 
                   {/* 视频信息 */}
                   <div className="flex-1 min-w-0">
-                    <div className="text-base font-medium truncate text-gray-900">
+                    <div className="text-sm font-medium truncate text-gray-700">
                       {video.title}
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="text-xs text-gray-500 mt-0.5">
                       {formatDuration(video.duration)}
                     </div>
                   </div>
