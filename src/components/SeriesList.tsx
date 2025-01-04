@@ -30,7 +30,7 @@ export const SeriesList: React.FC<SeriesListProps> = ({
   const rowVirtualizer = useVirtualizer({
     count: playlist.length,
     getScrollElement: () => scrollParentRef.current,
-    estimateSize: () => 72,
+    estimateSize: () => 84,
     overscan: 5,
   });
 
@@ -111,7 +111,7 @@ export const SeriesList: React.FC<SeriesListProps> = ({
               <div
                 key={virtualRow.index}
                 className={`absolute top-0 left-0 w-full ${
-                  isPlaying ? 'bg-white shadow-sm' : 'hover:bg-white/80'
+                  isPlaying ? 'bg-pink-50 shadow-sm before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-pink-500' : 'hover:bg-white/80'
                 }`}
                 style={{
                   height: `${virtualRow.size}px`,
@@ -119,13 +119,13 @@ export const SeriesList: React.FC<SeriesListProps> = ({
                 }}
               >
                 <button
-                  className="w-full h-full px-4 py-2 flex items-center gap-3 text-left"
+                  className="w-full h-full px-4 py-3 flex items-center gap-4 text-left"
                   onClick={() => onVideoSelect(video)}
                 >
                   {/* 序号或播放状态 */}
-                  <div className="w-6 flex-none flex items-center justify-center">
+                  <div className="w-8 flex-none flex items-center justify-center">
                     {isPlaying ? (
-                      <div className="w-2 h-2 rounded-full bg-pink-500" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-pink-500" />
                     ) : (
                       <span className="text-sm text-gray-900">
                         P{virtualRow.index + 1}
@@ -134,7 +134,7 @@ export const SeriesList: React.FC<SeriesListProps> = ({
                   </div>
 
                   {/* 缩略图 */}
-                  <div className="w-16 h-12 flex-none rounded overflow-hidden bg-gray-100">
+                  <div className="w-20 h-14 flex-none rounded overflow-hidden bg-gray-100">
                     {loadingImages.has(video.thumbnail) ? (
                       <div className="w-full h-full bg-gray-50 animate-pulse" />
                     ) : imageCache[video.thumbnail]?.error ? (
@@ -155,10 +155,10 @@ export const SeriesList: React.FC<SeriesListProps> = ({
 
                   {/* 视频信息 */}
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate text-gray-900">
+                    <div className="text-base font-medium truncate text-gray-900">
                       {video.title}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-sm text-gray-500 mt-1">
                       {formatDuration(video.duration)}
                     </div>
                   </div>

@@ -171,7 +171,7 @@ const App: React.FC = () => {
 
               {/* 合集列表 */}
               {seriesInfo && seriesInfo.videos.length > 1 && (
-                <div className="w-[360px] flex-none border-l border-gray-100 h-full">
+                <div className="w-[420px] flex-none border-l border-gray-100 h-full">
                   <ErrorBoundary>
                     <SeriesList
                       playlist={seriesInfo.videos}
