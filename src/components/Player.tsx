@@ -24,6 +24,10 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
   };
 
   useEffect(() => {
+    if (!currentVideo) {
+      return;
+    }
+
     if (!document.getElementById("audio-element")) {
       const audio = document.createElement("audio");
       audio.id = "audio-element";
@@ -62,7 +66,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
         audioRef.current = null;
       }
     };
-  }, []);
+  }, [currentVideo]);
 
   const {
     isPlaying,
@@ -84,7 +88,7 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
   useMediaSession({
     title: currentVideo?.title,
     artist: currentVideo?.author,
-    artwork: thumbnailUrl,
+    artwork: thumbnailUrl || undefined,
     onPlay: togglePlay,
     onPause: togglePlay,
     onPrevious: handlePrevious,
@@ -96,16 +100,16 @@ export const ModernPlayer: React.FC<ModernPlayerProps> = ({
     // 注册媒体控制监听
     const cleanup = window.electronAPI.onMediaControl((action) => {
       switch (action) {
-        case 'play-pause':
+        case "play-pause":
           togglePlay();
           break;
-        case 'next':
+        case "next":
           handleNext();
           break;
-        case 'previous':
+        case "previous":
           handlePrevious();
           break;
-        case 'stop':
+        case "stop":
           if (audioRef.current) {
             audioRef.current.pause();
             audioRef.current.currentTime = 0;

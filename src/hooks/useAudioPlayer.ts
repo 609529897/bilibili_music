@@ -43,6 +43,9 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
 
   // 初始化音频元素
   useEffect(() => {
+    if (!currentVideo) {
+      return;
+    }
     if (!audioRef.current) {
       const audio = document.getElementById('audio-element') as HTMLAudioElement;
       if (audio) {
@@ -67,7 +70,7 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
         audio.load();
       }
     };
-  }, []);
+  }, [currentVideo]);
 
   // 辅助函数：清理音频资源
   const cleanupAudio = useCallback(() => {
@@ -369,6 +372,9 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
   return {
     ...audioState,
     ...controls,
+    setIsPlaying: useCallback((isLoading: boolean) => {
+      updateAudioState({ isLoading });
+    }, [updateAudioState])
   };
 };
 
