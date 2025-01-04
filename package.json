@@ -70,7 +70,15 @@
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist"
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "此应用不需要使用麦克风",
+        "NSCameraUsageDescription": "此应用不需要使用相机",
+        "LSMinimumSystemVersion": "10.12.0",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
     },
     "dmg": {
       "title": "BiliMusic",

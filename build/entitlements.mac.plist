@@ -8,6 +8,8 @@
     <true/>
     <key>com.apple.security.cs.allow-dyld-environment-variables</key>
     <true/>
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
     <key>com.apple.security.network.client</key>
     <true/>
     <key>com.apple.security.network.server</key>
@@ -16,5 +18,15 @@
     <true/>
     <key>com.apple.security.files.downloads.read-write</key>
     <true/>
+    <key>com.apple.security.automation.apple-events</key>
+    <true/>
+    <key>com.apple.security.cs.debugger</key>
+    <true/>
+    <key>com.apple.security.device.camera</key>
+    <false/>
+    <key>com.apple.security.device.microphone</key>
+    <false/>
+    <key>com.apple.security.device.usb</key>
+    <false/>
   </dict>
 </plist> 
