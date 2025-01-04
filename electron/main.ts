@@ -1060,15 +1060,16 @@ ipcMain.handle('get-episode-info', async (_, bvid: string) => {
           cid: page.cid,
           title: page.part,
           duration: page.duration,
-          thumbnail: `http://i0.hdslb.com/bfs/archive/${page.first_frame || videoDetail.data.pic}`,
+          thumbnail: videoDetail.data.pic, // 使用视频主图作为所有选集的封面
           page: page.page,
+          author: videoDetail.data.owner.name, // 添加作者信息
         }));
 
         return {
           success: true,
           data: {
             videos,
-            currentIndex: (pages.findIndex((p: any) => p.cid === videoDetail.data.cid) + 1) || 1
+            currentIndex: (pages.findIndex((p: any) => p.cid === videoDetail.data.cid)) || 0
           }
         };
       }
@@ -1078,7 +1079,7 @@ ipcMain.handle('get-episode-info', async (_, bvid: string) => {
       success: true,
       data: {
         videos: [],
-        currentIndex: 1
+        currentIndex: 0
       }
     };
 

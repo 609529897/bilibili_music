@@ -98,6 +98,18 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
   // 处理视频选择
   const handleVideoSelect = useCallback(async (video: Video) => {
     console.log('Selected video:', video);
+    
+    // 如果是切换选集，直接更新播放器
+    if (currentVideo?.bvid === video.bvid && video.page) {
+      setCurrentVideo(video);
+      // 关闭当前播放器
+      await window.electronAPI.closePlayerView();
+      // 创建新的播放器并设置分P
+      await window.electronAPI.createPlayerView(`${video.bvid}?p=${video.page}`);
+      return;
+    }
+    
+    // 其他情况正常处理
     setCurrentVideo(video);
     
     // 先尝试加载选集信息
@@ -106,7 +118,7 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
       // 如果不是选集，尝试加载合集信息
       await loadSeriesInfo(video.bvid);
     }
-  }, [loadEpisodeInfo, loadSeriesInfo]);
+  }, [currentVideo, loadEpisodeInfo, loadSeriesInfo]);
 
   // 处理下一个视频
   const handleNext = useCallback(() => {
