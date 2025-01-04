@@ -136,10 +136,10 @@ export const PlayList: React.FC<PlayListProps> = ({
   return (
     <div 
       ref={parentRef} 
-      className="h-full flex flex-col min-h-0 bg-gray-50/50"
+      className="h-full flex flex-col min-h-0 bg-white"
     >
       {/* 标题区域 */}
-      <div className="flex-none px-4 py-3 text font-medium sticky top-0 z-10 text-gray-900 bg-gray-50/80 backdrop-blur-sm border-b border-gray-100 app-drag-region">
+      <div className="flex-none px-4 py-3 text font-medium sticky top-0 z-10 text-gray-900 bg-white backdrop-blur-sm border-b border-gray-100 app-drag-region">
         <div className="flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="currentColor" d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/>
