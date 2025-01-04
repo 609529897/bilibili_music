@@ -76,7 +76,7 @@ export const SeriesList: React.FC<SeriesListProps> = ({
   return (
     <div 
       ref={parentRef} 
-      className="h-full flex flex-col min-h-0 bg-white"
+      className="h-full flex flex-col overflow-hidden bg-white"
     >
       {/* 标题区域 */}
       <div className="flex-none px-4 py-3 font-medium sticky top-0 z-10 text-gray-700 bg-white border-b border-gray-100">
@@ -91,7 +91,7 @@ export const SeriesList: React.FC<SeriesListProps> = ({
       {/* 列表区域 */}
       <div
         ref={scrollParentRef}
-        className="flex-1 overflow-auto"
+        className="flex-1 overflow-y-auto"
       >
         <div
           style={{

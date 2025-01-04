@@ -184,7 +184,7 @@ const App: React.FC = () => {
 
               {/* 合集列表 */}
               <AnimatePresence mode="wait">
-                {seriesInfo && seriesInfo.videos.length > 1 && (
+                {seriesInfo && (
                   <motion.div
                     key="series"
                     className="w-[420px] flex-none border-l border-gray-100"
@@ -197,9 +197,8 @@ const App: React.FC = () => {
                       damping: 30,
                       opacity: { duration: 0.2 }
                     }}
-                    style={{ overflow: 'hidden' }}
                   >
-                    <div className="w-[420px]">
+                    <div className="w-[420px] h-full">
                       <ErrorBoundary>
                         <SeriesList
                           playlist={seriesInfo.videos}
@@ -216,7 +215,7 @@ const App: React.FC = () => {
                 {episodeInfo && episodeInfo.videos.length > 1 && (
                   <motion.div
                     key="episode"
-                    className="w-[420px] flex-none border-l border-gray-100"
+                    className="w-full flex-none border-l border-gray-100"
                     initial={{ width: 0, opacity: 0 }}
                     animate={{ width: 420, opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
@@ -226,9 +225,8 @@ const App: React.FC = () => {
                       damping: 30,
                       opacity: { duration: 0.2 }
                     }}
-                    style={{ overflow: 'hidden' }}
                   >
-                    <div className="w-[420px]">
+                    <div className="w-full h-full">
                       <ErrorBoundary>
                         <EpisodeList
                           playlist={episodeInfo.videos}
