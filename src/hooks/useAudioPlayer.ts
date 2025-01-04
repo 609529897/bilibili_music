@@ -101,18 +101,22 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
     console.log('Loading audio URL for:', bvid);
     const videoId = bvid + (currentVideo?.page ? `?p=${currentVideo.page}` : '');
     
-    const result = await ApiClient.request(
-      () => window.electronAPI.getVideoAudioUrl(videoId),
-      { maxRetries: 2 }
-    );
+    try {
+      const result = await window.electronAPI.getVideoAudioUrl(videoId);
+      if (!result.success || !result.data.audioUrl) {
+        throw new Error("获取音频地址失败");
+      }
 
-    if (!result.success || !result.data.audioUrl) {
-      throw new Error(result.error || "获取音频地址失败");
+      const proxyUrl = await window.electronAPI.proxyAudio(result.data.audioUrl);
+      if (!proxyUrl) {
+        throw new Error("代理音频地址失败");
+      }
+
+      return proxyUrl;
+    } catch (error) {
+      console.error('Failed to get audio URL:', error);
+      throw error;
     }
-
-    return await ApiClient.request(
-      () => window.electronAPI.proxyAudio(result.data.audioUrl)
-    );
   }, [currentVideo?.page]);
 
   // 处理音频播放
@@ -144,76 +148,51 @@ const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProp
       audio.crossOrigin = 'anonymous';
       audio.preload = 'auto';
 
-      // 并行加载音频URL
-      const audioUrlPromise = loadAudioUrl(currentVideo.bvid);
+      // 获取音频URL
+      const audioUrl = await loadAudioUrl(currentVideo.bvid);
+      if (abortController.signal.aborted) return;
 
-      // 等待一小段时间确保之前的音频完全停止
-      await Promise.all([
-        new Promise(resolve => setTimeout(resolve, 50)),
-        audioUrlPromise.then(async (audioUrl) => {
-          if (abortController.signal.aborted) return;
+      console.log('Got audio URL, setting up audio element');
+      audio.src = audioUrl;
+      audio.load();
 
-          console.log('Got audio URL, setting up audio element');
-          audio.src = audioUrl;
-          audio.load();
+      // 等待音频加载
+      await new Promise((resolve, reject) => {
+        const loadTimeout = setTimeout(() => {
+          reject(new Error('Audio loading timeout after 5 seconds'));
+        }, 5000);
 
-          // 等待音频加载
-          await new Promise((resolve, reject) => {
-            const loadTimeout = setTimeout(() => {
-              console.warn('Audio loading is taking longer than expected');
-              // 5秒后发出警告，但继续等待
-              setTimeout(() => {
-                reject(new Error('Audio loading timeout after 8 seconds'));
-              }, 3000);
-            }, 5000);
+        const handleCanPlay = () => {
+          clearTimeout(loadTimeout);
+          resolve(true);
+        };
 
-            const handleCanPlay = () => {
-              clearTimeout(loadTimeout);
-              console.log('Audio is ready to play');
-              resolve(true);
-            };
+        const handleError = (e: Event) => {
+          clearTimeout(loadTimeout);
+          const audioError = (e.target as HTMLAudioElement).error;
+          reject(new Error(`Audio loading failed: ${audioError?.message || 'Unknown error'}`));
+        };
 
-            const handleLoadStart = () => {
-              console.log('Audio started loading');
-            };
+        audio.addEventListener('canplay', handleCanPlay);
+        audio.addEventListener('error', handleError);
 
-            const handleProgress = () => {
-              // 重置超时计时器，因为正在加载中
-              clearTimeout(loadTimeout);
-            };
+        return () => {
+          clearTimeout(loadTimeout);
+          audio.removeEventListener('canplay', handleCanPlay);
+          audio.removeEventListener('error', handleError);
+        };
+      });
 
-            const handleError = (e: Event) => {
-              clearTimeout(loadTimeout);
-              const audioError = (e.target as HTMLAudioElement).error;
-              reject(new Error(`Audio loading failed: ${audioError?.message || 'Unknown error'}`));
-            };
+      if (abortController.signal.aborted) return;
 
-            audio.addEventListener('loadstart', handleLoadStart);
-            audio.addEventListener('progress', handleProgress);
-            audio.addEventListener('canplay', handleCanPlay);
-            audio.addEventListener('error', handleError);
-
-            return () => {
-              clearTimeout(loadTimeout);
-              audio.removeEventListener('loadstart', handleLoadStart);
-              audio.removeEventListener('progress', handleProgress);
-              audio.removeEventListener('canplay', handleCanPlay);
-              audio.removeEventListener('error', handleError);
-            };
-          });
-
-          if (abortController.signal.aborted) return;
-
-          console.log('Audio loaded, starting playback');
-          await audio.play();
-          
-          updateAudioState({
-            isPlaying: true,
-            isLoading: false,
-          });
-          console.log('Playback started successfully');
-        })
-      ]);
+      console.log('Audio loaded, starting playback');
+      await audio.play();
+      
+      updateAudioState({
+        isPlaying: true,
+        isLoading: false,
+      });
+      console.log('Playback started successfully');
     } catch (error) {
       console.error('Failed to load audio:', error);
       updateAudioState({ 
