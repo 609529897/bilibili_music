@@ -469,30 +469,41 @@ ipcMain.handle('get-favorite-videos', async (_event, mediaId: number, currentPag
 // 获取视频音频URL
 ipcMain.handle('get-video-audio-url', async (_event, bvid: string) => {
   try {
-    const cookieString = await getCookieString()
+    const cookieString = await getCookieString();
     const headers = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       'Referer': 'https://www.bilibili.com'
     }
 
+    // 解析 bvid 和 p 参数
+    let videoBvid = bvid;
+    let page = 1;
+    if (bvid.includes('?p=')) {
+      const [bv, p] = bvid.split('?p=');
+      videoBvid = bv;
+      page = parseInt(p, 10);
+    }
+
     // 先获取视频信息以获取 cid
     const videoInfoResponse = await axios.get(API.VIDEO_INFO, {
       params: {
-        bvid: bvid
+        bvid: videoBvid
       },
       headers: {
         ...headers,
         Cookie: cookieString
       }
-    })
+    });
 
     if (videoInfoResponse.data.code === 0) {
-      const cid = videoInfoResponse.data.data.cid
-      console.log('Got cid for video:', bvid, cid)
+      // 获取对应分P的 cid
+      const pages = videoInfoResponse.data.data.pages;
+      const cid = pages[page - 1]?.cid || videoInfoResponse.data.data.cid;
+      console.log('Got cid for video:', videoBvid, 'page:', page, 'cid:', cid);
 
       const playUrlResponse = await axios.get(API.PLAY_URL, {
         params: {
-          bvid: bvid,
+          bvid: videoBvid,
           cid: cid,
           fnval: 16,
           qn: 64,
@@ -503,26 +514,26 @@ ipcMain.handle('get-video-audio-url', async (_event, bvid: string) => {
           ...headers,
           Cookie: cookieString
         }
-      })
+      });
 
       if (playUrlResponse.data.code === 0) {
-        const audioUrl = playUrlResponse.data.data.dash?.audio?.[0]?.baseUrl
+        const audioUrl = playUrlResponse.data.data.dash?.audio?.[0]?.baseUrl;
         if (audioUrl) {
-          return { success: true, data: { audioUrl } }
+          return { success: true, data: { audioUrl } };
         }
-        return { success: false, error: 'No audio URL found' }
+        return { success: false, error: 'No audio URL found' };
       }
-      return { success: false, error: playUrlResponse.data.message }
+      return { success: false, error: playUrlResponse.data.message };
     }
-    return { success: false, error: videoInfoResponse.data.message }
+    return { success: false, error: videoInfoResponse.data.message };
   } catch (error) {
-    console.error('Error getting video audio URL:', error.response?.data || error)
+    console.error('Error getting video audio URL:', error.response?.data || error);
     return { 
       success: false, 
       error: error.response?.data?.message || error.message || 'Failed to get audio URL'
-    }
+    };
   }
-})
+});
 
 // 获取用户信息
 ipcMain.handle('get-user-info', async () => {

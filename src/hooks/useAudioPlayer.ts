@@ -9,446 +9,366 @@ interface UseAudioPlayerProps {
   onNext?: () => void;
 }
 
+interface AudioState {
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+  volume: number;
+  isMuted: boolean;
+  isLoading: boolean;
+  thumbnailUrl: string | null;
+}
+
+const initialAudioState: AudioState = {
+  isPlaying: false,
+  currentTime: 0,
+  duration: 0,
+  volume: 0.5,
+  isMuted: false,
+  isLoading: false,
+  thumbnailUrl: null,
+};
+
 const useAudioPlayer = ({ currentVideo, onPrevious, onNext }: UseAudioPlayerProps) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  // 状态管理
+  const [audioState, setAudioState] = useState<AudioState>(initialAudioState);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const loadingRef = useRef<boolean>(false);
 
-  const [thumbnailUrl, setThumbnailUrl] = useState("");
-
-  // 等待并获取 audio 元素
-  useEffect(() => {
-    const getAudioElement = () => {
-      const element = document.getElementById('audio-element') as HTMLAudioElement;
-      if (element) {
-        console.log('Audio element found:', element);
-        setAudioElement(element);
-        audioRef.current = element;
-        return true;
-      }
-      return false;
-    };
-
-    if (!getAudioElement()) {
-      console.log('Audio element not found, waiting...');
-      const interval = setInterval(() => {
-        if (getAudioElement()) {
-          clearInterval(interval);
-        }
-      }, 100);
-
-      return () => clearInterval(interval);
-    }
+  // 辅助函数：更新音频状态
+  const updateAudioState = useCallback((updates: Partial<AudioState>) => {
+    setAudioState(prev => ({ ...prev, ...updates }));
   }, []);
 
+  // 初始化音频元素
   useEffect(() => {
-    const getThumbnailUrl = async (path: string) => {
-      if (!path) return "";
-      try {
-        const imageUrl = await fetchImage(path);
-        return imageUrl;
-      } catch (error) {
-        console.error("Error fetching image:", error);
-        return "";
-      }
-    };
-
-    const loadThumbnail = async () => {
-      if (currentVideo?.thumbnail) {
-        const url = await getThumbnailUrl(currentVideo.thumbnail);
-        setThumbnailUrl(url);
+    if (!audioRef.current) {
+      const audio = document.getElementById('audio-element') as HTMLAudioElement;
+      if (audio) {
+        console.log('Found existing audio element');
+        audioRef.current = audio;
       } else {
-        setThumbnailUrl("");
+        console.log('Creating new audio element');
+        const newAudio = document.createElement('audio');
+        newAudio.id = 'audio-element';
+        newAudio.preload = 'auto';
+        newAudio.crossOrigin = 'anonymous';
+        document.body.appendChild(newAudio);
+        audioRef.current = newAudio;
       }
-    };
-    loadThumbnail();
-  }, [currentVideo?.thumbnail]);
-
-  useEffect(() => {
-    if (audioElement) {
-      audioElement.volume = volume;
-      audioElement.muted = isMuted;
-    }
-  }, [volume, isMuted, audioElement]);
-
-  const handleSeek = useCallback(async (newTime: number) => {
-    if (!audioElement) return;
-
-    try {
-      // 确保新时间在有效范围内
-      const validTime = Math.max(0, Math.min(newTime, audioElement.duration || 0));
-      
-      // 如果拖动位置超出实际时长的90%，重新加载音频
-      if (validTime > (audioElement.duration * 0.9)) {
-        console.log('Seeking near end of audio, reloading...');
-        // 触发重新加载
-        if (currentVideo) {
-          setCurrentTime(0);
-          handleAudio();
-        }
-        return;
-      }
-
-      console.log('Seeking to:', validTime);
-      audioElement.currentTime = validTime;
-      
-      if (isPlaying) {
-        try {
-          await audioElement.play();
-        } catch (playError) {
-          console.error('Error resuming playback after seek:', playError);
-          // 如果播放失败，尝试重新加载
-          if (currentVideo) {
-            console.log('Playback failed after seek, reloading...');
-            handleAudio();
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error seeking:', error);
-      // 如果设置时间失败，也尝试重新加载
-      if (currentVideo) {
-        console.log('Seek failed, reloading...');
-        handleAudio();
-      }
-    }
-  }, [audioElement, isPlaying, currentVideo]);
-
-  const handleAudio = useCallback(async () => {
-    if (!currentVideo?.bvid || !audioElement) return;
-
-    try {
-      setIsLoading(true);
-      const result = await ApiClient.request(
-        () => window.electronAPI.getVideoAudioUrl(currentVideo.bvid),
-        { maxRetries: 2 }
-      );
-
-      if (!result.success) {
-        throw new Error(result.error || "获取音频地址失败");
-      }
-
-      const audioUrl = await ApiClient.request(
-        () => window.electronAPI.proxyAudio(result.data.audioUrl)
-      );
-
-      // 如果有正在进行的加载过程，取消它
-      if (abortControllerRef.current) {
-        console.log('Aborting previous audio loading...');
-        abortControllerRef.current.abort();
-      }
-
-      // 创建新的 AbortController
-      const abortController = new AbortController();
-      abortControllerRef.current = abortController;
-
-      // 清理之前的音频状态
-      audioElement.pause();
-      audioElement.removeAttribute('src');
-      audioElement.load();
-      setIsPlaying(false);
-      setCurrentTime(0);
-      setDuration(0);
-
-      console.log('Loading audio for video:', currentVideo.bvid);
-
-      // 检查是否已被取消
-      if (abortController.signal.aborted) {
-        console.log('Audio loading aborted');
-        return;
-      }
-      
-      // 再次检查是否已被取消
-      if (abortController.signal.aborted) {
-        console.log('Audio loading aborted after getting URL');
-        return;
-      }
-
-      console.log('Got audio URL result:', result);
-      
-      if (!result.success || !result.data.audioUrl) {
-        throw new Error(result.error || "获取音频地址失败");
-      }
-
-      console.log('Got proxied audio URL:', audioUrl);
-
-      const loadAudio = () => {
-        return new Promise<void>((resolve, reject) => {
-          if (!audioElement) return reject(new Error('No audio element'));
-
-          let loadTimeout: NodeJS.Timeout;
-
-          const cleanup = () => {
-            clearTimeout(loadTimeout);
-            audioElement.removeEventListener('canplay', handleCanPlay);
-            audioElement.removeEventListener('error', handleError);
-            audioElement.removeEventListener('loadedmetadata', handleMetadata);
-          };
-
-          const handleCanPlay = () => {
-            if (abortController.signal.aborted) {
-              cleanup();
-              reject(new Error('Audio loading aborted'));
-              return;
-            }
-
-            console.log('Audio can play now');
-            cleanup();
-            resolve();
-          };
-
-          const handleMetadata = () => {
-            if (!abortController.signal.aborted) {
-              console.log('Audio metadata loaded:', {
-                duration: audioElement.duration,
-                currentTime: audioElement.currentTime,
-                readyState: audioElement.readyState,
-                networkState: audioElement.networkState
-              });
-              setDuration(audioElement.duration);
-            }
-          };
-
-          const handleError = (e: Event) => {
-            const target = e.target as HTMLAudioElement;
-            console.error('Audio loading error details:', {
-              error: target.error,
-              networkState: target.networkState,
-              readyState: target.readyState,
-              currentSrc: target.currentSrc,
-              src: target.src
-            });
-            cleanup();
-            reject(new Error('Failed to load audio'));
-          };
-
-          // 设置超时
-          loadTimeout = setTimeout(() => {
-            cleanup();
-            reject(new Error('Audio loading timeout'));
-          }, 10000);
-
-          audioElement.addEventListener('canplay', handleCanPlay);
-          audioElement.addEventListener('error', handleError);
-          audioElement.addEventListener('loadedmetadata', handleMetadata);
-
-          // 设置音频属性
-          audioElement.crossOrigin = 'anonymous';
-          audioElement.preload = 'auto';
-          audioElement.src = audioUrl;
-          audioElement.volume = volume;
-          audioElement.muted = isMuted;
-
-          // 开始加载
-          console.log('Starting audio load...');
-          audioElement.load();
-        });
-      };
-
-      let retryCount = 0;
-      const maxRetries = 3;
-      
-      while (retryCount < maxRetries) {
-        try {
-          if (abortController.signal.aborted) {
-            console.log('Audio loading aborted before retry');
-            return;
-          }
-
-          await loadAudio();
-          console.log('Audio loaded successfully');
-          setIsLoading(false);
-          
-          const handleTimeUpdate = () => {
-            if (!abortController.signal.aborted) {
-              setCurrentTime(audioElement.currentTime);
-            }
-          };
-
-          const handleEnded = () => {
-            if (!abortController.signal.aborted) {
-              console.log('Audio playback ended');
-              setIsPlaying(false);
-              setCurrentTime(0);
-              if (onNext) {
-                onNext();
-              }
-            }
-          };
-
-          audioElement.addEventListener('timeupdate', handleTimeUpdate);
-          audioElement.addEventListener('ended', handleEnded);
-
-          if (abortController.signal.aborted) {
-            console.log('Audio loading aborted before playback');
-            return;
-          }
-
-          // 自动开始播放
-          console.log('Starting playback...');
-          await audioElement.play();
-          setIsPlaying(true);
-          console.log('Playback started successfully');
-
-          return () => {
-            audioElement.removeEventListener('timeupdate', handleTimeUpdate);
-            audioElement.removeEventListener('ended', handleEnded);
-          };
-        } catch (error) {
-          if (abortController.signal.aborted) {
-            console.log('Audio loading aborted during retry');
-            return;
-          }
-
-          console.error(`Attempt ${retryCount + 1} failed:`, error);
-          retryCount++;
-          
-          audioElement.pause();
-          audioElement.removeAttribute('src');
-          audioElement.load();
-          
-          if (retryCount === maxRetries) {
-            console.error('Max retries reached, giving up');
-            setIsLoading(false);
-            throw error;
-          }
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-
-    } catch (error) {
-      console.error('Failed to load audio:', error);
-      // 显示错误提示
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentVideo, audioElement]);
-
-  useEffect(() => {
-    // 只在视频ID改变时重新加载音频
-    const currentVideoId = currentVideo?.bvid;
-    if (currentVideoId) {
-      handleAudio();
     }
 
     return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
-      
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.removeAttribute('src');
-        audioElement.load();
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+        audio.src = '';
+        audio.load();
       }
     };
-  }, [currentVideo?.bvid]); // 只依赖视频ID
+  }, []);
 
+  // 辅助函数：清理音频资源
+  const cleanupAudio = useCallback(() => {
+    console.log('Cleaning up audio resources');
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.src = '';
+      audio.load();
+    }
+
+    loadingRef.current = false;
+    updateAudioState({
+      isPlaying: false,
+      currentTime: 0,
+      duration: 0,
+      isLoading: false,
+    });
+  }, [updateAudioState]);
+
+  // 加载音频URL
+  const loadAudioUrl = useCallback(async (bvid: string) => {
+    console.log('Loading audio URL for:', bvid);
+    const videoId = bvid + (currentVideo?.page ? `?p=${currentVideo.page}` : '');
+    
+    const result = await ApiClient.request(
+      () => window.electronAPI.getVideoAudioUrl(videoId),
+      { maxRetries: 2 }
+    );
+
+    if (!result.success || !result.data.audioUrl) {
+      throw new Error(result.error || "获取音频地址失败");
+    }
+
+    return await ApiClient.request(
+      () => window.electronAPI.proxyAudio(result.data.audioUrl)
+    );
+  }, [currentVideo?.page]);
+
+  // 处理音频播放
+  const handleAudio = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!currentVideo?.bvid || !audio) {
+      console.log('No video or audio element available');
+      return;
+    }
+
+    if (loadingRef.current) {
+      console.log('Already loading audio, skipping');
+      return;
+    }
+
+    try {
+      loadingRef.current = true;
+      console.log('Starting audio loading process for:', currentVideo.title);
+      
+      cleanupAudio();
+      updateAudioState({ isLoading: true });
+
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
+      // 设置音频属性
+      audio.volume = audioState.volume;
+      audio.muted = audioState.isMuted;
+      audio.crossOrigin = 'anonymous';
+      audio.preload = 'auto';
+
+      // 并行加载音频URL
+      const audioUrlPromise = loadAudioUrl(currentVideo.bvid);
+
+      // 等待一小段时间确保之前的音频完全停止
+      await Promise.all([
+        new Promise(resolve => setTimeout(resolve, 50)),
+        audioUrlPromise.then(async (audioUrl) => {
+          if (abortController.signal.aborted) return;
+
+          console.log('Got audio URL, setting up audio element');
+          audio.src = audioUrl;
+          audio.load();
+
+          // 等待音频加载
+          await new Promise((resolve, reject) => {
+            const loadTimeout = setTimeout(() => {
+              console.warn('Audio loading is taking longer than expected');
+              // 5秒后发出警告，但继续等待
+              setTimeout(() => {
+                reject(new Error('Audio loading timeout after 8 seconds'));
+              }, 3000);
+            }, 5000);
+
+            const handleCanPlay = () => {
+              clearTimeout(loadTimeout);
+              console.log('Audio is ready to play');
+              resolve(true);
+            };
+
+            const handleLoadStart = () => {
+              console.log('Audio started loading');
+            };
+
+            const handleProgress = () => {
+              // 重置超时计时器，因为正在加载中
+              clearTimeout(loadTimeout);
+            };
+
+            const handleError = (e: Event) => {
+              clearTimeout(loadTimeout);
+              const audioError = (e.target as HTMLAudioElement).error;
+              reject(new Error(`Audio loading failed: ${audioError?.message || 'Unknown error'}`));
+            };
+
+            audio.addEventListener('loadstart', handleLoadStart);
+            audio.addEventListener('progress', handleProgress);
+            audio.addEventListener('canplay', handleCanPlay);
+            audio.addEventListener('error', handleError);
+
+            return () => {
+              clearTimeout(loadTimeout);
+              audio.removeEventListener('loadstart', handleLoadStart);
+              audio.removeEventListener('progress', handleProgress);
+              audio.removeEventListener('canplay', handleCanPlay);
+              audio.removeEventListener('error', handleError);
+            };
+          });
+
+          if (abortController.signal.aborted) return;
+
+          console.log('Audio loaded, starting playback');
+          await audio.play();
+          
+          updateAudioState({
+            isPlaying: true,
+            isLoading: false,
+          });
+          console.log('Playback started successfully');
+        })
+      ]);
+    } catch (error) {
+      console.error('Failed to load audio:', error);
+      updateAudioState({ 
+        isPlaying: false,
+        isLoading: false 
+      });
+    } finally {
+      loadingRef.current = false;
+    }
+  }, [currentVideo, audioState.volume, audioState.isMuted, cleanupAudio, updateAudioState, loadAudioUrl]);
+
+  // 设置音频事件监听器
   useEffect(() => {
-    if (!audioElement) return;
+    const audio = audioRef.current;
+    if (!audio) return;
 
-    const playAudio = async () => {
+    console.log('Setting up audio event listeners');
+
+    const handlers = {
+      loadedmetadata: () => {
+        console.log('Audio metadata loaded:', {
+          duration: audio.duration,
+          currentTime: audio.currentTime,
+          readyState: audio.readyState,
+          networkState: audio.networkState
+        });
+        updateAudioState({ duration: audio.duration });
+      },
+      timeupdate: () => {
+        updateAudioState({ currentTime: audio.currentTime });
+      },
+      ended: () => {
+        console.log('Audio playback ended');
+        updateAudioState({
+          isPlaying: false,
+          currentTime: 0,
+        });
+        onNext?.();
+      },
+      error: (e: Event) => {
+        const target = e.target as HTMLAudioElement;
+        console.error('Audio error:', {
+          error: target.error,
+          networkState: target.networkState,
+          readyState: target.readyState,
+          src: target.src
+        });
+      },
+      playing: () => {
+        console.log('Audio playing');
+        updateAudioState({ isPlaying: true });
+      },
+      pause: () => {
+        console.log('Audio paused');
+        updateAudioState({ isPlaying: false });
+      }
+    };
+
+    // 添加所有事件监听器
+    Object.entries(handlers).forEach(([event, handler]) => {
+      audio.addEventListener(event, handler);
+    });
+
+    return () => {
+      Object.entries(handlers).forEach(([event, handler]) => {
+        audio.removeEventListener(event, handler);
+      });
+    };
+  }, [updateAudioState, onNext]);
+
+  // 监听视频变化，自动开始播放
+  useEffect(() => {
+    if (currentVideo?.bvid) {
+      console.log('Video changed, starting playback:', currentVideo.title);
+      handleAudio().catch(error => {
+        console.error('Failed to start playback:', error);
+      });
+    }
+  }, [currentVideo?.bvid, handleAudio]);
+
+  // 加载缩略图
+  useEffect(() => {
+    if (currentVideo?.thumbnail) {
+      fetchImage(currentVideo.thumbnail)
+        .then(url => updateAudioState({ thumbnailUrl: url }))
+        .catch(console.error);
+    }
+  }, [currentVideo?.thumbnail, updateAudioState]);
+
+  // 播放控制函数
+  const controls = {
+    togglePlay: useCallback(async () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      
       try {
-        if (isPlaying) {
-          await audioElement.play();
+        if (audioState.isPlaying) {
+          audio.pause();
         } else {
-          audioElement.pause();
+          await audio.play();
         }
       } catch (error) {
-        console.error('Playback error:', error);
-        setIsPlaying(false);
+        console.error('Error toggling play state:', error);
       }
+    }, [audioState.isPlaying]),
+
+    toggleMute: useCallback(() => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      
+      const newMutedState = !audioState.isMuted;
+      audio.muted = newMutedState;
+      updateAudioState({ 
+        isMuted: newMutedState,
+        volume: newMutedState && audioState.volume === 0 ? 0.5 : audioState.volume 
+      });
+    }, [audioState.isMuted, audioState.volume, updateAudioState]),
+
+    handleVolumeChange: useCallback((newVolume: number) => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      
+      audio.volume = newVolume;
+      updateAudioState({
+        volume: newVolume,
+        isMuted: newVolume === 0
+      });
+    }, [updateAudioState]),
+
+    handleTimeSeek: useCallback((newTime: number) => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      
+      audio.currentTime = newTime;
+      updateAudioState({ currentTime: newTime });
+    }, [updateAudioState]),
+
+    handlePrevious: useCallback(() => {
+      cleanupAudio();
+      onPrevious?.();
+    }, [cleanupAudio, onPrevious]),
+
+    handleNext: useCallback(() => {
+      cleanupAudio();
+      onNext?.();
+    }, [cleanupAudio, onNext])
+  };
+
+  // 组件卸载时清理
+  useEffect(() => {
+    return () => {
+      cleanupAudio();
     };
-
-    playAudio();
-  }, [isPlaying, audioElement]);
-
-  const togglePlay = () => {
-    if (audioElement) {
-      if (isPlaying) {
-        audioElement.pause();
-      } else {
-        audioElement.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const toggleMute = useCallback(() => {
-    if (audioElement) {
-      const newMutedState = !isMuted;
-      audioElement.muted = newMutedState;
-      setIsMuted(newMutedState);
-      // 如果取消静音，恢复之前的音量
-      if (!newMutedState && volume === 0) {
-        const newVolume = 0.5;
-        audioElement.volume = newVolume;
-        setVolume(newVolume);
-      }
-    }
-  }, [audioElement, isMuted, volume]);
-
-  const handleVolumeChange = useCallback((newVolume: number) => {
-    if (audioElement) {
-      // 直接设置音量，不触发其他操作
-      audioElement.volume = newVolume;
-      setVolume(newVolume);
-      setIsMuted(newVolume === 0);
-    }
-  }, [audioElement]);
-
-  const handleTimeSeek = (newTime: number) => {
-    if (audioElement) {
-      audioElement.currentTime = newTime;
-      setCurrentTime(newTime);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (onPrevious) {
-      setIsPlaying(false);
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.currentTime = 0;
-      }
-      onPrevious();
-    }
-  };
-
-  const handleNext = () => {
-    if (onNext) {
-      setIsPlaying(false);
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.currentTime = 0;
-      }
-      onNext();
-    }
-  };
+  }, [cleanupAudio]);
 
   return {
-    isPlaying,
-    currentTime,
-    duration,
-    volume,
-    isMuted,
-    thumbnailUrl,
-    isLoading,
-    setIsPlaying,
-    togglePlay,
-    toggleMute,
-    handleVolumeChange,
-    handleTimeSeek,
-    handlePrevious,
-    handleNext,
-    handleSeek,
+    ...audioState,
+    ...controls,
   };
 };
 
