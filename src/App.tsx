@@ -12,6 +12,7 @@ import { FavoritesDialog } from "./components/FavoritesDialog";
 import { DisclaimerDialog } from "./components/DisclaimerDialog";
 import { SWRConfig } from 'swr';
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { motion, AnimatePresence } from 'framer-motion';
 
 const App: React.FC = () => {
   const {
@@ -172,32 +173,58 @@ const App: React.FC = () => {
               </div>
 
               {/* 合集列表 */}
-              {seriesInfo && seriesInfo.videos.length > 1 && (
-                <div className="w-[420px] flex-none border-l border-gray-100 h-full">
-                  <ErrorBoundary>
-                    <SeriesList
-                      playlist={seriesInfo.videos}
-                      currentVideo={currentVideo}
-                      onVideoSelect={handleVideoSelect}
-                      seriesTitle={`合集 · ${seriesInfo.videos.length}个视频`}
-                    />
-                  </ErrorBoundary>
-                </div>
-              )}
+              <AnimatePresence mode="wait">
+                {seriesInfo && seriesInfo.videos.length > 1 && (
+                  <motion.div
+                    key="series"
+                    className="w-[420px] flex-none border-l border-gray-100"
+                    initial={{ x: "100%", opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: "100%", opacity: 0 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 30,
+                      opacity: { duration: 0.2 }
+                    }}
+                  >
+                    <ErrorBoundary>
+                      <SeriesList
+                        playlist={seriesInfo.videos}
+                        currentVideo={currentVideo}
+                        onVideoSelect={handleVideoSelect}
+                        seriesTitle={`合集 · ${seriesInfo.videos.length}个视频`}
+                      />
+                    </ErrorBoundary>
+                  </motion.div>
+                )}
 
-              {/* 选集列表 */}
-              {episodeInfo && episodeInfo.videos.length > 1 && (
-                <div className="w-[420px] flex-none border-l border-gray-100 h-full">
-                  <ErrorBoundary>
-                    <EpisodeList
-                      playlist={episodeInfo.videos}
-                      currentVideo={currentVideo}
-                      onVideoSelect={handleVideoSelect}
-                      seriesTitle={`选集 · ${episodeInfo.videos.length}个分P`}
-                    />
-                  </ErrorBoundary>
-                </div>
-              )}
+                {/* 选集列表 */}
+                {episodeInfo && episodeInfo.videos.length > 1 && (
+                  <motion.div
+                    key="episode"
+                    className="w-[420px] flex-none border-l border-gray-100"
+                    initial={{ x: "100%", opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: "100%", opacity: 0 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 30,
+                      opacity: { duration: 0.2 }
+                    }}
+                  >
+                    <ErrorBoundary>
+                      <EpisodeList
+                        playlist={episodeInfo.videos}
+                        currentVideo={currentVideo}
+                        onVideoSelect={handleVideoSelect}
+                        seriesTitle={`选集 · ${episodeInfo.videos.length}个分P`}
+                      />
+                    </ErrorBoundary>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 

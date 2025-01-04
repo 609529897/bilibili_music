@@ -76,10 +76,10 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({
   return (
     <div 
       ref={parentRef} 
-      className="h-full flex flex-col min-h-0 bg-white" // 更浅的背景色
+      className="h-full flex flex-col min-h-0 bg-white"
     >
       {/* 标题区域 */}
-      <div className="flex-none px-4 py-3 text-sm font-medium sticky top-0 z-10 text-gray-700 bg-gray-50/60 backdrop-blur-sm border-b border-gray-100 app-drag-region">
+      <div className="flex-none px-4 py-3 font-medium sticky top-0 z-10 text-gray-700 bg-white border-b border-gray-100">
         <div className="flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24">
             <path fill="currentColor" d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
@@ -92,10 +92,6 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({
       <div
         ref={scrollParentRef}
         className="flex-1 overflow-auto"
-        style={{
-          height: 'calc(100% - 36px)', // 更小的标题高度
-          contain: 'strict',
-        }}
       >
         <div
           style={{
