@@ -59,8 +59,12 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
       console.log('Episode info response:', response);
       
       if (response.success && response.data.videos.length > 0) {
-        setEpisodeInfo(response.data);
-        setSeriesInfo(null); // 清除合集信息
+        // 只有当视频有多个分P时才设置选集信息
+        if (response.data.videos.length > 1) {
+          setEpisodeInfo(response.data);
+        } else {
+          setEpisodeInfo(null);
+        }
         return true;
       }
       
@@ -81,8 +85,12 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
       console.log('Series info response:', response);
       
       if (response.success && response.data.videos.length > 0) {
-        setSeriesInfo(response.data);
-        setEpisodeInfo(null); // 清除选集信息
+        // 只有当合集有多个视频时才设置合集信息
+        if (response.data.videos.length > 1) {
+          setSeriesInfo(response.data);
+        } else {
+          setSeriesInfo(null);
+        }
         return true;
       }
       
@@ -101,35 +109,45 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
     
     // 如果是从 PlayList 点击的视频（没有 page 参数）
     if (!video.page) {
-      // 设置临时视频
-      const tempVideo = { ...video, page: 1 };
-      setCurrentVideo(tempVideo);
-
       try {
+        // 先清除之前的合集和选集信息
+        setSeriesInfo(null);
+        setEpisodeInfo(null);
+        
         // 并行加载合集和选集信息
-        const [hasSeries, hasEpisodes] = await Promise.all([
-          loadSeriesInfo(video.bvid),
-          loadEpisodeInfo(video.bvid)
+        const [seriesResponse, episodeResponse] = await Promise.all([
+          window.electronAPI.getSeriesInfo(video.bvid),
+          window.electronAPI.getEpisodeInfo(video.bvid)
         ]);
 
-        // 只有在当前视频仍然是这个视频时才更新
-        if (currentVideo?.bvid === video.bvid) {
-          if (hasSeries && seriesInfo?.videos.length) {
-            setCurrentVideo(seriesInfo.videos[0]);
-          } else if (hasEpisodes && episodeInfo?.videos.length) {
-            setCurrentVideo(episodeInfo.videos[0]);
-          }
-          // 如果既不是合集也不是选集，保持临时视频不变
+        // 处理合集信息
+        if (seriesResponse.success && seriesResponse.data.videos.length > 1) {
+          setSeriesInfo(seriesResponse.data);
+          // 播放收藏的这首歌，而不是第一首
+          setCurrentVideo({ ...video, page: 1 });
+          return;
         }
+
+        // 处理选集信息
+        if (episodeResponse.success && episodeResponse.data.videos.length > 1) {
+          setEpisodeInfo(episodeResponse.data);
+          // 选集默认播放第一个
+          setCurrentVideo(episodeResponse.data.videos[0]);
+          return;
+        }
+
+        // 如果既不是合集也不是选集，使用原始视频
+        setCurrentVideo({ ...video, page: 1 });
       } catch (error) {
         console.error('Error loading video info:', error);
-        // 发生错误时保持临时视频不变
+        // 发生错误时使用原始视频
+        setCurrentVideo({ ...video, page: 1 });
       }
     } else {
-      // 如果已经有 page 参数，直接设置
+      // 如果已经有 page 参数，说明是从选集或合集中选择的
       setCurrentVideo(video);
     }
-  }, [currentVideo?.bvid, episodeInfo, loadEpisodeInfo, loadSeriesInfo, seriesInfo]);
+  }, []);
 
   // 处理下一个视频
   const handleNext = useCallback(() => {
