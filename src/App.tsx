@@ -4,6 +4,7 @@ import { usePlaylist } from "./hooks/usePlaylist";
 import { useUserInfo } from "./hooks/useUserInfo";
 import { FavoritesList } from "./components/FavoritesList";
 import { PlayList } from "./components/PlayList";
+import { SeriesList } from "./components/SeriesList";
 import { ModernPlayer } from "./components/Player";
 import { LoginScreen } from "./components/LoginScreen";
 import { FavoritesDialog } from "./components/FavoritesDialog";
@@ -33,8 +34,10 @@ const App: React.FC = () => {
     loadMore,
     isLoadLoading,
     handleNext,
-    handlePrevious
+    handlePrevious,
+    seriesInfo,
   } = usePlaylist({ selectedFavorite });
+
 
   const {
     isLoggedIn,
@@ -147,30 +150,38 @@ const App: React.FC = () => {
               />
             )}
 
-            {/* 播放列表 */}
-            <div className="flex-1 flex flex-col min-w-0">
-              <ErrorBoundary>
-                {/* 移动端菜单按钮 */}
-                {/* <button
-                  onClick={() => setIsSidebarOpen(true)}
-                  className="md:hidden absolute top-6 left-3 p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-white/10 z-30"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                  </svg>
-                </button> */}
-                <PlayList
-                  playlist={playlist}
-                  currentVideo={currentVideo}
-                  isLoading={playlistLoading}
-                  error={playlistError}
-                  selectedFavorite={selectedFavorite?.title}
-                  onVideoSelect={handleVideoSelect}
-                  hasMore={hasMore}
-                  loadMore={loadMore}
-                  isLoadLoading={isLoadLoading}
-                />
-              </ErrorBoundary>
+            {/* 播放列表和合集列表容器 */}
+            <div className="flex-1 flex min-w-0">
+              {/* 播放列表 */}
+              <div className="flex-1 flex flex-col min-w-0">
+                <ErrorBoundary>
+                  <PlayList
+                    playlist={playlist}
+                    currentVideo={currentVideo}
+                    isLoading={playlistLoading}
+                    error={playlistError}
+                    selectedFavorite={selectedFavorite?.title}
+                    onVideoSelect={handleVideoSelect}
+                    hasMore={hasMore}
+                    loadMore={loadMore}
+                    isLoadLoading={isLoadLoading}
+                  />
+                </ErrorBoundary>
+              </div>
+
+              {/* 合集列表 */}
+              {seriesInfo && seriesInfo.videos.length > 1 && (
+                <div className="w-[360px] flex-none border-l border-gray-100 h-full">
+                  <ErrorBoundary>
+                    <SeriesList
+                      playlist={seriesInfo.videos}
+                      currentVideo={currentVideo}
+                      onVideoSelect={handleVideoSelect}
+                      seriesTitle={`合集 · ${seriesInfo.videos.length}个视频`}
+                    />
+                  </ErrorBoundary>
+                </div>
+              )}
             </div>
           </div>
 

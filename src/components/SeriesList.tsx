@@ -2,16 +2,11 @@ import { useRef, useState, useEffect } from 'react';
 import { Video } from '../types/electron';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
-interface PlayListProps {
+interface SeriesListProps {
   playlist: Video[];
   currentVideo: Video | null;
-  isLoading: boolean;
-  error: string | null;
-  selectedFavorite: string | undefined;
   onVideoSelect: (video: Video) => void;
-  hasMore: boolean;
-  loadMore: () => void;
-  isLoadLoading: boolean;
+  seriesTitle: string;
 }
 
 interface ImageCache {
@@ -21,16 +16,11 @@ interface ImageCache {
   };
 }
 
-export const PlayList: React.FC<PlayListProps> = ({
+export const SeriesList: React.FC<SeriesListProps> = ({
   playlist,
   currentVideo,
-  isLoading,
-  error,
-  selectedFavorite,
   onVideoSelect,
-  hasMore,
-  loadMore,
-  isLoadLoading,
+  seriesTitle,
 }) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const scrollParentRef = useRef<HTMLDivElement>(null);
@@ -83,56 +73,6 @@ export const PlayList: React.FC<PlayListProps> = ({
     });
   }, [playlist, rowVirtualizer.getVirtualItems()]);
 
-  // 处理滚动到底部加载更多
-  const handleScroll = () => {
-    if (!scrollParentRef.current || !hasMore || isLoadLoading) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = scrollParentRef.current;
-    if (scrollHeight - scrollTop - clientHeight < 100) {
-      loadMore();
-    }
-  };
-
-  useEffect(() => {
-    const scrollElement = scrollParentRef.current;
-    if (scrollElement) {
-      scrollElement.addEventListener('scroll', handleScroll);
-      return () => scrollElement.removeEventListener('scroll', handleScroll);
-    }
-  }, [hasMore, isLoadLoading]);
-
-  if (isLoading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-[fade_2s_ease-in-out_infinite] text-sm font-medium tracking-wider">
-          LOADING...
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center gap-2">
-        <div className="text-red-500">加载失败</div>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="text-sm text-pink-500"
-        >
-          重试
-        </button>
-      </div>
-    );
-  }
-
-  if (!playlist.length) {
-    return (
-      <div className="h-full flex items-center justify-center text-gray-500">
-        暂无内容
-      </div>
-    );
-  }
-
   return (
     <div 
       ref={parentRef} 
@@ -142,9 +82,9 @@ export const PlayList: React.FC<PlayListProps> = ({
       <div className="flex-none px-4 py-3 text-sm font-medium sticky top-0 z-10 text-gray-900 bg-gray-50/80 backdrop-blur-sm border-b border-gray-100">
         <div className="flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/>
+            <path fill="currentColor" d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
           </svg>
-          {selectedFavorite || '播放列表'}
+          {seriesTitle}
         </div>
       </div>
 
@@ -188,7 +128,7 @@ export const PlayList: React.FC<PlayListProps> = ({
                       <div className="w-2 h-2 rounded-full bg-pink-500" />
                     ) : (
                       <span className="text-sm text-gray-900">
-                        {virtualRow.index + 1}
+                        P{virtualRow.index + 1}
                       </span>
                     )}
                   </div>
@@ -227,24 +167,6 @@ export const PlayList: React.FC<PlayListProps> = ({
             );
           })}
         </div>
-
-        {/* 加载更多提示 */}
-        {hasMore && (
-          <div className="py-4 flex justify-center">
-            {isLoadLoading ? (
-              <div className="animate-[fade_2s_ease-in-out_infinite] text-sm font-medium tracking-wider">
-                LOADING...
-              </div>
-            ) : (
-              <button
-                onClick={loadMore}
-                className="text-sm text-pink-500"
-              >
-                加载更多
-              </button>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -254,4 +176,4 @@ function formatDuration(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-}
+} 

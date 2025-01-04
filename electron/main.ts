@@ -13,6 +13,8 @@ const API = {
   FAVORITE_DETAIL: 'https://api.bilibili.com/x/v3/fav/resource/list',
   LOGIN_URL: 'https://passport.bilibili.com/login',
   VIDEO_INFO: 'https://api.bilibili.com/x/web-interface/view',
+  SERIES_INFO: 'https://api.bilibili.com/x/web-interface/view/detail',
+  UGCSERIES_INFO: 'https://api.bilibili.com/x/web-interface/view/detail'
 }
 
 // 基础请求头
@@ -76,7 +78,7 @@ function createWindow() {
   }
 
   // 默认打开开发者工具
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
 // 打开B站登录页面
@@ -774,13 +776,11 @@ ipcMain.handle('window-maximize', () => {
 ipcMain.handle('create-player-view', (_, bvid: string) => {
   if (!mainWindow) return;
   
-  // 如果已存在播放器视图，先移除
   if (playerView) {
     mainWindow.removeBrowserView(playerView);
     playerView = null;
   }
 
-  // 创建新的播放器视图
   playerView = new BrowserView({
     webPreferences: {
       nodeIntegration: false,
@@ -791,31 +791,54 @@ ipcMain.handle('create-player-view', (_, bvid: string) => {
 
   mainWindow.addBrowserView(playerView);
 
-  // 设置播放器视图的位置和大小
   const bounds = mainWindow.getBounds();
-  const titleBarHeight = process.platform === 'darwin' ? 28 : 32; // 标题栏高度
+  const titleBarHeight = process.platform === 'darwin' ? 28 : 32;
+  // 修改播放器视图高度，预留空间给合集列表
+  const playerHeight = Math.floor(bounds.height * 0.7); // 播放器占70%高度
+  
   playerView.setBounds({
     x: 0,
     y: titleBarHeight,
     width: bounds.width,
-    height: bounds.height - titleBarHeight
+    height: playerHeight - titleBarHeight
   });
   playerView.setBackgroundColor('#000000');
 
-  // 加载 B 站播放器
+  // 加载播放器并监听播放结束事件
   playerView.webContents.loadURL(
     `https://player.bilibili.com/player.html?bvid=${bvid}&high_quality=1&danmaku=0&autoplay=1&theater=1&t=0&p=1&as_wide=1&widescale=1`
   );
+
+  // 注入监听脚本
+  playerView.webContents.on('did-finish-load', () => {
+    playerView?.webContents.executeJavaScript(`
+      const video = document.querySelector('video');
+      if (video) {
+        video.addEventListener('ended', () => {
+          window.postMessage('video-ended', '*');
+        });
+      }
+    `);
+  });
+
+  // 监听视频结束事件
+  playerView.webContents.on('console-message', (event, level, message) => {
+    if (message === 'video-ended') {
+      mainWindow?.webContents.send('video-ended');
+    }
+  });
 
   // 监听窗口大小变化
   mainWindow.on('resize', () => {
     if (!mainWindow || !playerView) return;
     const newBounds = mainWindow.getBounds();
+    const playerHeight = Math.floor(newBounds.height * 0.7); // 保持70%的高度比例
+    
     playerView.setBounds({
       x: 0,
       y: titleBarHeight,
       width: newBounds.width,
-      height: newBounds.height - titleBarHeight
+      height: playerHeight - titleBarHeight
     });
   });
 });
@@ -926,4 +949,95 @@ if (mainWindow) {
 // 在应用退出时注销快捷键
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
+});
+
+// 添加获取视频合集信息的处理函数
+ipcMain.handle('get-series-info', async (_event, bvid: string) => {
+  try {
+    const cookieString = await getCookieString();
+    console.log('Getting series info for bvid:', bvid);
+    
+    // 获取视频详细信息（包含合集信息）
+    const detailResponse = await axios.get(API.SERIES_INFO, {
+      params: { bvid },
+      headers: {
+        ...headers,
+        Cookie: cookieString
+      }
+    });
+
+    console.log('Detail response:', JSON.stringify(detailResponse.data, null, 2));
+
+    if (detailResponse.data.code !== 0) {
+      throw new Error(detailResponse.data.message || 'Failed to get video info');
+    }
+
+    const detailData = detailResponse.data.data;
+    console.log('Detail data:', JSON.stringify(detailData, null, 2));
+
+    // 检查是否有合集信息
+    const ugcSeason = detailData.View?.ugc_season;
+    const sections = detailData.View?.ugc_season?.sections || [];
+    
+    console.log('UGC Season:', ugcSeason);
+    console.log('Sections:', sections);
+
+    // 如果不是合集视频，返回单个视频信息
+    if (!ugcSeason || sections.length === 0) {
+      console.log('Not a series video, returning single video info');
+      const videoData = detailData.View;
+      return {
+        success: true,
+        data: {
+          videos: [{
+            bvid: videoData.bvid,
+            title: videoData.title,
+            author: videoData.owner.name,
+            duration: videoData.duration,
+            thumbnail: videoData.pic,
+            cid: videoData.cid,
+            page: 1
+          }],
+          currentIndex: 0
+        }
+      };
+    }
+
+    // 处理合集信息
+    const allEpisodes = sections.reduce((acc: any[], section: any) => {
+      return acc.concat(section.episodes || []);
+    }, []);
+
+    console.log('All episodes:', allEpisodes.length);
+    
+    const currentIndex = allEpisodes.findIndex((v: any) => v.bvid === bvid);
+    console.log('Current index:', currentIndex);
+
+    const videos = allEpisodes.map((video: any) => ({
+      bvid: video.bvid,
+      title: video.title,
+      author: detailData.View.owner.name,
+      duration: video.arc.duration,
+      thumbnail: video.arc.pic,
+      cid: video.cid,
+      page: video.page
+    }));
+
+    console.log('Processed videos:', videos.length);
+
+    return {
+      success: true,
+      data: {
+        videos,
+        currentIndex: currentIndex >= 0 ? currentIndex : 0
+      }
+    };
+
+  } catch (error) {
+    console.error('Error getting series info:', error);
+    return {
+      success: false,
+      error: error.message || 'Failed to get series info'
+    };
+  }
 });

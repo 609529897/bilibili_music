@@ -4,13 +4,14 @@ interface UserInfo {
   face: string;
 }
 
-interface Video {
-  id: number;
+export interface Video {
   bvid: string;
   title: string;
   author: string;
-  thumbnail: string;
   duration: number;
+  thumbnail: string;
+  cid: number;
+  page?: number;
 }
 
 interface Favorite {
@@ -19,7 +20,7 @@ interface Favorite {
   count: number;
 }
 
-interface ApiResponse<T> {
+export interface ApiResponse<T> {
   success: boolean;
   data: T;
   error?: string;
@@ -30,16 +31,21 @@ interface AudioUrlResponse {
   audioUrl: string;
 }
 
-interface ElectronAPI {
+export interface SeriesInfo {
+  videos: Video[];
+  currentIndex: number;
+}
+
+export interface ElectronAPI {
   openBilibiliLogin: () => Promise<void>;
   checkLoginStatus: () => Promise<boolean>;
   getFavorites: () => Promise<ApiResponse<Favorite[]>>;
-  getFavoriteVideos: (id: number, currentPage?: number) => Promise<ApiResponse<Video[]>>;
+  getFavoriteVideos: (mediaId: number, currentPage?: number) => Promise<ApiResponse<Video[]>>;
   getUserInfo: () => Promise<ApiResponse<UserInfo>>;
-  getVideoAudioUrl: (bvid: string) => Promise<ApiResponse<AudioUrlResponse>>;
+  getVideoAudioUrl: (bvid: string) => Promise<ApiResponse<{ audioUrl: string }>>;
   onLoginSuccess: (callback: () => void | Promise<void>) => () => void;
   fetchImage: (url: string) => Promise<string>;
-  logout: () => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<ApiResponse<void>>;
   proxyAudio: (url: string) => Promise<string>;
   openExternal: (url: string) => Promise<void>;
   closeWindow: () => Promise<void>;
@@ -48,6 +54,8 @@ interface ElectronAPI {
   createPlayerView: (bvid: string) => Promise<void>;
   closePlayerView: () => Promise<void>;
   onMediaControl: (callback: (action: string) => void) => () => void;
+  getSeriesInfo: (bvid: string) => Promise<ApiResponse<SeriesInfo>>;
+  onVideoEnded: (callback: () => void) => () => void;
 }
 
 declare global {

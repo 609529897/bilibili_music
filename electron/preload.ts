@@ -30,4 +30,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.removeListener('media-control', handler);
     };
   },
+  getSeriesInfo: (bvid: string) => ipcRenderer.invoke('get-series-info', bvid),
+  onVideoEnded: (callback: () => void) => {
+    const handler = () => callback();
+    ipcRenderer.on('video-ended', handler);
+    return () => {
+      ipcRenderer.removeListener('video-ended', handler);
+    };
+  }
 })
