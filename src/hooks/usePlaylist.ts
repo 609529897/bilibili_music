@@ -10,6 +10,11 @@ interface SeriesInfo {
   currentIndex: number;
 }
 
+interface EpisodeInfo {
+  videos: Video[];
+  currentIndex: number;
+}
+
 export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
   const [playlist, setPlaylist] = useState<Video[]>([]);
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
@@ -18,7 +23,10 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
   const [hasMore, setHasMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoadLoading, setIsLoadLoading] = useState(false);
+  
+  // 分开存储合集和选集信息
   const [seriesInfo, setSeriesInfo] = useState<SeriesInfo | null>(null);
+  const [episodeInfo, setEpisodeInfo] = useState<EpisodeInfo | null>(null);
 
   // 加载收藏夹视频
   const loadFavoriteVideos = useCallback(async (mediaId: number, page: number = 1) => {
@@ -43,6 +51,28 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
     }
   }, []);
 
+  // 加载选集信息
+  const loadEpisodeInfo = useCallback(async (bvid: string) => {
+    try {
+      console.log('Loading episode info for:', bvid);
+      const response = await window.electronAPI.getEpisodeInfo(bvid);
+      console.log('Episode info response:', response);
+      
+      if (response.success && response.data.videos.length > 0) {
+        setEpisodeInfo(response.data);
+        setSeriesInfo(null); // 清除合集信息
+        return true;
+      }
+      
+      setEpisodeInfo(null);
+      return false;
+    } catch (error) {
+      console.error('Error loading episode info:', error);
+      setEpisodeInfo(null);
+      return false;
+    }
+  }, []);
+
   // 加载合集信息
   const loadSeriesInfo = useCallback(async (bvid: string) => {
     try {
@@ -50,15 +80,18 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
       const response = await window.electronAPI.getSeriesInfo(bvid);
       console.log('Series info response:', response);
       
-      if (response.success) {
+      if (response.success && response.data.videos.length > 0) {
         setSeriesInfo(response.data);
-      } else {
-        console.error('Failed to load series info:', response.error);
-        setSeriesInfo(null);
+        setEpisodeInfo(null); // 清除选集信息
+        return true;
       }
+      
+      setSeriesInfo(null);
+      return false;
     } catch (error) {
       console.error('Error loading series info:', error);
       setSeriesInfo(null);
+      return false;
     }
   }, []);
 
@@ -66,13 +99,29 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
   const handleVideoSelect = useCallback(async (video: Video) => {
     console.log('Selected video:', video);
     setCurrentVideo(video);
-    // 加载合集信息
-    await loadSeriesInfo(video.bvid);
-  }, [loadSeriesInfo]);
+    
+    // 先尝试加载选集信息
+    const hasEpisodes = await loadEpisodeInfo(video.bvid);
+    if (!hasEpisodes) {
+      // 如果不是选集，尝试加载合集信息
+      await loadSeriesInfo(video.bvid);
+    }
+  }, [loadEpisodeInfo, loadSeriesInfo]);
 
   // 处理下一个视频
   const handleNext = useCallback(() => {
     if (!currentVideo) return;
+
+    // 如果是选集视频
+    if (episodeInfo && episodeInfo.videos.length > 1) {
+      const currentIndex = episodeInfo.videos.findIndex(v => 
+        v.bvid === currentVideo.bvid && v.page === currentVideo.page
+      );
+      if (currentIndex < episodeInfo.videos.length - 1) {
+        handleVideoSelect(episodeInfo.videos[currentIndex + 1]);
+      }
+      return;
+    }
 
     // 如果是合集视频
     if (seriesInfo && seriesInfo.videos.length > 1) {
@@ -90,11 +139,22 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
     } else if (hasMore) {
       loadFavoriteVideos(selectedFavorite.id, currentPage + 1);
     }
-  }, [currentVideo, playlist, hasMore, selectedFavorite, currentPage, seriesInfo]);
+  }, [currentVideo, playlist, hasMore, selectedFavorite, currentPage, seriesInfo, episodeInfo]);
 
   // 处理上一个视频
   const handlePrevious = useCallback(() => {
     if (!currentVideo) return;
+
+    // 如果是选集视频
+    if (episodeInfo && episodeInfo.videos.length > 1) {
+      const currentIndex = episodeInfo.videos.findIndex(v => 
+        v.bvid === currentVideo.bvid && v.page === currentVideo.page
+      );
+      if (currentIndex > 0) {
+        handleVideoSelect(episodeInfo.videos[currentIndex - 1]);
+      }
+      return;
+    }
 
     // 如果是合集视频
     if (seriesInfo && seriesInfo.videos.length > 1) {
@@ -110,7 +170,7 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
     if (currentIndex > 0) {
       handleVideoSelect(playlist[currentIndex - 1]);
     }
-  }, [currentVideo, playlist, seriesInfo]);
+  }, [currentVideo, playlist, seriesInfo, episodeInfo]);
 
   // 监听视频结束事件
   useEffect(() => {
@@ -146,6 +206,7 @@ export function usePlaylist({ selectedFavorite }: UsePlaylistProps) {
     isLoadLoading,
     handleNext,
     handlePrevious,
-    seriesInfo,  // 添加合集信息
+    seriesInfo,  // 合集信息
+    episodeInfo, // 选集信息
   };
 }

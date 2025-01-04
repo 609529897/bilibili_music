@@ -31,6 +31,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     };
   },
   getSeriesInfo: (bvid: string) => ipcRenderer.invoke('get-series-info', bvid),
+  getEpisodeInfo: (bvid: string) => ipcRenderer.invoke('get-episode-info', bvid),
   onVideoEnded: (callback: () => void) => {
     const handler = () => callback();
     ipcRenderer.on('video-ended', handler);

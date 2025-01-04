@@ -78,7 +78,7 @@ function createWindow() {
   }
 
   // 默认打开开发者工具
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
 // 打开B站登录页面
@@ -1041,3 +1041,54 @@ ipcMain.handle('get-series-info', async (_event, bvid: string) => {
     };
   }
 });
+
+
+// 获取选集信息
+ipcMain.handle('get-episode-info', async (_, bvid: string) => {
+  try {
+    const videoDetailUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`;
+    const videoDetailResponse = await axios.get(videoDetailUrl, { headers });
+    const videoDetail = videoDetailResponse.data;
+
+    if (videoDetail.code === 0) {
+      const pages = videoDetail.data.pages;
+      
+      // 如果有多个分P
+      if (pages && pages.length > 1) {
+        const videos = pages.map((page: any) => ({
+          bvid: bvid,
+          cid: page.cid,
+          title: page.part,
+          duration: page.duration,
+          thumbnail: `http://i0.hdslb.com/bfs/archive/${page.first_frame || videoDetail.data.pic}`,
+          page: page.page,
+        }));
+
+        return {
+          success: true,
+          data: {
+            videos,
+            currentIndex: (pages.findIndex((p: any) => p.cid === videoDetail.data.cid) + 1) || 1
+          }
+        };
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        videos: [],
+        currentIndex: 1
+      }
+    };
+
+  } catch (error) {
+    console.error('Error fetching episode info:', error);
+    return {
+      success: false,
+      error: 'Failed to fetch episode info'
+    };
+  }
+});
+
+

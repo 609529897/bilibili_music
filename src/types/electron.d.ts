@@ -55,6 +55,7 @@ export interface ElectronAPI {
   closePlayerView: () => Promise<void>;
   onMediaControl: (callback: (action: string) => void) => () => void;
   getSeriesInfo: (bvid: string) => Promise<ApiResponse<SeriesInfo>>;
+  getEpisodeInfo: (bvid: string) => Promise<ApiResponse<SeriesInfo>>;
   onVideoEnded: (callback: () => void) => () => void;
 }
 

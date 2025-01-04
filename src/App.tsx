@@ -5,6 +5,7 @@ import { useUserInfo } from "./hooks/useUserInfo";
 import { FavoritesList } from "./components/FavoritesList";
 import { PlayList } from "./components/PlayList";
 import { SeriesList } from "./components/SeriesList";
+import { EpisodeList } from "./components/EpisodeList";
 import { ModernPlayer } from "./components/Player";
 import { LoginScreen } from "./components/LoginScreen";
 import { FavoritesDialog } from "./components/FavoritesDialog";
@@ -36,6 +37,7 @@ const App: React.FC = () => {
     handleNext,
     handlePrevious,
     seriesInfo,
+    episodeInfo,
   } = usePlaylist({ selectedFavorite });
 
 
@@ -178,6 +180,20 @@ const App: React.FC = () => {
                       currentVideo={currentVideo}
                       onVideoSelect={handleVideoSelect}
                       seriesTitle={`合集 · ${seriesInfo.videos.length}个视频`}
+                    />
+                  </ErrorBoundary>
+                </div>
+              )}
+
+              {/* 选集列表 */}
+              {episodeInfo && episodeInfo.videos.length > 1 && (
+                <div className="w-[420px] flex-none border-l border-gray-100 h-full">
+                  <ErrorBoundary>
+                    <EpisodeList
+                      playlist={episodeInfo.videos}
+                      currentVideo={currentVideo}
+                      onVideoSelect={handleVideoSelect}
+                      seriesTitle={`选集 · ${episodeInfo.videos.length}个分P`}
                     />
                   </ErrorBoundary>
                 </div>
