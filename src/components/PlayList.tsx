@@ -185,7 +185,11 @@ export const PlayList: React.FC<PlayListProps> = ({
                   {/* 序号或播放状态 */}
                   <div className="w-8 flex-none flex items-center justify-center">
                     {isPlaying ? (
-                      <div className="w-2.5 h-2.5 rounded-full bg-pink-500" />
+                      <div className="flex items-end gap-0.5 h-3">
+                        <div className="w-0.5 h-full bg-pink-500 origin-bottom animate-bar-1" />
+                        <div className="w-0.5 h-full bg-pink-500 origin-bottom animate-bar-2" />
+                        <div className="w-0.5 h-full bg-pink-500 origin-bottom animate-bar-3" />
+                      </div>
                     ) : (
                       <span className="text-sm text-gray-900">
                         {virtualRow.index + 1}
