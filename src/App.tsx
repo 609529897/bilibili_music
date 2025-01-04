@@ -156,7 +156,17 @@ const App: React.FC = () => {
             {/* 播放列表和合集列表容器 */}
             <div className="flex-1 flex min-w-0">
               {/* 播放列表 */}
-              <div className="flex-1 flex flex-col min-w-0">
+              <motion.div 
+                className="flex flex-col min-w-0"
+                animate={{ 
+                  flexGrow: 1,
+                  flexShrink: 0,
+                  flexBasis: (Number(seriesInfo?.videos?.length) > 1 || Number(episodeInfo?.videos?.length) > 1) 
+                    ? 'calc(100% - 420px)' 
+                    : '100%'
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
                 <ErrorBoundary>
                   <PlayList
                     playlist={playlist}
@@ -170,7 +180,7 @@ const App: React.FC = () => {
                     isLoadLoading={isLoadLoading}
                   />
                 </ErrorBoundary>
-              </div>
+              </motion.div>
 
               {/* 合集列表 */}
               <AnimatePresence mode="wait">
@@ -178,24 +188,27 @@ const App: React.FC = () => {
                   <motion.div
                     key="series"
                     className="w-[420px] flex-none border-l border-gray-100"
-                    initial={{ x: "100%", opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: "100%", opacity: 0 }}
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: 420, opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
                     transition={{ 
                       type: "spring", 
                       stiffness: 300, 
                       damping: 30,
                       opacity: { duration: 0.2 }
                     }}
+                    style={{ overflow: 'hidden' }}
                   >
-                    <ErrorBoundary>
-                      <SeriesList
-                        playlist={seriesInfo.videos}
-                        currentVideo={currentVideo}
-                        onVideoSelect={handleVideoSelect}
-                        seriesTitle={`合集 · ${seriesInfo.videos.length}个视频`}
-                      />
-                    </ErrorBoundary>
+                    <div className="w-[420px]">
+                      <ErrorBoundary>
+                        <SeriesList
+                          playlist={seriesInfo.videos}
+                          currentVideo={currentVideo}
+                          onVideoSelect={handleVideoSelect}
+                          seriesTitle={`合集 · ${seriesInfo.videos.length}个视频`}
+                        />
+                      </ErrorBoundary>
+                    </div>
                   </motion.div>
                 )}
 
@@ -204,24 +217,27 @@ const App: React.FC = () => {
                   <motion.div
                     key="episode"
                     className="w-[420px] flex-none border-l border-gray-100"
-                    initial={{ x: "100%", opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: "100%", opacity: 0 }}
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: 420, opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
                     transition={{ 
                       type: "spring", 
                       stiffness: 300, 
                       damping: 30,
                       opacity: { duration: 0.2 }
                     }}
+                    style={{ overflow: 'hidden' }}
                   >
-                    <ErrorBoundary>
-                      <EpisodeList
-                        playlist={episodeInfo.videos}
-                        currentVideo={currentVideo}
-                        onVideoSelect={handleVideoSelect}
-                        seriesTitle={`选集 · ${episodeInfo.videos.length}个分P`}
-                      />
-                    </ErrorBoundary>
+                    <div className="w-[420px]">
+                      <ErrorBoundary>
+                        <EpisodeList
+                          playlist={episodeInfo.videos}
+                          currentVideo={currentVideo}
+                          onVideoSelect={handleVideoSelect}
+                          seriesTitle={`选集 · ${episodeInfo.videos.length}个分P`}
+                        />
+                      </ErrorBoundary>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
