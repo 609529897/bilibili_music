@@ -24,6 +24,7 @@ const headers = {
 
 let mainWindow: BrowserWindow | null = null
 let playerView: BrowserView | null = null
+let forceQuit = false
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -39,6 +40,17 @@ function createWindow() {
       webSecurity: false, // 允许跨域请求
     },
   })
+
+  // 处理窗口关闭事件
+  mainWindow.on('close', (event) => {
+    if (process.platform === 'darwin' && !forceQuit) {
+      event.preventDefault();
+      mainWindow?.hide();
+    } else {
+      mainWindow = null;
+      playerView = null;
+    }
+  });
 
   // 添加加载错误处理
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
@@ -175,9 +187,8 @@ app.whenReady().then(() => {
     }
   });
 
-  createWindow()
-  registerMediaShortcuts()
-  // setupImageProxy()  // 注册图片代理服务
+  createWindow();
+  registerMediaShortcuts();
 
   // 处理外部链接
   ipcMain.handle('open-external', async (_event, url: string) => {
@@ -190,22 +201,44 @@ app.whenReady().then(() => {
   })
 
   // 注册 IPC 处理函数
-  ipcMain.handle('open-bilibili-login', openBilibiliLogin)
-  ipcMain.handle('check-login-status', checkLoginStatus)
+  ipcMain.handle('open-bilibili-login', openBilibiliLogin);
+  ipcMain.handle('check-login-status', checkLoginStatus);
+});
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
-    }
-  })
-})
+// 处理 dock 图标点击
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow();
+  } else {
+    mainWindow.show();
+  }
+});
 
+// 处理窗口全部关闭的情况
 app.on('window-all-closed', () => {
   playerView = null;
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
   }
-})
+});
+
+// 处理应用退出前的操作
+app.on('before-quit', () => {
+  forceQuit = true;
+});
+
+// 处理应用退出时的清理
+app.on('will-quit', () => {
+  forceQuit = true;
+  globalShortcut.unregisterAll();
+  if (mainWindow) {
+    mainWindow.destroy();
+    mainWindow = null;
+  }
+  if (playerView) {
+    playerView = null;
+  }
+});
 
 // 处理登录请求
 ipcMain.handle('bilibili-login', async () => {
