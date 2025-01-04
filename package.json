@@ -47,7 +47,9 @@
     "asar": {
       "smartUnpack": true
     },
-    "asarUnpack": "**/*.{node,dll}",
+    "asarUnpack": [
+      "**/*.{node,dll}"
+    ],
     "mac": {
       "icon": "build/icon.icns",
       "category": "public.app-category.music",
@@ -55,15 +57,13 @@
         {
           "target": "dir",
           "arch": [
-            "arm64",
-            "x64"
+            "arm64"
           ]
         },
         {
           "target": "dmg",
           "arch": [
-            "arm64",
-            "x64"
+            "arm64"
           ]
         }
       ],
@@ -72,6 +72,9 @@
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
+      "compression": "maximum",
+      "electronLanguages": ["zh-CN"],
+      "electronUpdaterCompatibility": ">=2.16",
       "extendInfo": {
         "NSMicrophoneUsageDescription": "此应用不需要使用麦克风",
         "NSCameraUsageDescription": "此应用不需要使用相机",
