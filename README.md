@@ -19,7 +19,7 @@ BiliMusic 是一个优雅的第三方哔哩哔哩音乐播放器，让你以更�
 
 ### 下载安装
 
-访问 [Releases](https://github.com/your-username/bilimusic/releases) 页面下载最新版本。
+访问 [Releases](https://github.com/609529897/bilibili_music/releases) 页面下载最新版本。
 
 目前支持：
 - macOS (Apple Silicon/Intel)
